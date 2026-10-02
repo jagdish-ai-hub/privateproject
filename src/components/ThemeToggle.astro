@@ -1,0 +1,15 @@
+---
+/** Light/dark toggle. Persists the choice in localStorage (wrapped in try/catch). */
+---
+<button id="theme-toggle" type="button" class="h-8 w-8 rounded-md border border-line text-sm hover:bg-subtle" aria-label="Toggle theme">
+  <span aria-hidden="true" data-icon>◐</span>
+</button>
+<script>
+  const btn = document.getElementById('theme-toggle');
+  btn?.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch {}
+    window.dispatchEvent(new CustomEvent('themechange', { detail: next }));
+  });
+</script>

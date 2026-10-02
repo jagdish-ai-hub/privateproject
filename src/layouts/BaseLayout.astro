@@ -1,0 +1,75 @@
+---
+/**
+ * Page shell: <head> (title, description, canonical, Open Graph, JSON-LD),
+ * header with search + theme toggle, footer with the compliance disclaimer.
+ *
+ * Props:
+ * - title: page title (the site name is appended)
+ * - description: meta description
+ * - path: canonical path, e.g. "/learn/direct-vs-regular"
+ * - jsonLd: optional array of schema.org objects emitted as JSON-LD
+ */
+import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  jsonLd?: Record<string, unknown>[];
+}
+const { title, description, path = Astro.url.pathname, jsonLd = [] } = Astro.props;
+const canonical = new URL(path, Astro.site).toString();
+const fullTitle = title.includes('MF Screener') ? title : `${title} | MF Screener`;
+const nav = [
+  { href: '/', label: 'Screener' },
+  { href: '/compare/', label: 'Compare' },
+  { href: '/tools/sip-calculator/', label: 'Calculators' },
+  { href: '/learn/', label: 'Learn' },
+];
+---
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Runs before paint so the saved / system theme never flashes. -->
+    <script is:inline>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    {jsonLd.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+  </head>
+  <body>
+    <header class="border-b border-line">
+      <div class="mx-auto flex max-w-7xl items-center gap-6 px-4 h-14">
+        <a href="/" class="font-semibold tracking-tight">MF Screener</a>
+        <nav class="flex gap-4 text-sm text-muted" aria-label="Main">
+          {nav.map((n) => <a href={n.href} class="hover:text-fg">{n.label}</a>)}
+        </nav>
+        <div class="ml-auto"><ThemeToggle /></div>
+      </div>
+    </header>
+    <main class="mx-auto max-w-7xl px-4 py-6"><slot /></main>
+    <footer class="border-t border-line mt-12">
+      <div class="mx-auto max-w-7xl px-4 py-6 text-xs text-muted space-y-2">
+        <p>Mutual fund investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future returns.</p>
+        <p>Educational information only; not investment advice. Data: AMFI via <a class="underline" href="https://www.mfapi.in">MFapi.in</a>.</p>
+        <p><a class="underline" href="/methodology/">Methodology</a> · <a class="underline" href="/about/">About</a> · <a class="underline" href="/privacy/">Privacy</a> · <a class="underline" href="/disclaimer/">Disclaimer</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

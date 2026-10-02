@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+/* Geist (OFL licence), self-hosted variable fonts copied from the `geist` package. */
+@font-face { font-family: 'Geist'; src: url('/fonts/Geist-Variable.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Geist Mono'; src: url('/fonts/GeistMono-Variable.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+
+/*
+ * Design tokens. Vercel-style monochrome: neutral greys, hairline borders,
+ * colour only for positive / negative returns. Light is the default; dark is
+ * applied by `data-theme="dark"` (set by the inline script in BaseLayout).
+ */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --fg: #0a0a0a;
+  --fg-muted: #666666;
+  --border: #eaeaea;
+  --border-strong: #cfcfcf;
+  --accent: #0a0a0a;
+  --accent-fg: #ffffff;
+  --pos: #0f7b3f;
+  --neg: #c62828;
+  --focus: #0070f3;
+  --chart-line: #0a0a0a;
+  --chart-grid: #f0f0f0;
+}
+:root[data-theme='dark'] {
+  --bg: #0a0a0a;
+  --bg-subtle: #111111;
+  --fg: #ededed;
+  --fg-muted: #a1a1a1;
+  --border: #262626;
+  --border-strong: #3a3a3a;
+  --accent: #ededed;
+  --accent-fg: #0a0a0a;
+  --pos: #3fb67a;
+  --neg: #f0716c;
+  --focus: #52a8ff;
+  --chart-line: #ededed;
+  --chart-grid: #1a1a1a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-subtle: var(--bg-subtle);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+  --radius-md: 6px;
+}
+
+html { background: var(--bg); color: var(--fg); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+body { margin: 0; min-height: 100vh; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Every number: monospaced, tabular, right-aligned by the .num helper. */
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+
+/* Skeleton shimmer for loading states (no layout shift: size comes from the parent). */
+.skeleton { background: linear-gradient(90deg, var(--bg-subtle), var(--border), var(--bg-subtle)); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; border-radius: 4px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
