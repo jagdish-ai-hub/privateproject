@@ -4,12 +4,14 @@
  *  - pages missing a <title>, meta description, canonical link or exactly one <h1>,
  *  - duplicate <title> or meta description across pages,
  *  - invalid JSON-LD blocks.
- * Usage: node scripts/check-site.mjs
+ * Usage: node scripts/check-site.mjs [--sample]
+ *   --sample  the build only contains some fund pages (MAX_FUND_PAGES): do not treat missing /fund/ links as errors.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const root = join(process.cwd(), 'dist');
+const sample = process.argv.includes('--sample');
 const files = [];
 (function walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -54,6 +56,7 @@ for (const file of files) {
   for (const m of html.matchAll(/\shref="([^"]+)"/g)) {
     const href = m[1];
     if (!href.startsWith('/') || href.startsWith('//')) continue; // external, mailto, #anchor
+    if (sample && href.startsWith('/fund/')) continue;
     if (!checkedLinks.has(href)) checkedLinks.set(href, resolves(href));
     if (!checkedLinks.get(href)) problems.push(`${rel}: broken link ${href}`);
   }

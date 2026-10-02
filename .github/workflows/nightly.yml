@@ -1,0 +1,53 @@
+name: Nightly data and deploy
+
+# AMFI publishes the day's NAVs in the evening (IST). This runs shortly after midnight IST.
+on:
+  schedule:
+    - cron: "40 18 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # The per-scheme NAV history cache. The first run downloads everything (~10 minutes);
+      # later runs only append the newest day, with no API call per scheme. Each run saves a new
+      # cache entry and restores the most recent one.
+      - name: Restore NAV history cache
+        uses: actions/cache@v4
+        with:
+          path: data/cache
+          key: nav-cache-${{ github.run_id }}
+          restore-keys: nav-cache-
+
+      - name: Build data (AMFI + MFapi)
+        run: npm run data:build
+
+      - name: Build the site
+        run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL }}
+          PUBLIC_ADSENSE_CLIENT: ${{ vars.PUBLIC_ADSENSE_CLIENT }}
+
+      - name: Check links and SEO basics
+        run: node scripts/check-site.mjs
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT }}
