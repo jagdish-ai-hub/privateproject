@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { applyView, prepare } from '../src/lib/screener/query.ts';
-import { DEFAULT_VIEW, parseView } from '../src/lib/screener/url.ts';
+import { parseView } from '../src/lib/screener/url.ts';
 import type { ScreenerData } from '../src/lib/screener/types.ts';
 
 /** The expected result count for a URL query, computed by the pure functions on the real data file. */
@@ -11,6 +11,11 @@ async function expectedTotal(page: Page, search: string): Promise<number> {
 }
 
 const showing = (page: Page) => page.getByTestId('result-count');
+
+/** The built dataset, so tests derive their inputs from it instead of assuming a full-size dataset. */
+async function loadData(page: Page): Promise<ScreenerData> {
+  return (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+}
 const firstRowName = (page: Page) => page.locator('tbody tr').first().locator('td').first();
 
 test('shows a skeleton first, then the real table with the default Direct + Growth view', async ({ page }) => {
@@ -25,14 +30,18 @@ test('shows a skeleton first, then the real table with the default Direct + Grow
 });
 
 test('search filters the table, updates the URL and matches the pure function', async ({ page }) => {
+  const data = await loadData(page);
+  // Use the first two words of a real fund name, so there is always at least one match.
+  const idx = data.name.findIndex((_, i) => data.dict.plan[data.plan[i]] === 'direct' && data.dict.option[data.option[i]] === 'growth');
+  const term = data.name[idx].split(/\s+/).slice(0, 2).join(' ');
   await page.goto('/');
   await expect(showing(page)).toBeVisible();
-  await page.getByLabel('Search funds').fill('small cap');
-  await expect(page).toHaveURL(/q=small(\+|%20)cap/);
-  const total = await expectedTotal(page, '?q=small cap');
+  await page.getByLabel('Search funds').fill(term);
+  await expect(page).toHaveURL(/q=/);
+  const total = await expectedTotal(page, `?q=${encodeURIComponent(term)}`);
   expect(total).toBeGreaterThan(0);
-  await expect(page.getByTestId('result-count')).toContainText(total.toLocaleString('en-IN'));
-  await expect(firstRowName(page)).toContainText(/small/i);
+  await expect(showing(page)).toContainText(total.toLocaleString('en-IN'));
+  await expect(firstRowName(page)).toContainText(term.split(' ')[0], { ignoreCase: true });
 });
 
 test('sorting toggles direction and orders the rows', async ({ page }) => {
@@ -56,33 +65,40 @@ test('sorting toggles direction and orders the rows', async ({ page }) => {
 });
 
 test('pagination moves pages, shows the range, and survives reload and Back', async ({ page }) => {
-  await page.goto('/');
+  const data = await loadData(page);
+  const total = applyView(prepare(data), parseView('?size=25')).total;
+  test.skip(total <= 25, `dataset too small for a second page (${total} funds in the default view)`);
+  await page.goto('/?size=25');
   await expect(showing(page)).toBeVisible();
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/page=2/);
-  await expect(showing(page)).toContainText('51');
+  await expect(showing(page)).toContainText('26');
   await page.reload();
-  await expect(showing(page)).toContainText('51');
+  await expect(showing(page)).toContainText('26');
   await page.goBack();
-  await expect(showing(page)).toContainText('1–50');
+  await expect(showing(page)).toContainText('1–25');
 });
 
 test('range filter excludes funds without data and agrees with the pure function', async ({ page }) => {
-  await page.goto('/?min_r5y=15');
+  const data = await loadData(page);
+  const vals = data.metrics.r5y.filter((v): v is number => v !== null).map((v) => v * 100).sort((a, b) => a - b);
+  test.skip(vals.length === 0, 'no fund in this dataset has a 5-year return');
+  const threshold = Math.floor(vals[Math.floor(vals.length / 2)]); // the median, so some but not all funds pass
+  const search = `?min_r5y=${threshold}&plan=&opt=`;
+  await page.goto(`/${search}`);
   await expect(showing(page)).toBeVisible();
-  const total = await expectedTotal(page, '?min_r5y=15');
+  const total = await expectedTotal(page, search);
   expect(total).toBeGreaterThan(0);
-  await expect(page.getByTestId('result-count')).toContainText(total.toLocaleString('en-IN'));
-  const view = parseView('?min_r5y=15');
-  expect(view.filters.ranges.r5y).toEqual({ min: 15 });
-  expect(view.filters.plan).toEqual(DEFAULT_VIEW.filters.plan);
+  await expect(showing(page)).toContainText(total.toLocaleString('en-IN'));
+  expect(total).toBeLessThanOrEqual(vals.length); // funds with no 5Y value are excluded, not counted as 0
+  expect(parseView(search).filters.ranges.r5y).toEqual({ min: threshold });
 });
 
 test('impossible filters show the empty state, and Clear filters recovers', async ({ page }) => {
   await page.goto('/?q=zzzzqqqq');
   await expect(page.getByText('No funds match these filters')).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters' }).click();
-  await expect(showing(page)).toContainText('1–50');
+  await expect(showing(page)).toContainText(/1–\d+/);
 });
 
 test('a failed data load shows an error with Retry, and Retry recovers', async ({ page }) => {
@@ -139,7 +155,7 @@ test.describe('phone layout', () => {
   });
 
   test('active filters are counted on the Filters button', async ({ page }) => {
-    await page.goto('/?cat=Small%20Cap');
+    await page.goto('/?cat=Any%20Category');
     await expect(showing(page)).toBeVisible();
     // Plan + Option defaults and Category = 3 active groups
     await expect(page.getByRole('button', { name: /^Filters/ })).toContainText('3');

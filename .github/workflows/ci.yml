@@ -21,8 +21,8 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
-      - name: Build a small real dataset (150 funds, polite to the free API)
-        run: npm run data:build -- --limit=150 --rps=5
+      - name: Build a small real dataset (400 funds, polite to the free API)
+        run: npm run data:build -- --limit=400 --rps=8
       - name: Build the site (30 fund pages) and check links / SEO basics
         run: |
           MAX_FUND_PAGES=30 npm run build
