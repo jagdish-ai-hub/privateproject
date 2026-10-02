@@ -2,6 +2,7 @@
   "name": "mf-screener",
   "version": "0.1.0",
   "private": true,
+  "engines": { "node": ">=22.18" },
   "type": "module",
   "description": "Free, no-signup Indian mutual fund screener built on AMFI / MFapi.in NAV data.",
   "scripts": {
@@ -13,7 +14,8 @@
     "test": "vitest run",
     "build:e2e": "MAX_FUND_PAGES=30 astro build",
     "test:e2e": "npm run build:e2e && playwright test",
-    "data:build": "node --experimental-strip-types scripts/build-data.ts"
+    "check:site": "node scripts/check-site.mjs",
+    "data:build": "node scripts/build-data.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.2",

@@ -1,0 +1,17 @@
+---
+/**
+ * Google AdSense slot with a fixed minimum height so ads never shift the layout.
+ * Renders NOTHING unless PUBLIC_ADSENSE_CLIENT is set (e.g. "ca-pub-1234567890123456"), so the
+ * site is ad-free until you decide otherwise. Provide a slot id per placement.
+ */
+interface Props { slot: string; minHeight?: number }
+const { slot, minHeight = 250 } = Astro.props;
+const client = import.meta.env.PUBLIC_ADSENSE_CLIENT;
+---
+{client && (
+  <aside aria-label="Advertisement" class="my-8" style={`min-height:${minHeight}px`}>
+    <p class="mb-1 text-center text-[10px] uppercase tracking-wider text-muted">Advertisement</p>
+    <ins class="adsbygoogle block" style={`min-height:${minHeight}px`} data-ad-client={client} data-ad-slot={slot} data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+)}

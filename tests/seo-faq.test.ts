@@ -7,7 +7,7 @@ import { METRIC_KEYS } from '../src/lib/screener/types.ts';
 
 const metrics = Object.fromEntries(METRIC_KEYS.map((k) => [k, null])) as Fund['metrics'];
 const fund: Fund = {
-  index: 0, code: 125497, slug: 'sbi-small-cap-fund-direct-plan-growth-125497', name: 'SBI Small Cap Fund - Direct Plan - Growth',
+  index: 0, displayName: 'SBI Small Cap Fund - Direct Plan - Growth', code: 125497, slug: 'sbi-small-cap-fund-direct-plan-growth-125497', name: 'SBI Small Cap Fund - Direct Plan - Growth',
   amc: 'SBI Mutual Fund', category: 'Small Cap', assetClass: 'Equity', schemeType: 'Open Ended', plan: 'direct', option: 'growth',
   nav: 205.754, navDate: iso('2026-10-01'), inception: iso('2013-11-18'), isin: 'INF200K01T51',
   metrics: { ...metrics, r1y: 0.0547, r3y: 0.1077, r5y: 0.1314, sip3y: 0.0652, sip5y: null },

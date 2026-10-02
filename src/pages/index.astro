@@ -1,10 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Screener } from '../components/screener/Screener.tsx';
+import { siteLd } from '../lib/seo.ts';
 ---
 <BaseLayout
   title="Mutual Fund Screener India: Compare Returns, SIP & Risk"
   description="Free Indian mutual fund screener. Filter thousands of schemes by category, plan, 1/3/5-year returns, SIP returns, volatility and drawdown. No sign-up."
+  path="/"
+  jsonLd={siteLd(new URL('/', Astro.site).toString())}
 >
   <h1 class="text-2xl font-semibold tracking-tight">Mutual fund screener</h1>
   <p class="mt-1 mb-5 max-w-3xl text-sm text-muted">

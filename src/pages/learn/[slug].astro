@@ -1,0 +1,52 @@
+---
+/** One guide: rendered Markdown, FAQ block, related guides, Article + FAQPage + Breadcrumb JSON-LD. */
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { articleLd, breadcrumbLd, faqLd } from '../../lib/seo.ts';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('learn');
+  return guides.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const all = await getCollection('learn');
+const related = entry.data.related.map((id) => all.find((g) => g.id === id)).filter((g) => g !== undefined);
+const path = `/learn/${entry.id}/`;
+const url = new URL(path, Astro.site).toString();
+const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  path={path}
+  jsonLd={[
+    breadcrumbLd([
+      { name: 'Home', url: new URL('/', Astro.site).toString() },
+      { name: 'Learn', url: new URL('/learn/', Astro.site).toString() },
+      { name: entry.data.title, url },
+    ]),
+    articleLd({ headline: entry.data.title, description: entry.data.description, url, datePublished: entry.data.datePublished, dateModified: entry.data.dateModified, siteUrl: new URL('/', Astro.site).toString() }),
+    faqLd(entry.data.faqs),
+  ]}
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Learn', href: '/learn/' }, { name: entry.data.title }]} />
+  <article>
+    <h1 class="max-w-3xl text-2xl font-semibold tracking-tight">{entry.data.title}</h1>
+    <p class="mt-2 text-xs text-muted">Last reviewed <time datetime={entry.data.dateModified}>{fmt(entry.data.dateModified)}</time> · General information, not investment advice</p>
+    <div class="prose-mf mt-5"><Content /></div>
+  </article>
+  <AdSlot slot="learn-article-end" />
+  <div class="max-w-3xl"><Faq faqs={entry.data.faqs} /></div>
+  {related.length > 0 && (
+    <section class="mt-10 max-w-3xl" aria-labelledby="rel-h">
+      <h2 id="rel-h" class="text-lg font-semibold tracking-tight">Related guides</h2>
+      <ul class="mt-3 space-y-2 text-sm">
+        {related.map((g) => <li><a class="underline" href={`/learn/${g.id}/`}>{g.data.title}</a></li>)}
+      </ul>
+    </section>
+  )}
+</BaseLayout>

@@ -1,0 +1,27 @@
+---
+/** Markdown site pages: methodology, about, privacy, disclaimer. */
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumbLd } from '../lib/seo.ts';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const path = `/${entry.id}/`;
+const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  path={path}
+  jsonLd={[breadcrumbLd([{ name: 'Home', url: new URL('/', Astro.site).toString() }, { name: entry.data.title, url: new URL(path, Astro.site).toString() }])]}
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: entry.data.title }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">{entry.data.title}</h1>
+  <p class="mt-2 text-xs text-muted">Last reviewed <time datetime={entry.data.dateModified}>{fmt(entry.data.dateModified)}</time></p>
+  <div class="prose-mf mt-5"><Content /></div>
+</BaseLayout>

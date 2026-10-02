@@ -39,10 +39,11 @@ const planText = { direct: 'Direct plan', regular: 'Regular plan', na: '', unkno
 const optionText = { growth: 'Growth option', idcw: 'IDCW option', bonus: 'Bonus option', other: '' }[f.option] ?? '';
 
 const description = clip(
-  `${f.name}: NAV ₹${formatNav(f.nav)} (${formatDay(f.navDate)}). Returns 1Y ${formatPct(m.r1y, 1)}, 3Y ${formatPct(m.r3y, 1)}, 5Y ${formatPct(m.r5y, 1)}; SIP returns, volatility, drawdown and category rank. Free, no sign-up.`,
+  `${f.displayName}: NAV ₹${formatNav(f.nav)} (${formatDay(f.navDate)}). Returns 1Y ${formatPct(m.r1y, 1)}, 3Y ${formatPct(m.r3y, 1)}, 5Y ${formatPct(m.r5y, 1)}; SIP returns, volatility, drawdown and category rank. Free, no sign-up.`,
   158,
 );
-const title = clip(`${f.name}: NAV, Returns & SIP Returns`, 70);
+// Not clipped: long names end in "Direct Plan - Growth" etc., which is what makes titles unique.
+const title = `${f.displayName}: NAV, Returns & SIP Returns`;
 
 const returnsRows = [
   ['1 month', 'r1m', 'Absolute', null], ['3 months', 'r3m', 'Absolute', null], ['6 months', 'r6m', 'Absolute', null],
@@ -68,7 +69,7 @@ const adjDate = (d: number) => formatDay(d);
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: f.category, href: `/category/${catSlug}/` }, { name: f.name }]} />
 
   <header>
-    <h1 class="text-2xl font-semibold tracking-tight">{f.name}</h1>
+    <h1 class="text-2xl font-semibold tracking-tight">{f.displayName}</h1>
     <p class="mt-1 text-sm text-muted">
       {f.amc} · {f.category}{planText && ` · ${planText}`}{optionText && ` · ${optionText}`}
     </p>

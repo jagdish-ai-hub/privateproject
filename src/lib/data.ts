@@ -11,6 +11,8 @@ import { METRIC_KEYS, type MetricKey, type ScreenerData } from './screener/types
 export interface Fund {
   /** Row index in the columnar data. */
   index: number;
+  /** Name for titles and headings: the scheme name, plus the scheme code if another scheme has the same name. */
+  displayName: string;
   code: number;
   slug: string;
   name: string;
@@ -34,6 +36,17 @@ export interface Fund {
 }
 
 let cached: ScreenerData | null = null;
+let cachedDupes: Set<string> | null = null;
+
+/** Scheme names that occur more than once (AMFI sometimes lists two schemes with the same name). */
+function duplicateNames(data: ScreenerData): Set<string> {
+  if (cachedDupes) return cachedDupes;
+  const seen = new Set<string>();
+  const dupes = new Set<string>();
+  for (const n of data.name) (seen.has(n) ? dupes : seen).add(n);
+  cachedDupes = dupes;
+  return dupes;
+}
 let cachedIsin: (string | null)[] | null = null;
 
 /** ISINs aligned with the dataset rows (kept out of the public file; static pages only). */
@@ -73,6 +86,7 @@ export function fundAt(data: ScreenerData, i: number): Fund {
   };
   return {
     index: i,
+    displayName: duplicateNames(data).has(data.name[i]) ? `${data.name[i]} (${data.code[i]})` : data.name[i],
     code: data.code[i],
     slug: fundSlug(data.name[i], data.code[i]),
     name: data.name[i],
