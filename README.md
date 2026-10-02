@@ -39,6 +39,7 @@ npm run data:build
 | `npm run data:build` | Download AMFI and MFapi data, compute everything. Flags in [docs/DATA.md](docs/DATA.md) |
 | `npm test` | Unit tests (Vitest) |
 | `npm run test:e2e` | Build a 30-page sample and run the browser tests (Playwright) |
+| `npm run typecheck` | Generates Astro's types, then runs `tsc` |
 | `npm run lint` | ESLint, including the rule that every exported function has TSDoc |
 | `npm run check:site` | After a build: broken links, duplicate titles, missing descriptions, invalid JSON-LD |
 

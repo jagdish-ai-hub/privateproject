@@ -17,8 +17,8 @@ jobs:
       - run: npm ci
       - name: Lint (includes the TSDoc rule for exported functions)
         run: npm run lint
-      - name: Typecheck
-        run: npx tsc --noEmit
+      - name: Typecheck (astro sync generates the content-collection types first)
+        run: npm run typecheck
       - name: Unit tests
         run: npm test
       - name: Build a small real dataset (150 funds, polite to the free API)
