@@ -2,7 +2,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { chartSeries, OLD_POINTS } from '../scripts/pipeline/chart.ts';
+import { ANCHOR_MONTHS, chartSeries, OLD_POINTS } from '../scripts/pipeline/chart.ts';
+import { periodReturn } from '../src/lib/calc/index.ts';
 import { getHistory, mergeSeries, pool, readCache, writeCache } from '../scripts/pipeline/history.ts';
 import { computeMetrics, rankDescending } from '../scripts/pipeline/metrics.ts';
 import { daily, iso, series } from './helpers.ts';
@@ -64,7 +65,18 @@ describe('chartSeries', () => {
     const recentIn = long.days.filter((d) => d >= lastYearStart).length;
     const recentOut = out.days.filter((d) => d >= lastYearStart).length;
     expect(recentOut).toBe(recentIn);
-    expect(out.days.length).toBeLessThanOrEqual(OLD_POINTS + recentIn);
+    expect(out.days.length).toBeLessThanOrEqual(OLD_POINTS + recentIn + ANCHOR_MONTHS.length);
+  });
+  it('chart and returns table agree: periodReturn on the thinned series equals the full series for every standard period', () => {
+    // A wiggly 11-year series so LTTB really drops points near the anchors.
+    const wiggly = daily('2015-10-01', 4000, (i) => 100 + i * 0.03 + 8 * Math.sin(i / 9) + 5 * Math.sin(i / 37));
+    const thin = chartSeries(wiggly);
+    expect(thin.days.length).toBeLessThan(wiggly.days.length / 2);
+    for (const m of ANCHOR_MONTHS) {
+      const full = periodReturn(wiggly, m);
+      expect(full, `${m}M computable`).not.toBeNull();
+      expect(periodReturn(thin, m)?.value, `${m}M`).toBe(full?.value);
+    }
   });
   it('keeps the first and last points and stays strictly ascending with no duplicates', () => {
     expect(out.days[0]).toBe(long.days[0]);

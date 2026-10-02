@@ -18,7 +18,6 @@ export interface ScreenerData {
   /** Lookup tables for the small-integer categorical columns below. */
   dict: { amc: string[]; category: string[]; assetClass: string[]; plan: string[]; option: string[]; schemeType: string[] };
   code: number[];
-  slug: string[];
   name: string[];
   amc: number[];
   category: number[];
@@ -30,7 +29,8 @@ export interface ScreenerData {
   /** Day numbers (days since 1970-01-01). */
   navDate: number[];
   inception: number[];
-  isin: (string | null)[];
+  /** 0 = plain history, 1 = adjusted for unit splits, 2 = history before an unexplained NAV jump was dropped. */
+  adj: number[];
   metrics: Record<MetricKey, (number | null)[]>;
   /** `r1yRank`, `r1yOf`, `r3yRank`, ... : rank within same category + plan + option. */
   ranks: Record<string, (number | null)[]>;

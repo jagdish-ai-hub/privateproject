@@ -10,3 +10,4 @@ export * from './sip.ts';
 export * from './risk.ts';
 export * from './rolling.ts';
 export * from './downsample.ts';
+export * from './splits.ts';

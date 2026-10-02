@@ -166,18 +166,4 @@ export function resolveName(amfiName: string, planCol: string, optionCol: string
   return [amfiName, planCol, optionCol].filter(Boolean).join(' - ');
 }
 
-/**
- * URL-safe slug from a name. Lower-case ASCII words joined with hyphens.
- *
- * @param text - Any text.
- * @returns The slug (may be empty).
- * @example
- * slugify('HDFC Mid-Cap Opportunities Fund - Direct Plan'); // "hdfc-mid-cap-opportunities-fund-direct-plan"
- */
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
+export { slugify } from '../../src/lib/slug.ts';

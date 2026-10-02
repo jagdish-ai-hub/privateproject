@@ -5,7 +5,7 @@ import type { Filters, ViewState } from '../src/lib/screener/types.ts';
 import { makeData } from './screener-helpers.ts';
 
 const noFilters: Filters = { q: '', amc: [], assetClass: [], category: [], plan: [], option: [], ranges: {} };
-const view = (over: Partial<ViewState> & { filters?: Partial<Filters> } = {}): ViewState => ({
+const view = (over: Partial<Omit<ViewState, 'filters'>> & { filters?: Partial<Filters> } = {}): ViewState => ({
   ...DEFAULT_VIEW,
   ...over,
   filters: { ...noFilters, ...over.filters },
