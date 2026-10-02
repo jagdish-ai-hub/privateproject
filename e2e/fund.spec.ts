@@ -36,7 +36,7 @@ test('fund page: heading, chart, and chart % always equals the returns table', a
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   const fund = await pickFund(page);
   await page.goto(fund.path);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(fund.name);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(fund.name); // may carry the scheme code when two schemes share a name
   await expect(page.locator('canvas').first()).toBeVisible({ timeout: 10_000 });
 
   const shown = page.locator('p[aria-live="polite"]').first();
