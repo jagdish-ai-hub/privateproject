@@ -35,6 +35,10 @@ function themeColors(): { bg: string; fg: string; muted: string; grid: string; l
 export function NavChart({ days, navs, name }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const [range, setRange] = useState<number>(12);
+  // The chart library loads asynchronously; this ref makes it use the *latest* range, not the one
+  // captured when the effect started (which caused a stale-range race).
+  const rangeRef = useRef(range);
+  rangeRef.current = range;
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [hover, setHover] = useState<{ day: number; nav: number } | null>(null);
   const api = useRef<{ setRange: (m: number) => void; retheme: () => void } | null>(null);
@@ -68,6 +72,11 @@ export function NavChart({ days, navs, name }: Props) {
           const startIdx = Math.max(0, indexOnOrBefore(series, from));
           chart.timeScale().setVisibleRange({ from: formatIso(days[startIdx]) as never, to: formatIso(last) as never });
         };
+        // Mirror the chart's real visible range into data attributes (used by tests and handy for debugging).
+        const toText = (t: unknown): string => (typeof t === 'object' && t !== null ? `${(t as { year: number }).year}-${String((t as { month: number }).month).padStart(2, '0')}-${String((t as { day: number }).day).padStart(2, '0')}` : String(t));
+        chart.timeScale().subscribeVisibleTimeRangeChange((r) => {
+          if (r && box.current) { box.current.dataset.visibleFrom = toText(r.from); box.current.dataset.visibleTo = toText(r.to); }
+        });
         chart.subscribeCrosshairMove((p) => {
           const pt = p.seriesData.get(line) as { value?: number } | undefined;
           if (!p.time || !pt || pt.value === undefined) { setHover(null); return; }
@@ -86,7 +95,7 @@ export function NavChart({ days, navs, name }: Props) {
         const mo = new MutationObserver(onTheme);
         mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
         cleanup = () => { mo.disconnect(); chart.remove(); api.current = null; };
-        show(range);
+        show(rangeRef.current);
         setStatus('ready');
       })
       .catch(() => { if (!disposed) setStatus('error'); });

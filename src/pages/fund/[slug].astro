@@ -124,7 +124,7 @@ const adjDate = (d: number) => formatDay(d);
                 <td class="px-3 py-2">{label}</td>
                 <td class="px-3 py-2 text-muted">{basis}</td>
                 <td class={`num px-3 py-2 ${signClass(m[key])}`}>{formatPct(m[key])}</td>
-                <td class="num px-3 py-2 text-muted">{rank ? `#${rank.rank} of ${rank.of}` : '—'}</td>
+                <td class="num px-3 py-2 text-muted">{rank && rank.of > 1 ? `#${rank.rank} of ${rank.of}` : '—'}</td>
               </tr>
             ))}
           </tbody>

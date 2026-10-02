@@ -11,7 +11,8 @@
     "check": "astro check",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "build:e2e": "MAX_FUND_PAGES=30 astro build",
+    "test:e2e": "npm run build:e2e && playwright test",
     "data:build": "node --experimental-strip-types scripts/build-data.ts"
   },
   "dependencies": {
