@@ -14,6 +14,27 @@
 Any static host works. Build with `npm run data:build && npm run build` and upload `dist/`.
 Mind the host's file limit ([DATA.md](DATA.md#file-count)).
 
+## Data licensing: read this before you monetise
+
+The site is free and ad-free as built. **Putting ads on it is commercial use**, and the data comes
+from AMFI:
+
+> AMFI grants you a non-exclusive, personal, non-transferable, non-sublicensable, limited and
+> revocable right to access, use and display this Site ... for your personal and non-commercial use
+> only ... No other use of the Site is authorised unless you and we have agreed otherwise in writing.
+> (AMFI Terms of Use, https://www.amfiindia.com/terms-of-use, read 2 October 2026)
+
+MFapi.in is a free wrapper over the same AMFI file and does not change AMFI's terms. NAV data is
+widely republished by commercial sites, but that is not the same as a licence. Before turning on ads:
+
+1. Ask AMFI in writing whether and on what terms the daily NAV data may be used on a
+   free, ad-supported website, or use a licensed data vendor instead.
+2. Get legal advice if in doubt. This is a business risk, not a technical one.
+3. Keep crediting AMFI and MFapi.in (the footer already does).
+
+Switching data source is contained: only `scripts/pipeline/amfi.ts` and `scripts/pipeline/history.ts`
+know where data comes from; everything downstream reads `screener.json` and the nav files.
+
 ## Before applying for Google AdSense
 
 - A real domain, `SITE_URL` set, and `PUBLIC_CONTACT_EMAIL` set (the contact page needs a way to

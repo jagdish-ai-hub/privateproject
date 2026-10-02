@@ -81,6 +81,11 @@ docs/                      DATA, CACHING, DESIGN, DEPLOY
 [DATA](docs/DATA.md) · [CACHING](docs/CACHING.md) · [DESIGN](docs/DESIGN.md) · [DEPLOY and ads](docs/DEPLOY.md) ·
 [Methodology](src/content/pages/methodology.md)
 
+## Before you monetise
+
+AMFI's terms limit use of its data to personal, non-commercial use unless agreed in writing. Read
+[docs/DEPLOY.md](docs/DEPLOY.md#data-licensing-read-this-before-you-monetise) before enabling ads.
+
 ## Disclaimer
 
 Educational information only, not investment advice. Mutual fund investments are subject to market risks.
