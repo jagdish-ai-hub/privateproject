@@ -18,7 +18,7 @@ export function Pagination({ page, pages, from, to, total, size, onPage, onSize 
   const btn = 'h-8 min-w-8 rounded-md border px-2 text-sm';
   return (
     <div class="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-      <p class="text-muted" aria-live="polite">
+      <p class="text-muted" aria-live="polite" data-testid="result-count">
         {total === 0 ? 'No funds' : <>Showing <span class="num">{formatNum(from, 0)}–{formatNum(to, 0)}</span> of <span class="num">{formatNum(total, 0)}</span> funds</>}
       </p>
       <div class="flex flex-wrap items-center gap-3">

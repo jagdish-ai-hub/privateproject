@@ -55,9 +55,9 @@ const nav = [
   </head>
   <body>
     <header class="border-b border-line">
-      <div class="mx-auto flex max-w-7xl items-center gap-6 px-4 h-14">
+      <div class="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2">
         <a href="/" class="font-semibold tracking-tight">MF Screener</a>
-        <nav class="flex gap-4 text-sm text-muted" aria-label="Main">
+        <nav class="order-3 flex w-full gap-4 overflow-x-auto text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
           {nav.map((n) => <a href={n.href} class="hover:text-fg">{n.label}</a>)}
         </nav>
         <div class="ml-auto"><ThemeToggle /></div>

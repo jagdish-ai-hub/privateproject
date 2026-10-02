@@ -46,7 +46,7 @@ export function MultiSelect({ label, options, selected, onChange, labels = {} }:
         <span aria-hidden="true" class="ml-1.5 text-muted">▾</span>
       </button>
       {open && (
-        <div class="absolute left-0 z-30 mt-1 w-72 rounded-md border border-line bg-bg shadow-sm">
+        <div class="absolute left-0 z-30 mt-1 w-72 rounded-md border border-line bg-bg shadow-sm max-sm:fixed max-sm:inset-x-3 max-sm:top-24 max-sm:mt-0 max-sm:w-auto">
           {options.length > 8 && (
             <input
               type="search" autoFocus placeholder={`Search ${label.toLowerCase()}…`} value={query}

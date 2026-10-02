@@ -45,6 +45,9 @@ export function FilterBar(props: Props) {
   };
   const activeRanges = Object.values(filters.ranges).filter((r) => r && (r.min !== undefined || r.max !== undefined)).length;
   const groups = [...new Set(COLUMNS.map((c) => c.group))];
+  // On phones the filter buttons sit behind one "Filters" toggle; from `sm` up they are always shown.
+  const [showFilters, setShowFilters] = useState(false);
+  const activeCount = [filters.assetClass, filters.category, filters.amc, filters.plan, filters.option].filter((l) => l.length).length + activeRanges;
 
   return (
     <div class="flex flex-wrap items-center gap-2" role="search" aria-label="Filter funds">
@@ -53,6 +56,14 @@ export function FilterBar(props: Props) {
         onInput={(e) => setQ((e.currentTarget as HTMLInputElement).value)}
         class="h-9 w-full rounded-md border border-line bg-bg px-3 text-sm sm:w-64"
       />
+      <button
+        type="button" class="h-9 rounded-md border border-line px-3 text-sm hover:bg-subtle sm:hidden" aria-expanded={showFilters}
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        Filters{activeCount > 0 && <span class="ml-1.5 rounded bg-accent px-1.5 text-xs text-accent-fg">{activeCount}</span>}
+        <span aria-hidden="true" class="ml-1.5 text-muted">{showFilters ? '▴' : '▾'}</span>
+      </button>
+      <div class={`${showFilters ? 'flex' : 'hidden'} w-full flex-wrap items-center gap-2 sm:flex sm:w-auto`}>
       {dict && (
         <>
           <MultiSelect label="Type" options={dict.assetClass} selected={filters.assetClass} onChange={(assetClass) => onFilters({ assetClass })} />
@@ -93,6 +104,7 @@ export function FilterBar(props: Props) {
       </button>
       <button type="button" class="h-9 rounded-md border border-line px-3 text-sm hover:bg-subtle disabled:opacity-40" disabled={disabled} onClick={onExport}>Export CSV</button>
       {!isDefault && <button type="button" class="h-9 px-2 text-sm text-muted underline hover:text-fg" onClick={onReset}>Reset</button>}
+      </div>
     </div>
   );
 }

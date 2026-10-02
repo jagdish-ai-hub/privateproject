@@ -97,7 +97,7 @@ export function Screener() {
         <>
           <div class="flex items-center justify-between text-xs text-muted">
             <span>{prepared ? <>NAV as of <span class="num">{formatDay(Date.parse(prepared.data.asOf) / 86_400_000)}</span></> : 'Loading funds…'}</span>
-            <span>Direct + Growth by default · sorted by {COLUMNS.find((c) => c.key === view.sort.key)?.label ?? 'name'}</span>
+            <span>Sorted by {view.sort.key === 'name' ? 'name' : COLUMNS.find((c) => c.key === view.sort.key)?.label ?? view.sort.key} ({view.sort.dir === 'desc' ? 'high to low' : 'low to high'}); funds with no value come last</span>
           </div>
           {result && result.total === 0 ? (
             <div class="rounded-md border border-line p-10 text-center">

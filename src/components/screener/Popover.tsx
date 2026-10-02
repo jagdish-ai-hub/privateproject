@@ -33,7 +33,7 @@ export function Popover({ label, badge = 0, width = 'w-80', children }: Props) {
         {badge > 0 && <span class="ml-1.5 rounded bg-accent px-1.5 text-xs text-accent-fg">{badge}</span>}
         <span aria-hidden="true" class="ml-1.5 text-muted">▾</span>
       </button>
-      {open && <div role="dialog" aria-label={label} class={`absolute left-0 z-30 mt-1 max-w-[92vw] rounded-md border border-line bg-bg p-3 shadow-sm ${width}`}>{children}</div>}
+      {open && <div role="dialog" aria-label={label} class={`absolute left-0 z-30 mt-1 rounded-md border border-line bg-bg p-3 shadow-sm ${width} max-sm:fixed max-sm:inset-x-3 max-sm:top-24 max-sm:mt-0 max-sm:max-h-[70vh] max-sm:w-auto max-sm:overflow-auto`}>{children}</div>}
     </div>
   );
 }

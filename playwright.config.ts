@@ -14,5 +14,5 @@ export default defineConfig({
     launchOptions: process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
   },
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } }],
-  webServer: { command: 'npm run preview -- --port 4321', url: 'http://localhost:4321', reuseExistingServer: true, timeout: 60_000 },
+  webServer: { command: 'node scripts/serve-dist.mjs 4321', url: 'http://localhost:4321', reuseExistingServer: true, timeout: 60_000 },
 });

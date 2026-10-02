@@ -10,7 +10,7 @@ async function expectedTotal(page: Page, search: string): Promise<number> {
   return applyView(prepare(data), parseView(search)).total;
 }
 
-const showing = (page: Page) => page.getByText(/Showing/).first();
+const showing = (page: Page) => page.getByTestId('result-count');
 const firstRowName = (page: Page) => page.locator('tbody tr').first().locator('td').first();
 
 test('shows a skeleton first, then the real table with the default Direct + Growth view', async ({ page }) => {
@@ -20,7 +20,7 @@ test('shows a skeleton first, then the real table with the default Direct + Grow
   await expect(showing(page)).toBeVisible();
   await expect(page.locator('tbody .skeleton')).toHaveCount(0);
   const total = await expectedTotal(page, '');
-  await expect(page.getByText(/of .* funds/).first()).toContainText(total.toLocaleString('en-IN'));
+  await expect(page.getByTestId('result-count')).toContainText(total.toLocaleString('en-IN'));
   await expect(page.getByRole('button', { name: /^Plan/ })).toContainText('1');
 });
 
@@ -31,7 +31,7 @@ test('search filters the table, updates the URL and matches the pure function', 
   await expect(page).toHaveURL(/q=small(\+|%20)cap/);
   const total = await expectedTotal(page, '?q=small cap');
   expect(total).toBeGreaterThan(0);
-  await expect(page.getByText(/of .* funds/).first()).toContainText(total.toLocaleString('en-IN'));
+  await expect(page.getByTestId('result-count')).toContainText(total.toLocaleString('en-IN'));
   await expect(firstRowName(page)).toContainText(/small/i);
 });
 
@@ -72,7 +72,7 @@ test('range filter excludes funds without data and agrees with the pure function
   await expect(showing(page)).toBeVisible();
   const total = await expectedTotal(page, '?min_r5y=15');
   expect(total).toBeGreaterThan(0);
-  await expect(page.getByText(/of .* funds/).first()).toContainText(total.toLocaleString('en-IN'));
+  await expect(page.getByTestId('result-count')).toContainText(total.toLocaleString('en-IN'));
   const view = parseView('?min_r5y=15');
   expect(view.filters.ranges.r5y).toEqual({ min: 15 });
   expect(view.filters.plan).toEqual(DEFAULT_VIEW.filters.plan);
@@ -111,4 +111,37 @@ test('no horizontal page scroll on a phone-sized screen', async ({ page }) => {
   await expect(showing(page)).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test.describe('phone layout', () => {
+  test.use({ viewport: { width: 375, height: 800 } });
+
+  test('filter buttons sit behind a Filters toggle; popovers stay on screen', async ({ page }) => {
+    await page.goto('/');
+    await expect(showing(page)).toBeVisible();
+    const toolbar = page.getByRole('search');
+    await expect(toolbar.getByRole('button', { name: /^Category/ })).toBeHidden();
+    await page.getByRole('button', { name: /^Filters/ }).click();
+    await expect(toolbar.getByRole('button', { name: /^Category/ })).toBeVisible();
+
+    for (const name of [/^Ranges/, /^Columns/, /^Fund house/]) {
+      await toolbar.getByRole('button', { name }).click();
+      const panel = page.locator('[role="dialog"], [role="listbox"]').first();
+      await expect(panel).toBeVisible();
+      const box = await panel.boundingBox();
+      expect(box).not.toBeNull();
+      expect((box?.x ?? 0)).toBeGreaterThanOrEqual(-1);
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(376);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow).toBeLessThanOrEqual(0);
+      await page.keyboard.press('Escape');
+    }
+  });
+
+  test('active filters are counted on the Filters button', async ({ page }) => {
+    await page.goto('/?cat=Small%20Cap');
+    await expect(showing(page)).toBeVisible();
+    // Plan + Option defaults and Category = 3 active groups
+    await expect(page.getByRole('button', { name: /^Filters/ })).toContainText('3');
+  });
 });
