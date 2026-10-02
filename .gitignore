@@ -6,3 +6,4 @@ playwright-report/
 test-results/
 data/cache/
 public/data/
+data/generated/
