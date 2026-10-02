@@ -2,7 +2,7 @@ import tseslint from 'typescript-eslint';
 import jsdoc from 'eslint-plugin-jsdoc';
 
 export default tseslint.config(
-  { ignores: ['dist/', '.astro/', 'node_modules/', 'public/', 'playwright-report/'] },
+  { ignores: ['src/env.d.ts', 'dist/', '.astro/', 'node_modules/', 'public/', 'playwright-report/'] },
   ...tseslint.configs.recommended,
   {
     files: ['src/lib/**/*.ts', 'scripts/**/*.ts'],
