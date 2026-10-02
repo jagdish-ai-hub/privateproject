@@ -1,0 +1,54 @@
+---
+/** One page per calculator: the interactive calculator, how it works, a worked example, FAQ, JSON-LD. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import { Calculator } from '../../components/calculators/Calculator.tsx';
+import { breadcrumbLd, calculatorLd, faqLd } from '../../lib/seo.ts';
+import { TOOLS } from '../../lib/tools.ts';
+
+export function getStaticPaths() {
+  return TOOLS.map((t) => ({ params: { slug: t.slug }, props: { slug: t.slug } }));
+}
+const { slug } = Astro.props;
+const tool = TOOLS.find((t) => t.slug === slug)!;
+const path = `/tools/${tool.slug}/`;
+const url = new URL(path, Astro.site).toString();
+const others = TOOLS.filter((t) => t.slug !== tool.slug);
+---
+<BaseLayout
+  title={tool.title}
+  description={tool.description}
+  path={path}
+  jsonLd={[
+    breadcrumbLd([
+      { name: 'Home', url: new URL('/', Astro.site).toString() },
+      { name: 'Calculators', url: new URL('/tools/', Astro.site).toString() },
+      { name: tool.name, url },
+    ]),
+    calculatorLd(tool.name, url, tool.description),
+    faqLd(tool.faqs),
+  ]}
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Calculators', href: '/tools/' }, { name: tool.name }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">{tool.h1}</h1>
+  <p class="mt-2 mb-6 max-w-3xl text-sm text-muted">{tool.intro}</p>
+
+  <Calculator client:load kind={tool.kind} />
+
+  <section class="mt-10 max-w-3xl" aria-labelledby="how-h">
+    <h2 id="how-h" class="text-lg font-semibold tracking-tight">How it works</h2>
+    <p class="mt-3 rounded-md border border-line bg-subtle p-3 font-mono text-sm leading-relaxed">{tool.formula}</p>
+    {tool.how.map((p) => <p class="mt-3 text-sm leading-relaxed text-muted">{p}</p>)}
+    <p class="mt-3 text-sm leading-relaxed"><strong class="font-medium">Example.</strong> {tool.example()}</p>
+  </section>
+
+  <Faq faqs={tool.faqs} />
+
+  <section class="mt-10" aria-labelledby="more-h">
+    <h2 id="more-h" class="text-lg font-semibold tracking-tight">Other calculators</h2>
+    <ul class="mt-3 flex flex-wrap gap-2">
+      {others.map((t) => <li><a class="inline-block rounded-md border border-line px-3 py-1.5 text-sm hover:bg-subtle" href={`/tools/${t.slug}/`}>{t.name}</a></li>)}
+    </ul>
+  </section>
+</BaseLayout>

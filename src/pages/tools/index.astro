@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { TOOLS } from '../../lib/tools.ts';
+---
+<BaseLayout
+  title="Mutual Fund Calculators: SIP, Lumpsum, SWP, CAGR"
+  description="Free mutual fund calculators: SIP, step-up SIP, lumpsum, goal SIP, SWP and CAGR. No sign-up."
+  path="/tools/"
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Calculators' }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">Mutual fund calculators</h1>
+  <p class="mt-2 max-w-3xl text-sm text-muted">Plan investments with simple, transparent calculators. Every page shows the formula it uses.</p>
+  <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {TOOLS.map((t) => (
+      <li><a href={`/tools/${t.slug}/`} class="block h-full rounded-md border border-line p-4 hover:bg-subtle">
+        <span class="font-medium">{t.name}</span>
+        <span class="mt-1 block text-sm text-muted">{t.description}</span>
+      </a></li>
+    ))}
+  </ul>
+</BaseLayout>
