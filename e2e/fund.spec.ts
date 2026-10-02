@@ -75,3 +75,25 @@ test('fund page: JSON-LD is valid JSON with breadcrumb, fund and FAQ markup, and
   for (const q of faq.mainEntity) await expect(page.locator('summary', { hasText: q.name }).first()).toBeVisible();
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new RegExp(`${fund.path}$`));
 });
+
+test('fund page: if the chart data fails to load, an error with Retry is shown, and Retry recovers', async ({ page }) => {
+  await page.route('**/data/nav/*.json', (r) => r.abort());
+  const fund = await pickFund(page);
+  await page.goto(fund.path);
+  await expect(page.getByRole('alert')).toContainText('chart data could not be loaded');
+  await page.unroute('**/data/nav/*.json');
+  await page.getByRole('button', { name: 'Retry' }).click();
+  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 10_000 });
+});
+
+test('fund page: a skeleton of the same height is shown while chart data loads (no layout jump)', async ({ page }) => {
+  await page.route('**/data/nav/*.json', async (r) => { await new Promise((x) => setTimeout(x, 700)); await r.continue(); });
+  const fund = await pickFund(page);
+  await page.goto(fund.path);
+  const skeleton = page.getByLabel('Loading chart');
+  await expect(skeleton).toBeVisible();
+  const h1 = (await skeleton.boundingBox())?.height ?? 0;
+  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 10_000 });
+  const chartBox = await page.locator('[data-visible-from]').first().evaluate((el) => el.parentElement?.getBoundingClientRect().height ?? 0);
+  expect(Math.abs(h1 - chartBox)).toBeLessThanOrEqual(2);
+});

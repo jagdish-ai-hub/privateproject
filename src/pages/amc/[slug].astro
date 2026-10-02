@@ -1,0 +1,43 @@
+---
+/** One page per fund house (AMC): its Direct + Growth funds with returns, ordered by 3-year return. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import FundTable from '../../components/FundTable.astro';
+import { fundAt, loadScreener } from '../../lib/data.ts';
+import { breadcrumbLd, faqLd, type Faq as FaqItem } from '../../lib/seo.ts';
+import { slugify } from '../../lib/slug.ts';
+
+export function getStaticPaths() {
+  const data = loadScreener();
+  return data.dict.amc.map((name, ai) => ({ params: { slug: slugify(name) }, props: { ai, name } }));
+}
+
+const { ai, name } = Astro.props;
+const data = loadScreener();
+const all: number[] = [];
+for (let i = 0; i < data.count; i++) if (data.amc[i] === ai) all.push(i);
+const funds = all
+  .filter((i) => data.dict.plan[data.plan[i]] === 'direct' && data.dict.option[data.option[i]] === 'growth')
+  .map((i) => fundAt(data, i))
+  .sort((a, b) => (b.metrics.r3y ?? -Infinity) - (a.metrics.r3y ?? -Infinity) || a.name.localeCompare(b.name));
+const categories = new Set(all.map((i) => data.category[i]));
+const path = `/amc/${slugify(name)}/`;
+const description = `${name} schemes in India: ${all.length} active schemes across ${categories.size} categories. Compare returns, SIP returns and risk of ${funds.length} Direct Growth funds. Free, no sign-up.`;
+const faqs: FaqItem[] = [
+  { question: `How many mutual fund schemes does ${name} have?`, answer: `${name} has ${all.length} active schemes in the AMFI data (counting each plan and option separately), across ${categories.size} categories. ${funds.length} are Direct plans with the Growth option.` },
+];
+---
+<BaseLayout title={`${name}: Fund List, Returns & Risk`} description={description} path={path}
+  jsonLd={[breadcrumbLd([{ name: 'Home', url: new URL('/', Astro.site).toString() }, { name, url: new URL(path, Astro.site).toString() }]), faqLd(faqs)]}>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">{name}</h1>
+  <p class="mt-2 max-w-3xl text-sm text-muted">{all.length} active schemes in {categories.size} categories. Direct plan, Growth option funds are listed below by 3-year return. This is a data ordering, not a recommendation.</p>
+  <p class="mt-3 text-sm"><a class="underline" href={`/?amc=${encodeURIComponent(name)}`}>Open all {name} schemes in the screener</a>.</p>
+  <div class="mt-5">
+    {funds.length > 0
+      ? <FundTable funds={funds.slice(0, 150)} caption={`${name} Direct Growth funds`} showCategory />
+      : <p class="rounded-md border border-line p-6 text-sm text-muted">No Direct Growth schemes found for this fund house. Use the screener to see its other plans.</p>}
+  </div>
+  <Faq faqs={faqs} />
+</BaseLayout>

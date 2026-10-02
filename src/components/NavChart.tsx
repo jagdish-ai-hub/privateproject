@@ -5,11 +5,15 @@ import { indexOnOrBefore } from '../lib/calc/series.ts';
 import { formatNav, formatPct, signClass } from '../lib/format.ts';
 
 interface Props {
-  /** Day numbers, ascending. */
-  days: number[];
-  /** NAV per day. */
-  navs: number[];
+  /** URL of the fund's chart data file, e.g. `/data/nav/122639.json` (`{ d: days[], n: navs[] }`). */
+  src: string;
   /** Fund name, used as the accessible label. */
+  name: string;
+}
+
+interface InnerProps {
+  days: number[];
+  navs: number[];
   name: string;
 }
 
@@ -26,13 +30,48 @@ function themeColors(): { bg: string; fg: string; muted: string; grid: string; l
 }
 
 /**
+ * Loads a fund's chart data and shows the chart. While loading it shows a skeleton of the same
+ * size (no layout jump); if the file cannot be fetched it shows an error with a Retry button.
+ *
+ * @param props - Data URL and fund name.
+ * @returns The chart block.
+ */
+export function NavChart({ src, name }: Props) {
+  const [data, setData] = useState<{ d: number[]; n: number[] } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    setFailed(false);
+    fetch(src)
+      .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json() as Promise<{ d: number[]; n: number[] }>; })
+      .then((j) => { if (!cancelled) setData(j); })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
+  }, [src, attempt]);
+
+  if (failed) {
+    return (
+      <div role="alert" class="grid h-80 place-items-center rounded-md border border-line text-center">
+        <div>
+          <p class="text-sm text-muted">The chart data could not be loaded.</p>
+          <button type="button" onClick={() => setAttempt((a) => a + 1)} class="mt-3 h-9 rounded-md bg-accent px-4 text-sm text-accent-fg">Retry</button>
+        </div>
+      </div>
+    );
+  }
+  if (!data) return <div class="skeleton h-80 w-full" aria-busy="true" aria-label="Loading chart" />;
+  return <NavChartInner days={data.d} navs={data.n} name={name} />;
+}
+
+/**
  * NAV history chart (TradingView lightweight-charts, loaded lazily on the client).
  *
  * The % change shown for each range comes from the same `periodReturn` function the returns
  * table uses, run on the same NAV points, so the two can never disagree. Ranges the fund is
  * too young for are disabled rather than showing a partial figure.
  */
-export function NavChart({ days, navs, name }: Props) {
+function NavChartInner({ days, navs, name }: InnerProps) {
   const box = useRef<HTMLDivElement>(null);
   const [range, setRange] = useState<number>(12);
   // The chart library loads asynchronously; this ref makes it use the *latest* range, not the one

@@ -111,7 +111,7 @@ export interface ChartData {
  * @returns The series, or `null` if the file does not exist.
  */
 export function loadNav(code: number): ChartData | null {
-  const path = `data/generated/nav/${code}.json`;
+  const path = `public/data/nav/${code}.json`;
   return existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as ChartData) : null;
 }
 

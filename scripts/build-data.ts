@@ -25,7 +25,10 @@ import { adjustForSplits } from '../src/lib/calc/splits.ts';
 const NAVALL_URL = 'https://portal.amfiindia.com/spages/NAVAll.txt';
 const CACHE_DIR = 'data/cache';
 const OUT_PUBLIC = 'public/data';
-const OUT_NAV = 'data/generated/nav';
+const OUT_NAV = `${OUT_PUBLIC}/nav`;
+
+/** Cloudflare Pages' free plan allows 20,000 files per site: fund pages + these nav files + assets must stay under it. */
+const FILE_LIMIT_WARN = 19_000;
 
 /** A scheme is active if its NAV is at most this many days older than the newest NAV. */
 const ACTIVE_WITHIN_DAYS = 10;
@@ -189,6 +192,8 @@ async function main(): Promise<void> {
   const suspicious = rows.filter((r) => (r.m.r1y !== null && Math.abs(r.m.r1y) > 3) || (r.m.mdd3y !== null && r.m.mdd3y < -0.9)).map((r) => ({ code: r.s.code, name: r.fullName, r1y: r.m.r1y, mdd3y: r.m.mdd3y }));
   mkdirSync('data/generated', { recursive: true });
   writeFileSync('data/generated/report.json', JSON.stringify({ asOf: out.asOf, count: rows.length, noHistory, futureDated: future.length, failed: errors.length, splitAdjusted: adjustedCount, trimmedAtBreak: trimmedCount, spikePointsRemoved: spikeCount, suspicious }, null, 1));
+  const approxFiles = rows.length * 2 + 400; // one fund page + one nav file per scheme, plus category/AMC/guide pages and assets
+  if (approxFiles > FILE_LIMIT_WARN) console.warn(`WARNING: about ${approxFiles} files will be deployed; Cloudflare Pages free plan allows 20,000. Consider hosting nav files elsewhere or limiting fund pages.`);
   console.log(`wrote ${rows.length} schemes; split-adjusted ${adjustedCount}; trimmed ${trimmedCount}; spike points removed ${spikeCount}; no-history ${noHistory.length}; suspicious ${suspicious.length}; ${((Date.now() - started) / 1000).toFixed(1)}s`);
 }
 

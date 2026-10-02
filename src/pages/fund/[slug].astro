@@ -102,7 +102,7 @@ const adjDate = (d: number) => formatDay(d);
   <section class="mt-6" aria-labelledby="chart-h">
     <h2 id="chart-h" class="sr-only">NAV chart</h2>
     {nav
-      ? <NavChart client:visible days={nav.d} navs={nav.n} name={f.name} />
+      ? <NavChart client:visible src={`/data/nav/${f.code}.json`} name={f.name} />
       : <p class="rounded-md border border-line p-6 text-sm text-muted">Chart data is not available for this scheme.</p>}
   </section>
 

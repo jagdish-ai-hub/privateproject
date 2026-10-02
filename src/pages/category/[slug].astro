@@ -1,0 +1,75 @@
+---
+/**
+ * One page per SEBI category: how many funds, typical returns, and a table of the Direct +
+ * Growth funds ranked by 3-year return. Text is generated from the data, so every page differs.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import FundTable from '../../components/FundTable.astro';
+import { fundAt, loadScreener } from '../../lib/data.ts';
+import { formatPct } from '../../lib/format.ts';
+import { breadcrumbLd, faqLd, type Faq as FaqItem } from '../../lib/seo.ts';
+import { slugify } from '../../lib/slug.ts';
+import { median } from '../../lib/stats.ts';
+
+export function getStaticPaths() {
+  const data = loadScreener();
+  return data.dict.category.map((name, ci) => ({ params: { slug: slugify(name) }, props: { ci, name } }));
+}
+
+const { ci, name } = Astro.props;
+const data = loadScreener();
+const all: number[] = [];
+for (let i = 0; i < data.count; i++) if (data.category[i] === ci) all.push(i);
+const directGrowth = all.filter((i) => data.dict.plan[data.plan[i]] === 'direct' && data.dict.option[data.option[i]] === 'growth');
+const ranked = directGrowth
+  .map((i) => fundAt(data, i))
+  .sort((a, b) => (b.metrics.r3y ?? -Infinity) - (a.metrics.r3y ?? -Infinity) || (b.metrics.r1y ?? -Infinity) - (a.metrics.r1y ?? -Infinity));
+const shown = ranked.slice(0, 100);
+const assetClass = data.dict.assetClass[data.assetClass[all[0]]];
+const med = (k: 'r1y' | 'r3y' | 'r5y') => median(directGrowth.map((i) => data.metrics[k][i]));
+const withR3 = ranked.filter((f) => f.metrics.r3y !== null);
+const top = withR3[0];
+const path = `/category/${slugify(name)}/`;
+
+const description = `${name} mutual funds in India: ${all.length} schemes, ${directGrowth.length} Direct Growth plans. Median returns 1Y ${formatPct(med('r1y'), 1)}, 3Y ${formatPct(med('r3y'), 1)}, 5Y ${formatPct(med('r5y'), 1)}. Compare returns, SIP returns and risk. Free.`;
+const faqs: FaqItem[] = [
+  {
+    question: `How many ${name} mutual funds are there in India?`,
+    answer: `There are ${all.length} active ${name} schemes in the AMFI data, counting every plan and option. ${directGrowth.length} of them are Direct plans with the Growth option, which is the cleanest group to compare.`,
+  },
+  {
+    question: `What are the typical returns of ${name} funds?`,
+    answer: `Among Direct Growth ${name} funds, the median returns are ${formatPct(med('r1y'))} over 1 year, ${formatPct(med('r3y'))} over 3 years and ${formatPct(med('r5y'))} over 5 years (CAGR). Individual funds differ widely and past returns do not predict future returns.`,
+  },
+  {
+    question: `What does the ${name} category mean?`,
+    answer: `${name} is a SEBI-defined scheme category within ${assetClass}. AMFI lists every scheme under a category, and funds in the same category are the fairest ones to compare against each other.`,
+  },
+];
+---
+<BaseLayout
+  title={`${name} Mutual Funds: Returns, SIP Returns & Risk`}
+  description={description}
+  path={path}
+  jsonLd={[
+    breadcrumbLd([{ name: 'Home', url: new URL('/', Astro.site).toString() }, { name, url: new URL(path, Astro.site).toString() }]),
+    faqLd(faqs),
+  ]}
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">{name} mutual funds</h1>
+  <p class="mt-2 max-w-3xl text-sm text-muted">
+    {all.length} active schemes ({assetClass}). The table lists the {directGrowth.length} Direct plan, Growth option funds, ordered by 3-year return.
+    {top && <> The highest 3-year return in this list is {formatPct(top.metrics.r3y)} ({top.name}).</>}
+    This is a data ordering, not a recommendation.
+  </p>
+  <p class="mt-3 text-sm"><a class="underline" href={`/?cat=${encodeURIComponent(name)}`}>Open these funds in the screener</a> to filter by plan, fund house, returns or risk.</p>
+
+  <div class="mt-5">
+    <FundTable funds={shown} caption={`${name} Direct Growth funds by 3-year return`} />
+    {ranked.length > shown.length && <p class="mt-2 text-xs text-muted">Showing the top {shown.length} of {ranked.length}. Use the screener for the full list.</p>}
+  </div>
+  <Faq faqs={faqs} />
+</BaseLayout>
