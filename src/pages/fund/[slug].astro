@@ -72,9 +72,10 @@ const adjDate = (d: number) => formatDay(d);
     <p class="mt-1 text-sm text-muted">
       {f.amc} · {f.category}{planText && ` · ${planText}`}{optionText && ` · ${optionText}`}
     </p>
-    <p class="mt-4">
+    <p class="mt-4 flex flex-wrap items-baseline gap-x-3">
       <span class="num text-3xl font-semibold tracking-tight">₹{formatNav(f.nav)}</span>
-      <span class="ml-2 text-sm text-muted">NAV as on {formatDay(f.navDate)}</span>
+      <span class="text-sm text-muted">NAV as on {formatDay(f.navDate)}</span>
+      <a href={`/compare/?f=${f.code}`} class="text-sm underline hover:no-underline">Compare with other funds</a>
     </p>
   </header>
 
