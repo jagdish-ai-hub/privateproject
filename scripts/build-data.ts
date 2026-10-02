@@ -3,9 +3,10 @@
  * `data/generated/nav/{code}.json`.
  *
  * Usage:
- *   node scripts/build-data.ts [--limit=N] [--concurrency=5] [--offline] [--amc=Name]
+ *   node scripts/build-data.ts [--limit=N] [--concurrency=5] [--rps=10] [--offline] [--amc=Name]
  *
  * - `--limit=N`   only process the first N active schemes (development)
+ * - `--rps=N`      max MFapi requests per second across all workers (default 10; 0 = unlimited)
  * - `--offline`   reuse `data/cache/NAVAll.txt` instead of downloading it
  * - `--amc=Name`  only schemes whose fund house contains Name (development)
  *
@@ -16,7 +17,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseNavAll, type AmfiScheme } from './pipeline/amfi.ts';
 import { classifyCategory, classifyOption, classifyPlan, resolveName } from './pipeline/classify.ts';
 import { chartSeries } from './pipeline/chart.ts';
-import { fetchJson, getHistory, MFAPI, pool } from './pipeline/history.ts';
+import { createRateLimiter, fetchJson, FileHistoryStore, getHistory, MFAPI, pool } from './pipeline/history.ts';
 import { computeMetrics, METRIC_KEYS, rankDescending, type Metrics } from './pipeline/metrics.ts';
 import { formatIso } from '../src/lib/calc/dates.ts';
 import { adjustForSplits } from '../src/lib/calc/splits.ts';
@@ -92,10 +93,14 @@ async function main(): Promise<void> {
   console.log(`parsed ${all.length} rows; as-of ${formatIso(asOf)}; active ${active.length}; future-dated (excluded) ${future.length}`);
 
   const concurrency = Number(args.get('concurrency') ?? 5);
+  // Swap this one line to change where histories are cached (see HistoryStore in history.ts).
+  const store = new FileHistoryStore(`${CACHE_DIR}/nav`);
+  const rps = Number(args.get('rps') ?? 10);
+  const limiter = createRateLimiter(rps > 0 ? 1000 / rps : 0);
   const { results, errors } = await pool(
     active,
     concurrency,
-    async (s: AmfiScheme) => getHistory(s.code, `${CACHE_DIR}/nav/${s.code}.json.gz`, { day: s.navDay, nav: s.nav }),
+    async (s: AmfiScheme) => getHistory(s.code, store, { day: s.navDay, nav: s.nav }, { limiter }),
     (done, total) => { if (done % 250 === 0 || done === total) console.log(`  history ${done}/${total}`); },
   );
   if (errors.length) console.warn(`  ${errors.length} schemes failed to download (skipped); first: ${String(errors[0].error)}`);

@@ -1,0 +1,216 @@
+---
+/**
+ * One static page per active scheme: NAV, chart, returns (with peer rank), SIP returns, risk,
+ * notices about adjusted data, similar funds, FAQ and JSON-LD. Generated from screener.json.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import FundTable from '../../components/FundTable.astro';
+import { NavChart } from '../../components/NavChart.tsx';
+import { fundAt, loadNav, loadScreener, peersOf } from '../../lib/data.ts';
+import { fundFaqs } from '../../lib/faq.ts';
+import { formatDay, formatNav, formatNum, formatPct, formatPlainPct, signClass } from '../../lib/format.ts';
+import { breadcrumbLd, faqLd, fundLd } from '../../lib/seo.ts';
+import { slugify } from '../../lib/slug.ts';
+import { clip } from '../../lib/stats.ts';
+
+export function getStaticPaths() {
+  const data = loadScreener();
+  // MAX_FUND_PAGES lets development / CI smoke builds skip most of the ~8.5k pages.
+  // FUND_CODES=122639,115284 builds only those schemes.
+  const max = Number(process.env.MAX_FUND_PAGES ?? Infinity);
+  const only = process.env.FUND_CODES ? new Set(process.env.FUND_CODES.split(',').map(Number)) : null;
+  const indices = Array.from({ length: data.count }, (_, i) => i).filter((i) => !only || only.has(data.code[i])).slice(0, max);
+  return indices.map((i) => ({ params: { slug: fundAt(data, i).slug }, props: { index: i } }));
+}
+
+const { index } = Astro.props;
+const data = loadScreener();
+const f = fundAt(data, index);
+const nav = loadNav(f.code);
+const m = f.metrics;
+const peers = peersOf(data, f).map((i) => fundAt(data, i));
+const faqs = fundFaqs(f);
+const path = `/fund/${f.slug}/`;
+const url = new URL(path, Astro.site).toString();
+const catSlug = slugify(f.category);
+const planText = { direct: 'Direct plan', regular: 'Regular plan', na: '', unknown: 'Plan not stated' }[f.plan] ?? '';
+const optionText = { growth: 'Growth option', idcw: 'IDCW option', bonus: 'Bonus option', other: '' }[f.option] ?? '';
+
+const description = clip(
+  `${f.name}: NAV ₹${formatNav(f.nav)} (${formatDay(f.navDate)}). Returns 1Y ${formatPct(m.r1y, 1)}, 3Y ${formatPct(m.r3y, 1)}, 5Y ${formatPct(m.r5y, 1)}; SIP returns, volatility, drawdown and category rank. Free, no sign-up.`,
+  158,
+);
+const title = clip(`${f.name}: NAV, Returns & SIP Returns`, 70);
+
+const returnsRows = [
+  ['1 month', 'r1m', 'Absolute', null], ['3 months', 'r3m', 'Absolute', null], ['6 months', 'r6m', 'Absolute', null],
+  ['1 year', 'r1y', 'CAGR', f.ranks.r1y], ['3 years', 'r3y', 'CAGR', f.ranks.r3y], ['5 years', 'r5y', 'CAGR', f.ranks.r5y],
+  ['10 years', 'r10y', 'CAGR', null], ['Since launch', 'rInc', 'CAGR', null],
+] as const;
+const adjDate = (d: number) => formatDay(d);
+---
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  jsonLd={[
+    breadcrumbLd([
+      { name: 'Home', url: new URL('/', Astro.site).toString() },
+      { name: f.category, url: new URL(`/category/${catSlug}/`, Astro.site).toString() },
+      { name: f.name, url },
+    ]),
+    fundLd({ name: f.name, url, description, amc: f.amc, category: f.category, isin: f.isin, code: f.code }),
+    faqLd(faqs),
+  ]}
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: f.category, href: `/category/${catSlug}/` }, { name: f.name }]} />
+
+  <header>
+    <h1 class="text-2xl font-semibold tracking-tight">{f.name}</h1>
+    <p class="mt-1 text-sm text-muted">
+      {f.amc} · {f.category}{planText && ` · ${planText}`}{optionText && ` · ${optionText}`}
+    </p>
+    <p class="mt-4">
+      <span class="num text-3xl font-semibold tracking-tight">₹{formatNav(f.nav)}</span>
+      <span class="ml-2 text-sm text-muted">NAV as on {formatDay(f.navDate)}</span>
+    </p>
+  </header>
+
+  <div class="mt-4 space-y-2 text-sm">
+    {f.option === 'idcw' && (
+      <p class="rounded-md border border-line bg-subtle p-3 text-muted">
+        This is an IDCW (dividend) option. Money paid out as IDCW reduces the NAV, so the returns below are NAV price returns and
+        understate what an investor who received the payouts earned. Compare with the Growth option of the same scheme for total return.
+      </p>
+    )}
+    {nav?.splits && nav.splits.length > 0 && (
+      <p class="rounded-md border border-line bg-subtle p-3 text-muted">
+        NAV history is adjusted for {nav.splits.map(([d, k]) => k >= 1 ? `a ${k}-for-1 unit split on ${adjDate(d)}` : `a ${Math.round(1 / k)}-to-1 unit consolidation on ${adjDate(d)}`).join(' and ')}.
+        Without this the NAV drop would look like a loss. The latest NAV shown above is the real, unadjusted NAV.
+      </p>
+    )}
+    {f.adj === 2 && nav?.breaks && nav.breaks.length > 0 && (
+      <p class="rounded-md border border-line bg-subtle p-3 text-muted">
+        On {adjDate(nav.breaks[nav.breaks.length - 1][0])} the NAV changed by {formatPct(nav.breaks[nav.breaks.length - 1][1] - 1, 0)} in one day without a recognisable unit split
+        (for example a large payout or a scheme change). History before that date is left out of all returns and charts on this page, so no figure spans the change.
+      </p>
+    )}
+  </div>
+
+  <section class="mt-6" aria-labelledby="chart-h">
+    <h2 id="chart-h" class="sr-only">NAV chart</h2>
+    {nav
+      ? <NavChart client:visible days={nav.d} navs={nav.n} name={f.name} />
+      : <p class="rounded-md border border-line p-6 text-sm text-muted">Chart data is not available for this scheme.</p>}
+  </section>
+
+  <div class="mt-8 grid gap-6 lg:grid-cols-2">
+    <section aria-labelledby="ret-h">
+      <h2 id="ret-h" class="mb-2 text-lg font-semibold tracking-tight">Returns</h2>
+      <div class="overflow-auto rounded-md border border-line">
+        <table class="w-full text-sm">
+          <caption class="sr-only">Returns of {f.name}</caption>
+          <thead><tr class="border-b border-line text-xs text-muted">
+            <th scope="col" class="px-3 py-2 text-left font-medium">Period</th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">Basis</th>
+            <th scope="col" class="px-3 py-2 text-right font-medium">Return</th>
+            <th scope="col" class="px-3 py-2 text-right font-medium">Rank in peers</th>
+          </tr></thead>
+          <tbody>
+            {returnsRows.map(([label, key, basis, rank]) => (
+              <tr class="border-b border-line last:border-0">
+                <td class="px-3 py-2">{label}</td>
+                <td class="px-3 py-2 text-muted">{basis}</td>
+                <td class={`num px-3 py-2 ${signClass(m[key])}`}>{formatPct(m[key])}</td>
+                <td class="num px-3 py-2 text-muted">{rank ? `#${rank.rank} of ${rank.of}` : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-2 text-xs text-muted">
+        Rank compares funds in the same category, plan and option ({f.category}, {planText || 'any plan'}, {optionText || 'any option'}).
+        A dash means the fund is too new for that period. <a class="underline" href="/methodology/">How returns are calculated</a>.
+      </p>
+    </section>
+
+    <div class="space-y-6">
+      <section aria-labelledby="sip-h">
+        <h2 id="sip-h" class="mb-2 text-lg font-semibold tracking-tight">SIP returns (XIRR)</h2>
+        <div class="overflow-auto rounded-md border border-line">
+          <table class="w-full text-sm">
+            <caption class="sr-only">SIP returns of {f.name}</caption>
+            <tbody>
+              {[['1 year SIP', 'sip1y'], ['3 year SIP', 'sip3y'], ['5 year SIP', 'sip5y']].map(([label, key]) => (
+                <tr class="border-b border-line last:border-0">
+                  <td class="px-3 py-2">{label}</td>
+                  <td class={`num px-3 py-2 ${signClass(m[key as 'sip1y'])}`}>{formatPct(m[key as 'sip1y'])}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="risk-h">
+        <h2 id="risk-h" class="mb-2 text-lg font-semibold tracking-tight">Risk (last 3 years)</h2>
+        <div class="overflow-auto rounded-md border border-line">
+          <table class="w-full text-sm">
+            <caption class="sr-only">Risk measures of {f.name}</caption>
+            <tbody>
+              <tr class="border-b border-line"><td class="px-3 py-2">Volatility (annualised)</td><td class="num px-3 py-2">{formatPlainPct(m.vol3y)}</td></tr>
+              <tr class="border-b border-line"><td class="px-3 py-2">Max drawdown</td><td class={`num px-3 py-2 ${signClass(m.mdd3y)}`}>{formatPct(m.mdd3y)}</td></tr>
+              <tr class="border-b border-line"><td class="px-3 py-2">Sharpe ratio</td><td class="num px-3 py-2">{formatNum(m.sharpe3y)}</td></tr>
+              <tr><td class="px-3 py-2">Sortino ratio</td><td class="num px-3 py-2">{formatNum(m.sortino3y)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="mt-8" aria-labelledby="roll-h">
+    <h2 id="roll-h" class="mb-2 text-lg font-semibold tracking-tight">Rolling returns</h2>
+    <div class="overflow-auto rounded-md border border-line">
+      <table class="w-full text-sm">
+        <caption class="sr-only">Rolling returns of {f.name}</caption>
+        <thead><tr class="border-b border-line text-xs text-muted">
+          <th scope="col" class="px-3 py-2 text-left font-medium">Window</th>
+          <th scope="col" class="px-3 py-2 text-right font-medium">Average</th>
+          <th scope="col" class="px-3 py-2 text-right font-medium">Worst</th>
+          <th scope="col" class="px-3 py-2 text-right font-medium">Positive windows</th>
+        </tr></thead>
+        <tbody>
+          <tr class="border-b border-line"><td class="px-3 py-2">1 year</td><td class={`num px-3 py-2 ${signClass(m.roll1yAvg)}`}>{formatPct(m.roll1yAvg)}</td><td class={`num px-3 py-2 ${signClass(m.roll1yMin)}`}>{formatPct(m.roll1yMin)}</td><td class="num px-3 py-2">{formatPlainPct(m.roll1yPos)}</td></tr>
+          <tr><td class="px-3 py-2">3 years</td><td class={`num px-3 py-2 ${signClass(m.roll3yAvg)}`}>{formatPct(m.roll3yAvg)}</td><td class={`num px-3 py-2 ${signClass(m.roll3yMin)}`}>{formatPct(m.roll3yMin)}</td><td class="num px-3 py-2">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-xs text-muted">Rolling returns look at every possible start date, so they show how consistent returns were rather than one lucky or unlucky period.</p>
+  </section>
+
+  <section class="mt-8" aria-labelledby="about-h">
+    <h2 id="about-h" class="mb-2 text-lg font-semibold tracking-tight">Fund details</h2>
+    <dl class="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1.5 rounded-md border border-line p-4 text-sm">
+      <dt class="text-muted">Fund house</dt><dd>{f.amc}</dd>
+      <dt class="text-muted">Category</dt><dd><a class="hover:underline" href={`/category/${catSlug}/`}>{f.category}</a> ({f.assetClass})</dd>
+      <dt class="text-muted">Scheme type</dt><dd>{f.schemeType}</dd>
+      <dt class="text-muted">Plan / option</dt><dd>{[planText, optionText].filter(Boolean).join(' · ') || '—'}</dd>
+      <dt class="text-muted">First NAV</dt><dd class="num text-left">{formatDay(f.inception)}</dd>
+      <dt class="text-muted">AMFI scheme code</dt><dd class="num text-left">{f.code}</dd>
+      <dt class="text-muted">ISIN</dt><dd class="num text-left">{f.isin ?? '—'}</dd>
+    </dl>
+  </section>
+
+  {peers.length > 0 && (
+    <section class="mt-8" aria-labelledby="peers-h">
+      <h2 id="peers-h" class="mb-2 text-lg font-semibold tracking-tight">Other {f.category} funds ({planText || 'same plan'}, {optionText || 'same option'})</h2>
+      <FundTable funds={peers} caption={`Other ${f.category} funds`} />
+      <p class="mt-2 text-xs text-muted">Listed by 3-year return. <a class="underline" href={`/category/${catSlug}/`}>See all {f.category} funds</a>. Not a recommendation.</p>
+    </section>
+  )}
+
+  <Faq faqs={faqs} />
+</BaseLayout>

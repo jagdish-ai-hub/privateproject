@@ -4,7 +4,8 @@ import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { ANCHOR_MONTHS, chartSeries, OLD_POINTS } from '../scripts/pipeline/chart.ts';
 import { periodReturn } from '../src/lib/calc/index.ts';
-import { getHistory, mergeSeries, pool, readCache, writeCache } from '../scripts/pipeline/history.ts';
+import { afterEach, vi } from 'vitest';
+import { createRateLimiter, fetchJson, FileHistoryStore, getHistory, MemoryHistoryStore, mergeSeries, pool, readCache, writeCache } from '../scripts/pipeline/history.ts';
 import { computeMetrics, rankDescending } from '../scripts/pipeline/metrics.ts';
 import { daily, iso, series } from './helpers.ts';
 
@@ -23,18 +24,74 @@ describe('cache + merge', () => {
     expect(m.navs).toEqual([1, 2, 33]);
     expect(m.days).toEqual([iso('2026-01-01'), iso('2026-01-02'), iso('2026-01-03')]);
   });
-  it('getHistory appends the AMFI latest NAV with no network call when the cache is 1-5 days behind', async () => {
-    const path = join(tmp, 'b.json.gz');
-    writeCache(path, series([['2026-09-29', 10], ['2026-09-30', 11]]));
-    const s = await getHistory(1, path, { day: iso('2026-10-01'), nav: 12 });
+  it('getHistory appends the AMFI latest NAV with no network call when the store is 1-5 days behind', async () => {
+    const store = new MemoryHistoryStore();
+    store.set(1, series([['2026-09-29', 10], ['2026-09-30', 11]]));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const s = await getHistory(1, store, { day: iso('2026-10-01'), nav: 12 });
     expect(s?.navs).toEqual([10, 11, 12]);
-    expect(readCache(path)?.navs).toEqual([10, 11, 12]);
+    expect(store.get(1)?.navs).toEqual([10, 11, 12]);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
-  it('getHistory returns the cache untouched when it is already current', async () => {
-    const path = join(tmp, 'c.json.gz');
-    writeCache(path, series([['2026-09-30', 11], ['2026-10-01', 12]]));
-    const s = await getHistory(1, path, { day: iso('2026-10-01'), nav: 12 });
-    expect(s?.navs).toEqual([11, 12]);
+  it('getHistory returns the stored copy untouched when it is already current (no fetch)', async () => {
+    const store = new MemoryHistoryStore();
+    store.set(1, series([['2026-09-30', 11], ['2026-10-01', 12]]));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    expect((await getHistory(1, store, { day: iso('2026-10-01'), nav: 12 }))?.navs).toEqual([11, 12]);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+  it('first sight of a scheme downloads once, stores it, and the next call hits the store (cache hit)', async () => {
+    const store = new MemoryHistoryStore();
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ status: 'SUCCESS', data: [{ date: '01-10-2026', nav: '12' }, { date: '30-09-2026', nav: '11' }] })));
+    vi.stubGlobal('fetch', fetchSpy);
+    await getHistory(7, store, { day: iso('2026-10-01'), nav: 12 });
+    await getHistory(7, store, { day: iso('2026-10-01'), nav: 12 });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(store.get(7)?.navs).toEqual([11, 12]);
+  });
+  it('FileHistoryStore is a drop-in HistoryStore backed by files', () => {
+    const store = new FileHistoryStore(join(tmp, 'store'));
+    expect(store.get(5)).toBeNull();
+    store.set(5, series([['2026-01-01', 1]]));
+    expect(store.get(5)?.navs).toEqual([1]);
+  });
+});
+
+describe('rate limiting', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it('limiter spaces request starts at least the interval apart, even when called concurrently', async () => {
+    const limiter = createRateLimiter(30);
+    const starts: number[] = [];
+    await Promise.all(Array.from({ length: 5 }, async () => { await limiter.wait(); starts.push(Date.now()); }));
+    starts.sort((a, b) => a - b);
+    for (let i = 1; i < starts.length; i++) expect(starts[i] - starts[i - 1]).toBeGreaterThanOrEqual(25);
+  });
+  it('a limiter of 0 never waits', async () => {
+    const t0 = Date.now();
+    const l = createRateLimiter(0);
+    for (let i = 0; i < 20; i++) await l.wait();
+    expect(Date.now() - t0).toBeLessThan(50);
+  });
+  it('on HTTP 429 it honours Retry-After, retries, and then succeeds', async () => {
+    const calls: number[] = [];
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      calls.push(Date.now());
+      return calls.length === 1 ? new Response('slow down', { status: 429, headers: { 'retry-after': '0' } }) : new Response('{"ok":true}');
+    }));
+    expect(await fetchJson<{ ok: boolean }>('https://x.test/a', { retries: 2 })).toEqual({ ok: true });
+    expect(calls).toHaveLength(2);
+  });
+  it('gives up with an error after the retries are used up', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 503 })));
+    await expect(fetchJson('https://x.test/b', { retries: 1 })).rejects.toThrow(/503/);
+  });
+  it('a permanent 404 returns null without retrying', async () => {
+    const spy = vi.fn(async () => new Response('', { status: 404 }));
+    vi.stubGlobal('fetch', spy);
+    expect(await fetchJson('https://x.test/c')).toBeNull();
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
 

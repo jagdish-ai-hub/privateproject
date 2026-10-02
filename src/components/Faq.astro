@@ -1,0 +1,22 @@
+---
+/**
+ * FAQ block rendered with native <details>, so it works without JavaScript. The visible text
+ * is exactly what the FAQPage JSON-LD contains.
+ */
+import type { Faq } from '../lib/seo.ts';
+interface Props { faqs: Faq[]; heading?: string }
+const { faqs, heading = 'Frequently asked questions' } = Astro.props;
+---
+<section class="mt-10" aria-labelledby="faq-h">
+  <h2 id="faq-h" class="text-lg font-semibold tracking-tight">{heading}</h2>
+  <div class="mt-3 divide-y divide-line rounded-md border border-line">
+    {faqs.map((f) => (
+      <details class="group px-4 py-3">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium">
+          {f.question}<span aria-hidden="true" class="text-muted group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="mt-2 text-sm leading-relaxed text-muted">{f.answer}</p>
+      </details>
+    ))}
+  </div>
+</section>
