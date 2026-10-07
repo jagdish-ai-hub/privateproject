@@ -120,11 +120,32 @@ export const DIRECT_PLANS_START_DAY = 15_706;
  * @returns The plan.
  */
 export function classifyPlan(planCol: string, name: string, assetClass: AssetClass, firstNavDay?: number): Plan {
-  if (/direct/i.test(planCol) || /\bdirect\b/i.test(name)) return 'direct';
-  if (/regular/i.test(planCol) || /\bregular\b/i.test(name)) return 'regular';
+  // AMFI's own Plan column is authoritative whenever it says something.
+  const fromCol = planFromText(planCol);
+  if (fromCol) return fromCol;
+  const fromName = planFromText(name);
+  if (fromName) return fromName;
   if (assetClass === 'ETF') return 'na';
   if (firstNavDay !== undefined && firstNavDay < DIRECT_PLANS_START_DAY) return 'regular';
   return 'unknown';
+}
+
+/**
+ * Read Direct / Regular from free text. An explicit "Direct Plan" / "Regular Plan" phrase wins.
+ * Names such as "Kotak X Fund - Regular Plan - Payout of IDCW option- Direct" contain both words;
+ * the phrase makes them Regular. If both words appear and neither is in a "... Plan" phrase the
+ * text is ambiguous and yields `null`.
+ *
+ * @param text - Plan column text or scheme name.
+ * @returns The plan, or `null` if the text does not say.
+ */
+function planFromText(text: string): 'direct' | 'regular' | null {
+  const phrase = /\b(direct|regular)\s+plan\b/i.exec(text);
+  if (phrase) return phrase[1].toLowerCase() as 'direct' | 'regular';
+  const direct = /\bdirect\b/i.test(text);
+  const regular = /\bregular\b/i.test(text);
+  if (direct && regular) return null;
+  return direct ? 'direct' : regular ? 'regular' : null;
 }
 
 /**
@@ -140,12 +161,24 @@ export function classifyPlan(planCol: string, name: string, assetClass: AssetCla
  * @returns The option, or `other` when nothing says.
  */
 export function classifyOption(optionCol: string, name: string, reinvestIsinOnly = false): Option {
-  const text = `${optionCol} ${name}`;
+  // AMFI's Option column is authoritative whenever it says something; otherwise read the name.
+  const found = optionFromText(optionCol) ?? optionFromText(name);
+  if (found) return found;
+  // Last resort: only the "dividend reinvestment" ISIN column is filled, so it is an IDCW option.
+  return reinvestIsinOnly ? 'idcw' : 'other';
+}
+
+/**
+ * Read an option from free text. IDCW wording wins over "growth" when both appear.
+ *
+ * @param text - Option column text or scheme name.
+ * @returns The option, or `null` if the text does not say.
+ */
+function optionFromText(text: string): Option | null {
   if (/idcw|dividend|income distribution|payout|reinvest/i.test(text)) return 'idcw';
   if (/bonus/i.test(text)) return 'bonus';
   if (/growth/i.test(text)) return 'growth';
-  // Last resort: only the "dividend reinvestment" ISIN column is filled, so it is an IDCW option.
-  return reinvestIsinOnly ? 'idcw' : 'other';
+  return null;
 }
 
 /**

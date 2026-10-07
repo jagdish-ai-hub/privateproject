@@ -84,6 +84,15 @@ describe('classifyPlan', () => {
   it('is regular for unlabelled schemes that started before Direct plans existed (1 Jan 2013)', () => {
     expect(classifyPlan('', 'X Fund - Growth', 'Equity', toDayNumber(2005, 6, 1))).toBe('regular');
   });
+  it("AMFI's plan column beats the name when they disagree or the name has both words (Kotak regression)", () => {
+    const name = 'Kotak Active Momentum Fund - Regular Plan - Payout of Income Distribution cum capital withdrawal option- Direct';
+    expect(classifyPlan('Regular Plan', name, 'Equity')).toBe('regular');
+    expect(classifyPlan('', name, 'Equity')).toBe('regular'); // the explicit "Regular Plan" phrase wins
+    expect(classifyPlan('Direct Plan', 'X Fund - Regular Plan', 'Equity')).toBe('direct');
+  });
+  it('a name with both words and no "... Plan" phrase is ambiguous, not guessed', () => {
+    expect(classifyPlan('', 'X Fund direct to regular switch', 'Equity', toDayNumber(2020, 1, 1))).toBe('unknown');
+  });
   it('ETFs have no plans', () => {
     expect(classifyPlan('', 'Nippon Nifty BeES', 'ETF')).toBe('na');
   });
@@ -96,6 +105,11 @@ describe('classifyOption', () => {
     expect(classifyOption('', 'X - Weekly Dividend Reinvestment')).toBe('idcw');
     expect(classifyOption('', 'X - Income Distribution cum Capital Withdrawal')).toBe('idcw');
     expect(classifyOption('Bonus', '')).toBe('bonus');
+  });
+  it("AMFI's option column beats the name", () => {
+    expect(classifyOption('Growth Option', 'X Fund - IDCW')).toBe('growth');
+    expect(classifyOption('IDCW Option', 'X Fund - Growth')).toBe('idcw');
+    expect(classifyOption('Defined Maturity Date Option', 'X Gilt Fund - Growth')).toBe('growth'); // column says nothing useful: name decides
   });
   it('idcw wins when both words appear, other when nothing says, reinvest-only ISIN means idcw', () => {
     expect(classifyOption('', 'X - Growth and IDCW')).toBe('idcw');
