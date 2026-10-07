@@ -37,6 +37,7 @@ describe('TER and AUM FAQs', () => {
     expect(t).toContain('30 Sep 2026');
     const a = faqs.find((f) => f.question.includes('AUM'))?.answer ?? '';
     expect(a).toContain('₹32,100 Cr');
+    expect(a).toContain('This plan alone holds ₹20,000 Cr');
     expect(a).toContain('July - September 2026');
   });
   it('an unmatched fund says so, never 0.00%, and has no AUM question', () => {

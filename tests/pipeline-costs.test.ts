@@ -28,8 +28,10 @@ describe('joinCosts', () => {
   });
   it('AUM joins on the exact AMFI code', () => {
     const { costs, stats } = joinCosts([flexi(), flexi({ code: 999999 })], index, aum);
+    expect(costs[0].planAum).toBe(12345.67);
     expect(costs[0].aum).toBe(12345.67);
-    expect(costs[1].aum).toBeNull();
+    expect(costs[1].planAum).toBeNull(); // no AUM row for this code ...
+    expect(costs[1].aum).toBe(12345.67); // ... but it is the same scheme, so it shows the scheme total
     expect(stats.aumMatched).toBe(1);
   });
   it('an ETF labelled "Direct Plan" still gets the cost AMFI filed under Regular (UTI regression)', () => {
@@ -42,7 +44,7 @@ describe('joinCosts', () => {
   it('unknown plan, unmatched name or missing source gives null, never 0', () => {
     const { costs } = joinCosts([flexi({ plan: 'unknown' }), flexi({ name: 'Imaginary Fund - Direct Plan - Growth' })], index, aum);
     expect(costs.map((c) => c.ter)).toEqual([null, null]);
-    expect(joinCosts([flexi()], null, null).costs[0]).toEqual({ ter: null, terDetail: null, terParts: null, aum: null });
+    expect(joinCosts([flexi()], null, null).costs[0]).toEqual({ ter: null, terDetail: null, terParts: null, planAum: null, aum: null });
   });
   it('counts coverage for Direct+Growth, by asset class, and lists unmatched fund houses', () => {
     const { stats } = joinCosts([flexi(), flexi({ name: 'Nope Fund - Direct Plan - Growth' }), flexi({ amc: 'Ghost Mutual Fund' })], index, aum);
@@ -77,5 +79,23 @@ describe('AUM names as a third source of plan/option', () => {
   it('AMFI’s AUM table names carry plan and option, e.g. "... - Growth - Direct"', () => {
     const { names } = parseAumTable([{ schemes: [{ AMFI_Code: 148397, SchemeNAVName: 'IL&FS Infrastructure Debt Fund Series 2A - Growth - Direct', AverageAumForTheMonth: { a: 100 } }] }]);
     expect(names.get(148397)).toContain('Growth - Direct');
+  });
+});
+
+describe('whole-scheme AUM', () => {
+  it('adds up every plan and option of the same scheme, and leaves other schemes alone', () => {
+    const two: AumQuarter = { fy: 'x', period: 'q', names: new Map(), crore: new Map([[1, 100], [2, 40.5], [3, 0.25], [4, 999]]) };
+    const s = [
+      flexi({ code: 1, name: 'Parag Parikh Flexi Cap Fund - Direct Plan - Growth' }),
+      flexi({ code: 2, name: 'Parag Parikh Flexi Cap Fund - Regular Plan - Growth', plan: 'regular' }),
+      flexi({ code: 3, name: 'Parag Parikh Flexi Cap Fund - Direct Plan - Monthly IDCW Payout', option: 'idcw' }),
+      flexi({ code: 4, name: 'Parag Parikh Conservative Hybrid Fund - Direct Plan - Growth' }),
+      flexi({ code: 5, name: 'Parag Parikh Flexi Cap Fund - Direct Plan - IDCW' }),
+    ];
+    const { costs } = joinCosts(s, null, two);
+    expect(costs.slice(0, 3).map((c) => c.aum)).toEqual([140.75, 140.75, 140.75]); // 100 + 40.5 + 0.25
+    expect(costs[0].planAum).toBe(100);
+    expect(costs[3].aum).toBe(999);
+    expect(costs[4].aum).toBe(140.75); // no AUM of its own, but still part of the same scheme: shows the scheme total
   });
 });

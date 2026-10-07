@@ -10,7 +10,7 @@ export const fund: Fund = {
   index: 0, displayName: 'SBI Small Cap Fund - Direct Plan - Growth', code: 125497, slug: 'sbi-small-cap-fund-direct-plan-growth-125497', name: 'SBI Small Cap Fund - Direct Plan - Growth',
   amc: 'SBI Mutual Fund', category: 'Small Cap', assetClass: 'Equity', schemeType: 'Open Ended', plan: 'direct', option: 'growth',
   nav: 205.754, navDate: iso('2026-10-01'), inception: iso('2013-11-18'), isin: 'INF200K01T51',
-  ter: 0.77, aum: 32100.4, aumPeriod: 'July - September 2026', terAsOf: '2026-10-06', terParts: null,
+  ter: 0.77, aum: 32100.4, planAum: 20000.1, aumPeriod: 'July - September 2026', terAsOf: '2026-10-06', terParts: null,
   terDetail: { date: '2026-09-30', regular: { ber: 1.4, brokerage: 0.06, transaction: 0.05, levies: 0.19, total: 1.7 }, direct: { ber: 0.6, brokerage: 0.06, transaction: 0.05, levies: 0.06, total: 0.77 } },
   metrics: { ...metrics, r1y: 0.0547, r3y: 0.1077, r5y: 0.1314, sip3y: 0.0652, sip5y: null },
   ranks: { r1y: null, r3y: null, r5y: null }, adj: 0,

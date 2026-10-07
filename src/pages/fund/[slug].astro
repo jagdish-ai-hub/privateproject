@@ -214,7 +214,8 @@ const partRows = f.terParts
                 <tr class="border-b border-line"><td class="px-3 py-2">Difference (Regular minus Direct)</td><td class="num px-3 py-2" data-testid="ter-gap">{gap.gap.toFixed(2)} pts a year</td></tr>
               </>
             )}
-            <tr><td class="px-3 py-2">Average AUM{f.aumPeriod && ` (${f.aumPeriod})`}</td><td class="num px-3 py-2" data-testid="aum">{formatAum(f.aum)}</td></tr>
+            <tr class="border-b border-line"><td class="px-3 py-2">Fund size, all plans (AUM{f.aumPeriod && `, ${f.aumPeriod}`})</td><td class="num px-3 py-2" data-testid="aum">{formatAum(f.aum)}</td></tr>
+            <tr><td class="px-3 py-2">AUM of this plan alone</td><td class="num px-3 py-2" data-testid="plan-aum">{formatAum(f.planAum)}</td></tr>
           </tbody>
         </table>
       </div>
@@ -236,7 +237,7 @@ const partRows = f.terParts
       {f.ter === null
         ? 'We could not match this scheme to an expense ratio in the data AMFI publishes, so it is left blank rather than guessed. '
         : `Expense ratio as disclosed by the fund house to AMFI${f.terDetail ? ` on ${formatIsoDate(f.terDetail.date)}` : ''}; it is charged inside the fund and already reflected in the NAV. `}
-      {levNote && <>{levNote} </>}AUM is the quarterly average reported by AMFI, in ₹ crore.
+      {levNote && <>{levNote} </>}AUM is the quarterly average reported by AMFI, in ₹ crore; "all plans" adds up every plan and option of the scheme, which is the fund size other sites show.
       See <a class="underline" href="/learn/direct-vs-regular-mutual-funds/">Direct vs Regular</a> and <a class="underline" href="/learn/expense-ratio-and-exit-load/">expense ratio</a>.
     </p>
   </section>

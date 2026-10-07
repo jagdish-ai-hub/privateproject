@@ -1,6 +1,6 @@
 import type { AssetClass, Option, Plan } from './classify.ts';
 import type { AumQuarter } from './aum.ts';
-import { amcKey, pickTer, pickTerParts, type TerIndex, type TerParts } from './ter.ts';
+import { amcKey, normalizeName, pickTer, pickTerParts, type TerIndex, type TerParts } from './ter.ts';
 
 /** What the join needs to know about one scheme. */
 export interface SchemeForCosts {
@@ -25,7 +25,12 @@ export interface Costs {
   terDetail: { regular: TerParts | null; direct: TerParts | null; date: string } | null;
   /** The breakdown of this scheme's own plan. */
   terParts: TerParts | null;
-  /** Average AUM in Rs crore for the latest complete quarter. */
+  /** Average AUM in Rs crore of this plan/option alone (AMFI reports one figure per scheme code). */
+  planAum: number | null;
+  /**
+   * Average AUM in Rs crore of the whole scheme: every plan and option of the same fund added up.
+   * This is the "fund size" other sites show; a Direct plan alone is only part of it.
+   */
   aum: number | null;
 }
 
@@ -91,8 +96,20 @@ export function joinCosts(schemes: readonly SchemeForCosts[], terIndex: TerIndex
       ter,
       terParts: row ? pickTerParts(row, planForTer) : null,
       terDetail: row ? { regular: row.regular, direct: row.direct, date: row.date } : null,
-      aum: aumValue,
+      planAum: aumValue,
+      aum: null,
     };
+  });
+  // Whole-scheme AUM: add up every plan and option of the same scheme (same fund house, base name, category).
+  const key = (s: SchemeForCosts) => `${amcKey(s.amc)}|${normalizeName(s.name)}|${s.rawCategory}`;
+  const totals = new Map<string, number>();
+  schemes.forEach((s, i) => {
+    const v = costs[i].planAum;
+    if (v !== null) totals.set(key(s), (totals.get(key(s)) ?? 0) + v);
+  });
+  schemes.forEach((s, i) => {
+    const t = totals.get(key(s));
+    costs[i].aum = t === undefined ? null : Math.round(t * 100) / 100;
   });
   if (terIndex) {
     const ours = new Map<string, string>();

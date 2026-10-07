@@ -61,7 +61,7 @@ export function fundFaqs(f: Fund): Faq[] {
   if (f.aum !== null) {
     out.push({
       question: `What is the AUM of ${f.name}?`,
-      answer: `The average assets under management (AUM) of ${f.name} was ${formatAum(f.aum)}${f.aumPeriod ? ` for ${f.aumPeriod}` : ''}, as reported by AMFI. Average AUM is for a whole quarter, so it can differ from the fund size on any one day.`,
+      answer: `The average assets under management (AUM) of the whole scheme behind ${f.name}, with all its plans and options added up, was ${formatAum(f.aum)}${f.aumPeriod ? ` for ${f.aumPeriod}` : ''}, as reported by AMFI.${f.planAum !== null && f.planAum !== f.aum ? ` This plan alone holds ${formatAum(f.planAum)}.` : ''} Average AUM is for a whole quarter, so it can differ from the fund size on any one day.`,
     });
   }
   out.push({

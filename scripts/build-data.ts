@@ -229,7 +229,7 @@ async function main(): Promise<void> {
     adj: rows.map((r) => r.adj),
     /** Expense ratio (percent a year) of each scheme's own plan, or null. */
     ter: costs.map((c) => c.ter),
-    /** Average AUM in Rs crore for `aumPeriod`, or null. */
+    /** Average AUM in Rs crore of the whole scheme (all plans and options) for `aumPeriod`, or null. */
     aum: costs.map((c) => c.aum),
     terAsOf: costStats.terAsOf,
     aumPeriod: aum?.period ?? null,
@@ -240,7 +240,7 @@ async function main(): Promise<void> {
   writeFileSync(`${OUT_PUBLIC}/screener.json`, JSON.stringify(out));
   // Fields only the static pages need stay out of the file every visitor downloads.
   mkdirSync('data/generated', { recursive: true });
-  writeFileSync('data/generated/extra.json', JSON.stringify({ isin: rows.map((r) => r.s.isinGrowth ?? r.s.isinReinvest), terDetail: costs.map((c) => c.terDetail), terParts: costs.map((c) => c.terParts) }));
+  writeFileSync('data/generated/extra.json', JSON.stringify({ isin: rows.map((r) => r.s.isinGrowth ?? r.s.isinReinvest), terDetail: costs.map((c) => c.terDetail), terParts: costs.map((c) => c.terParts), planAum: costs.map((c) => c.planAum) }));
 
   // Sanity report: suspicious values usually mean bad source data, not real performance.
   const adjustedCount = rows.filter((r) => r.adj === 1).length;

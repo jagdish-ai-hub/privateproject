@@ -28,7 +28,7 @@ if a call fails the previous cached values are used and flagged stale; the build
   exist. AMFI returns truncated JSON instead of HTTP 429 when throttled, so a JSON parse failure is retried.
   There is no scheme code, so the join (`pipeline/costs.ts`) is by fund house + normalised name + category.
   ETFs fill only one plan column, so they use whichever is filled.
-- **AUM** (`pipeline/aum.ts`): units are ₹ lakh (divided by 100 for crore); two fields are summed; the
+- **AUM** (`pipeline/aum.ts`): AMFI gives one figure per plan/option code; `screener.json` `aum` adds them up per scheme (fund house + base name + category) as the "fund size", and `extra.json` `planAum` keeps the single plan's value. Units are ₹ lakh (divided by 100 for crore); two fields are summed; the
   newest quarter is partial, so the newest quarter with at least 5,000 rows is used.
 - **Cache:** `data/cache/ter/{mfId}.json` (refreshed after 7 days) and `data/cache/aum-*.json`. Same
   store-interface idea as [CACHING.md](CACHING.md) (`TerStore`, `AumStore`).

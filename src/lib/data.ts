@@ -49,8 +49,10 @@ export interface Fund {
   isin: string | null;
   /** Total expense ratio of this plan in percent; null when AMFI's TER data has no match. */
   ter: number | null;
-  /** Average AUM in Rs crore for the AUM quarter; null when not reported. */
+  /** Average AUM in Rs crore of the whole scheme (all plans and options) for the AUM quarter; null when not reported. */
   aum: number | null;
+  /** Average AUM in Rs crore of this plan/option alone; null when not reported. */
+  planAum: number | null;
   /** Both plans of this scheme side by side (null when the scheme has no TER match). */
   terDetail: TerDetail | null;
   /** Breakdown of this plan's TER. */
@@ -84,6 +86,7 @@ interface Extra {
   isin: (string | null)[];
   terDetail: (TerDetail | null)[];
   terParts: (TerParts | null)[];
+  planAum: (number | null)[];
 }
 let cachedExtra: Extra | null = null;
 
@@ -91,7 +94,7 @@ function loadExtra(): Extra {
   if (cachedExtra) return cachedExtra;
   const path = 'data/generated/extra.json';
   const raw = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Extra>) : {};
-  cachedExtra = { isin: raw.isin ?? [], terDetail: raw.terDetail ?? [], terParts: raw.terParts ?? [] };
+  cachedExtra = { isin: raw.isin ?? [], terDetail: raw.terDetail ?? [], terParts: raw.terParts ?? [], planAum: raw.planAum ?? [] };
   return cachedExtra;
 }
 
@@ -140,6 +143,7 @@ export function fundAt(data: ScreenerData, i: number): Fund {
     isin: loadExtra().isin[i] ?? null,
     ter: data.ter?.[i] ?? null,
     aum: data.aum?.[i] ?? null,
+    planAum: loadExtra().planAum[i] ?? null,
     terDetail: loadExtra().terDetail[i] ?? null,
     terParts: loadExtra().terParts[i] ?? null,
     terAsOf: data.terAsOf ?? null,
