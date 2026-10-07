@@ -31,6 +31,14 @@ export interface ScreenerData {
   inception: number[];
   /** 0 = plain history, 1 = adjusted for unit splits, 2 = history before an unexplained NAV jump was dropped. */
   adj: number[];
+  /** Expense ratio, percent a year, of the scheme's own plan (null = not available). */
+  ter: (number | null)[];
+  /** Average AUM in Rs crore for `aumPeriod` (null = not available). */
+  aum: (number | null)[];
+  /** Newest TER disclosure date used, ISO. */
+  terAsOf: string | null;
+  /** Quarter the AUM refers to, e.g. "April - June 2026". */
+  aumPeriod: string | null;
   metrics: Record<MetricKey, (number | null)[]>;
   /** `r1yRank`, `r1yOf`, `r3yRank`, ... : rank within same category + plan + option. */
   ranks: Record<string, (number | null)[]>;

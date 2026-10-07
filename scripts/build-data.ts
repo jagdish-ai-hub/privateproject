@@ -4,18 +4,27 @@
  *
  * Usage:
  *   node scripts/build-data.ts [--limit=N] [--concurrency=5] [--rps=10] [--offline] [--amc=Name]
+ *                              [--ter=auto|refresh|cached|skip] [--aum=skip] [--min-ter-coverage=0.8]
  *
  * - `--limit=N`   only process the first N active schemes (development)
  * - `--rps=N`      max MFapi requests per second across all workers (default 10; 0 = unlimited)
  * - `--offline`   reuse `data/cache/NAVAll.txt` instead of downloading it
  * - `--amc=Name`  only schemes whose fund house contains Name (development)
+ * - `--ter=MODE`   expense ratios from AMFI: `auto` (default: refresh a fund house when its cache is
+ *                 older than 7 days), `refresh` (always), `cached` (never fetch), `skip`
+ * - `--aum=skip`   do not load AUM
+ * - `--min-ter-coverage=F`  fail the build if fewer than this fraction of Direct+Growth schemes get a
+ *                 TER while TER data was loaded (default {@link DEFAULT_TER_FLOOR})
  *
  * The first run downloads full history for every active scheme (resumable: finished
  * schemes are cached in `data/cache/nav/`). Later runs only append the newest NAV.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseNavAll, type AmfiScheme } from './pipeline/amfi.ts';
-import { classifyCategory, classifyOption, classifyPlan, resolveName } from './pipeline/classify.ts';
+import { FileAumStore, loadAum, type AumQuarter } from './pipeline/aum.ts';
+import { classifyCategory, classifyOption, classifyPlan, resolveName, type AssetClass, type Option, type Plan } from './pipeline/classify.ts';
+import { coverageProblem, joinCosts } from './pipeline/costs.ts';
+import { buildTerIndex, FileTerStore, loadTer, type LoadedTer, type TerMode } from './pipeline/ter.ts';
 import { chartSeries } from './pipeline/chart.ts';
 import { createRateLimiter, fetchJson, FileHistoryStore, getHistory, MFAPI, pool } from './pipeline/history.ts';
 import { computeMetrics, METRIC_KEYS, rankDescending, type Metrics } from './pipeline/metrics.ts';
@@ -29,6 +38,9 @@ const OUT_NAV = `${OUT_PUBLIC}/nav`;
 
 /** Cloudflare Pages' free plan allows 20,000 files per site: fund pages + these nav files + assets must stay under it. */
 const FILE_LIMIT_WARN = 19_000;
+
+/** Default minimum TER coverage of Direct + Growth schemes (see `--min-ter-coverage`). */
+const DEFAULT_TER_FLOOR = 0.9; // measured: 96% of Direct+Growth schemes on 7 Oct 2026
 
 /** A scheme is active if its NAV is at most this many days older than the newest NAV. */
 const ACTIVE_WITHIN_DAYS = 10;
@@ -136,6 +148,44 @@ async function main(): Promise<void> {
     }));
   });
 
+  // Expense ratio (TER) and AUM from AMFI. Both are optional: if AMFI is unreachable the build still
+  // succeeds and these columns are empty. They load before peer ranks because AMFI's AUM names can
+  // resolve some "plan not stated" / "option other" schemes, and ranks depend on plan and option.
+  const noTer: LoadedTer = { rows: [], fetched: 0, fromCache: 0, failed: [], stale: [] };
+  let terLoaded = noTer;
+  try {
+    terLoaded = await loadTer({ store: new FileTerStore(`${CACHE_DIR}/ter`), mode: (args.get('ter') ?? 'auto') as TerMode, limiter: createRateLimiter(1000), log: (m) => console.log(m) });
+  } catch (e) { console.warn(`  TER skipped: ${String(e)}`); }
+  let aum: AumQuarter | null = null;
+  if (args.get('aum') !== 'skip') {
+    try { aum = await loadAum({ store: new FileAumStore(`${CACHE_DIR}/aum`), opts: { limiter }, log: (m) => console.log(m) }); } catch (e) { console.warn(`  AUM skipped: ${String(e)}`); }
+  }
+  const before = { unknownPlan: rows.filter((r) => r.plan === 'unknown').length, otherOption: rows.filter((r) => r.option === 'other').length };
+  for (const r of rows) {
+    const aumName = aum?.names.get(r.s.code);
+    if (!aumName) continue;
+    if (r.plan === 'unknown') r.plan = classifyPlan('', aumName, r.cls.assetClass);
+    if (r.option === 'other') r.option = classifyOption('', aumName, false);
+  }
+  const after = { unknownPlan: rows.filter((r) => r.plan === 'unknown').length, otherOption: rows.filter((r) => r.option === 'other').length };
+  const { costs, stats: costStats } = joinCosts(
+    rows.map((r) => ({ code: r.s.code, amc: r.s.amc, name: r.fullName, rawCategory: r.s.rawCategory, plan: r.plan as Plan, option: r.option as Option, assetClass: r.cls.assetClass as AssetClass })),
+    terLoaded.rows.length ? buildTerIndex(terLoaded.rows) : null,
+    aum,
+  );
+  console.log(`  TER matched ${costStats.terMatched}/${costStats.terTotal} (Direct+Growth ${costStats.directGrowth.matched}/${costStats.directGrowth.total}); AUM matched ${costStats.aumMatched}/${costStats.aumTotal}${aum ? ` (${aum.period})` : ''}`);
+  const costReport = {
+    ter: { ...costStats, source: 'AMFI populate-te-rdata-revised', fetched: terLoaded.fetched, fromCache: terLoaded.fromCache, failedAmcs: terLoaded.failed, staleAmcs: terLoaded.stale },
+    aum: { period: aum?.period ?? null, schemes: aum?.crore.size ?? 0 },
+    planOptionResolution: { before, after },
+  };
+  const terProblem = coverageProblem(costStats, terLoaded.rows.length, Number(args.get('min-ter-coverage') ?? DEFAULT_TER_FLOOR));
+  if (terProblem) {
+    mkdirSync('data/generated', { recursive: true });
+    writeFileSync('data/generated/report.json', JSON.stringify({ costs: costReport, error: terProblem }, null, 1));
+    throw new Error(terProblem);
+  }
+
   // Peer ranks: same category + plan + option, for 1Y / 3Y / 5Y returns.
   const groups = new Map<string, number[]>();
   rows.forEach((r, i) => {
@@ -177,6 +227,12 @@ async function main(): Promise<void> {
     navDate: rows.map((r) => r.s.navDay),
     inception: rows.map((r) => r.inception),
     adj: rows.map((r) => r.adj),
+    /** Expense ratio (percent a year) of each scheme's own plan, or null. */
+    ter: costs.map((c) => c.ter),
+    /** Average AUM in Rs crore for `aumPeriod`, or null. */
+    aum: costs.map((c) => c.aum),
+    terAsOf: costStats.terAsOf,
+    aumPeriod: aum?.period ?? null,
     metrics,
     ranks,
   };
@@ -184,14 +240,14 @@ async function main(): Promise<void> {
   writeFileSync(`${OUT_PUBLIC}/screener.json`, JSON.stringify(out));
   // Fields only the static pages need stay out of the file every visitor downloads.
   mkdirSync('data/generated', { recursive: true });
-  writeFileSync('data/generated/extra.json', JSON.stringify({ isin: rows.map((r) => r.s.isinGrowth ?? r.s.isinReinvest) }));
+  writeFileSync('data/generated/extra.json', JSON.stringify({ isin: rows.map((r) => r.s.isinGrowth ?? r.s.isinReinvest), terDetail: costs.map((c) => c.terDetail), terParts: costs.map((c) => c.terParts) }));
 
   // Sanity report: suspicious values usually mean bad source data, not real performance.
   const adjustedCount = rows.filter((r) => r.adj === 1).length;
   const trimmedCount = rows.filter((r) => r.adj === 2).length;
   const suspicious = rows.filter((r) => (r.m.r1y !== null && Math.abs(r.m.r1y) > 3) || (r.m.mdd3y !== null && r.m.mdd3y < -0.9)).map((r) => ({ code: r.s.code, name: r.fullName, r1y: r.m.r1y, mdd3y: r.m.mdd3y }));
   mkdirSync('data/generated', { recursive: true });
-  writeFileSync('data/generated/report.json', JSON.stringify({ asOf: out.asOf, count: rows.length, noHistory, futureDated: future.length, failed: errors.length, splitAdjusted: adjustedCount, trimmedAtBreak: trimmedCount, spikePointsRemoved: spikeCount, suspicious }, null, 1));
+  writeFileSync('data/generated/report.json', JSON.stringify({ asOf: out.asOf, count: rows.length, noHistory, futureDated: future.length, failed: errors.length, splitAdjusted: adjustedCount, trimmedAtBreak: trimmedCount, spikePointsRemoved: spikeCount, costs: costReport, suspicious }, null, 1));
   const approxFiles = rows.length * 2 + 400; // one fund page + one nav file per scheme, plus category/AMC/guide pages and assets
   if (approxFiles > FILE_LIMIT_WARN) console.warn(`WARNING: about ${approxFiles} files will be deployed; Cloudflare Pages free plan allows 20,000. Consider hosting nav files elsewhere or limiting fund pages.`);
   console.log(`wrote ${rows.length} schemes; split-adjusted ${adjustedCount}; trimmed ${trimmedCount}; spike points removed ${spikeCount}; no-history ${noHistory.length}; suspicious ${suspicious.length}; ${((Date.now() - started) / 1000).toFixed(1)}s`);

@@ -103,6 +103,11 @@ describe('buildTerIndex (joining TER rows to schemes)', () => {
     expect(index.find('SBI Mutual Fund', 'Parag Parikh Flexi Cap Fund - Direct Plan - Growth', 'Flexi Cap')).toBeNull();
     expect(index.find('PPFAS Mutual Fund', 'Parag Parikh Imaginary Fund - Direct Plan - Growth', 'Flexi Cap')).toBeNull();
   });
+  it('several dates of one scheme collapse to the newest instead of looking like several schemes', () => {
+    const mk = (date: string, total: number): TerRow & { amc: string } => ({ nsdlCode: 'ONE', name: 'Gold ETF', category: 'Exchange Traded Funds (ETFs) - Gold ETF', date, regular: { ber: 0, brokerage: 0, transaction: 0, levies: 0, total }, direct: null, amc: 'UTI Mutual Fund' });
+    const idx = buildTerIndex([mk('2026-09-01', 0.5), mk('2026-09-30', 0.59), mk('2026-09-15', 0.55)]);
+    expect(idx.find('UTI Mutual Fund', 'Gold ETF - Direct Plan - Growth', '')?.regular?.total).toBe(0.59);
+  });
   it('two TER rows with one base name are split by category, and refused when category cannot decide', () => {
     const mk = (code: string, category: string): TerRow & { amc: string } => ({ nsdlCode: code, name: 'X Index Fund', category, date: '2026-09-30', regular: null, direct: { ber: 0, brokerage: 0, transaction: 0, levies: 0, total: 0.3 }, amc: 'X Mutual Fund' });
     const idx = buildTerIndex([mk('1', 'Equity Scheme - Large Cap Fund'), mk('2', 'Equity Scheme - Small Cap Fund')]);

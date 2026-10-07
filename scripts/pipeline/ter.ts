@@ -180,8 +180,8 @@ export function amcKey(name: string): string {
 /** Lookup from (fund house, base name) to TER rows. */
 export interface TerIndex {
   find(amc: string, name: string, category: string): TerRow | null;
-  /** Number of distinct fund-house keys. */
-  amcCount: number;
+  /** The fund-house keys present in the TER data (see {@link amcKey}). */
+  amcKeys: Set<string>;
 }
 
 /**
@@ -195,13 +195,20 @@ export interface TerIndex {
  * @returns An index with a `find` method.
  */
 export function buildTerIndex(rows: readonly (TerRow & { amc: string })[]): TerIndex {
-  const map = new Map<string, (TerRow & { amc: string })[]>();
+  // Defence in depth: several dates of the same scheme must never look like several schemes.
+  const newest = new Map<string, TerRow & { amc: string }>();
   for (const r of rows) {
+    const k = `${r.amc}|${r.nsdlCode}`;
+    const cur = newest.get(k);
+    if (!cur || r.date > cur.date) newest.set(k, r);
+  }
+  const map = new Map<string, (TerRow & { amc: string })[]>();
+  for (const r of newest.values()) {
     const key = `${amcKey(r.amc)}|${normalizeName(r.name)}`;
     map.set(key, [...(map.get(key) ?? []), r]);
   }
   return {
-    amcCount: new Set(rows.map((r) => amcKey(r.amc))).size,
+    amcKeys: new Set([...newest.values()].map((r) => amcKey(r.amc))),
     find(amc, name, category) {
       const hits = map.get(`${amcKey(amc)}|${normalizeName(name)}`);
       if (!hits) return null;

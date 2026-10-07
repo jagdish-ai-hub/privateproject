@@ -10,6 +10,8 @@ export interface FakeFund {
   option?: string;
   nav?: number;
   inception?: number;
+  ter?: number | null;
+  aum?: number | null;
   m?: Partial<Record<MetricKey, number | null>>;
 }
 
@@ -36,6 +38,10 @@ export function makeData(funds: FakeFund[], newest = 20_000): ScreenerData {
     navDate: funds.map(() => newest),
     inception: funds.map((f) => f.inception ?? newest - 365 * 5),
     adj: funds.map(() => 0),
+    ter: funds.map((f) => f.ter ?? null),
+    aum: funds.map((f) => f.aum ?? null),
+    terAsOf: '2026-09-30',
+    aumPeriod: 'April - June 2026',
     metrics,
     ranks: {},
   };
