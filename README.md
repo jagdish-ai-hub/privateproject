@@ -1,11 +1,11 @@
 # MF Screener
 
 A free, no-sign-up screener for Indian mutual funds, built with [Astro](https://astro.build) on
-official AMFI NAV data (via [MFapi.in](https://www.mfapi.in)).
+official AMFI NAV data (via [MFapi.in](https://www.mfapi.in)), plus expense ratio (TER) and AUM from AMFI's own site.
 
 - **Screener**: every active scheme (~8,450), filter by category, plan, option, returns, SIP returns,
-  volatility, drawdown; sort, paginate, share a link, export CSV.
-- **Fund pages** (one per scheme): NAV chart, returns with peer rank, SIP returns, risk, rolling returns, FAQ.
+  volatility, drawdown, expense ratio, AUM; sort, paginate, share a link, export CSV.
+- **Fund pages** (one per scheme): NAV chart, returns with peer rank, SIP returns, risk, rolling returns, costs and size (Direct vs Regular TER, AUM), FAQ.
 - **Compare** up to four funds on a rebased chart.
 - **Calculators**: SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR.
 - **Guides**: 16 plain-language articles with FAQs and JSON-LD.
@@ -71,7 +71,7 @@ docs/                      DATA, CACHING, DESIGN, DEPLOY
   See the [methodology](src/content/pages/methodology.md).
 - **Bad data is handled, not hidden.** Unit splits are adjusted, one-day glitches removed, unexplained
   jumps cut off, and the fund page says so.
-- **A missing value is a dash, never zero.**
+- **A missing value is a dash, never zero.** That includes expense ratio and AUM, which come from AMFI's own APIs and are optional in the build.
 - **The browser makes one data request** (`screener.json`, about 316 KB compressed) and never calls MFapi.
 - **Every data view has loading, error and empty states.**
 - **Every exported function has TSDoc**, enforced by lint.

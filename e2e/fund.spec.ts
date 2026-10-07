@@ -97,3 +97,21 @@ test('fund page: a skeleton of the same height is shown while chart data loads (
   const chartBox = await page.locator('[data-visible-from]').first().evaluate((el) => el.parentElement?.getBoundingClientRect().height ?? 0);
   expect(Math.abs(h1 - chartBox)).toBeLessThanOrEqual(2);
 });
+
+test('fund page: costs block shows this plan\'s TER and AUM from the data, and a dash when there is none', async ({ page }) => {
+  const data = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+  const built = Array.from({ length: Math.min(30, data.count) }, (_, i) => i);
+  const withTer = built.find((i) => data.ter[i] !== null);
+  const without = built.find((i) => data.ter[i] === null);
+  if (withTer === undefined && without === undefined) throw new Error('no fund among the first 30 pages');
+  if (withTer !== undefined) {
+    await page.goto(`/fund/${fundSlug(data.name[withTer], data.code[withTer])}/`);
+    await expect(page.getByTestId('ter')).toHaveText(`${(data.ter[withTer] as number).toFixed(2)}%`);
+    if (data.aum[withTer] !== null) await expect(page.getByTestId('aum')).toContainText('₹');
+  }
+  if (without !== undefined) {
+    await page.goto(`/fund/${fundSlug(data.name[without], data.code[without])}/`);
+    await expect(page.getByTestId('ter')).toHaveText('—');
+    await expect(page.getByTestId('costs')).not.toContainText('0.00%');
+  }
+});

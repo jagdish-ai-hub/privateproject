@@ -55,7 +55,8 @@ The page address holds your filters. Copy it to share. **Export CSV** downloads 
 - Compare like with like: same category, same plan, same option.
 - Look at more than one period; a fund can top one list by luck.
 - Check risk next to return.
-- Remember what the screener cannot show: expense ratio, exit load, portfolio and fund manager. Check these in the fund's own documents.
+- Look at the **TER** and **AUM** columns too. A lower expense ratio means less cost every year, and a very small AUM can mean a fund is new or not popular. Neither is a verdict on its own.
+- Remember what the screener cannot show: exit load, portfolio and fund manager. Check these in the fund's own documents.
 - Past performance does not indicate future returns. This site is educational and does not recommend any fund.
 
 If you want to know how each number is calculated, read the [methodology](/methodology/).

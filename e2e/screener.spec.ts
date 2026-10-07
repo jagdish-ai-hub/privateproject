@@ -161,3 +161,16 @@ test.describe('phone layout', () => {
     await expect(page.getByRole('button', { name: /^Filters/ })).toContainText('3');
   });
 });
+
+test('TER column: filter max_ter matches the pure function and every shown row is within the limit', async ({ page }) => {
+  await page.goto('/?max_ter=1');
+  const total = await expectedTotal(page, '?max_ter=1');
+  await expect(showing(page)).toContainText(total.toLocaleString('en-IN'));
+  const idx = await page.locator('thead th').evaluateAll((ths) => ths.findIndex((t) => /^TER/.test((t.textContent ?? '').trim())));
+  expect(idx).toBeGreaterThan(0);
+  const cells = await page.locator('tbody tr').evaluateAll((rows, i) => rows.map((r) => (r.querySelectorAll('td')[i]?.textContent ?? '').trim()), idx);
+  for (const c of cells) {
+    expect(c).not.toBe('—'); // a fund with no TER must not slip into "TER at most 1%"
+    expect(parseFloat(c)).toBeLessThanOrEqual(1);
+  }
+});

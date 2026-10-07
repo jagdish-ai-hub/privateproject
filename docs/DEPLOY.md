@@ -24,6 +24,7 @@ from AMFI:
 > only ... No other use of the Site is authorised unless you and we have agreed otherwise in writing.
 > (AMFI Terms of Use, https://www.amfiindia.com/terms-of-use, read 2 October 2026)
 
+The expense ratio and AUM columns are fetched from AMFI's own website APIs, so the same terms apply to them.
 MFapi.in is a free wrapper over the same AMFI file and does not change AMFI's terms. NAV data is
 widely republished by commercial sites, but that is not the same as a licence. Before turning on ads:
 

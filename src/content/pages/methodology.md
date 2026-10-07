@@ -72,11 +72,19 @@ The chart uses the same cleaned NAV series as the tables. The most recent year i
 
 SIP, step-up SIP, goal SIP and SWP calculators use the market-standard convention of a monthly rate equal to the yearly rate ÷ 12, compounded monthly, with SIP instalments at the start of each month. This is why ₹10,000 a month for 10 years at 12% gives about ₹23.23 lakh, matching most other Indian SIP calculators. The lumpsum calculator compounds yearly. Results are projections from the rate you enter and are not forecasts.
 
-## 12. What is not included
+## 12. Costs and size (expense ratio and AUM)
 
-Expense ratio, assets under management, exit load, portfolio holdings, fund manager, riskometer and benchmark returns are not in the free data used here, so they are not shown, and a missing value is a dash, never an estimate. Returns are before tax and exit load. Returns on IDCW options are NAV price returns and exclude payouts.
+**Expense ratio (TER).** Each fund house discloses the total expense ratio of every scheme to AMFI, for the Regular and the Direct plan, and AMFI publishes it. We read the newest disclosure for each scheme and show the plan you are looking at. The disclosure also splits the TER into a base expense ratio, brokerage, transaction cost and statutory levies, which fund pages show. AMFI's file has no scheme code, so we match schemes by fund house, scheme name and category. A scheme we cannot match with confidence shows a dash rather than a guess. A plan that does not exist (for example a Direct plan that was never launched) is never shown as 0%. ETFs have a single cost, which is shown for the ETF.
 
-## 13. Update schedule
+**AUM.** AUM is the average assets under management for the latest complete quarter that AMFI has published, in ₹ crore, matched by the AMFI scheme code. The newest quarter is skipped while AMFI is still filling it in.
+
+The "as of" date of the expense ratio and the quarter of the AUM are shown on the fund page. Both come from AMFI's own website, not from MFapi, and both are optional: if AMFI cannot be reached the previous values are kept and the page still builds.
+
+## 13. What is not included
+
+Exit load, portfolio holdings, fund manager, riskometer and benchmark returns are not in the data used here, so they are not shown, and a missing value is a dash, never an estimate. Returns are before tax and exit load. Returns on IDCW options are NAV price returns and exclude payouts.
+
+## 14. Update schedule
 
 The data is refreshed each night after AMFI publishes the day's NAVs. The "NAV as of" date on the screener tells you the data date.
 

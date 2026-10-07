@@ -8,7 +8,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Faq from '../../components/Faq.astro';
 import FundTable from '../../components/FundTable.astro';
 import { fundAt, loadScreener } from '../../lib/data.ts';
-import { formatPct } from '../../lib/format.ts';
+import { formatPct, formatTer } from '../../lib/format.ts';
 import { breadcrumbLd, faqLd, type Faq as FaqItem } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
 import { median } from '../../lib/stats.ts';
@@ -29,6 +29,7 @@ const ranked = directGrowth
 const shown = ranked.slice(0, 100);
 const assetClass = data.dict.assetClass[data.assetClass[all[0]]];
 const med = (k: 'r1y' | 'r3y' | 'r5y') => median(directGrowth.map((i) => data.metrics[k][i]));
+const medTer = median(directGrowth.map((i) => data.ter[i] ?? null));
 const withR3 = ranked.filter((f) => f.metrics.r3y !== null);
 const top = withR3[0];
 const path = `/category/${slugify(name)}/`;
@@ -42,6 +43,12 @@ const faqs: FaqItem[] = [
   {
     question: `What are the typical returns of ${name} funds?`,
     answer: `Among Direct Growth ${name} funds, the median returns are ${formatPct(med('r1y'))} over 1 year, ${formatPct(med('r3y'))} over 3 years and ${formatPct(med('r5y'))} over 5 years (CAGR). Individual funds differ widely and past returns do not predict future returns.`,
+  },
+  {
+    question: `What is the typical expense ratio of ${name} funds?`,
+    answer: medTer === null
+      ? `We could not match enough ${name} Direct Growth funds to an expense ratio in the data AMFI publishes to give a typical figure.`
+      : `Among Direct Growth ${name} funds that have a disclosed expense ratio, the median total expense ratio (TER) is ${formatTer(medTer)} a year. Regular plans of the same funds cost more because they include distributor commission. TER is disclosed by each fund house to AMFI and is already reflected in the NAV.`,
   },
   {
     question: `What does the ${name} category mean?`,
@@ -63,7 +70,7 @@ const faqs: FaqItem[] = [
   <p class="mt-2 max-w-3xl text-sm text-muted">
     {all.length} active schemes ({assetClass}). The table lists the {directGrowth.length} Direct plan, Growth option funds, ordered by 3-year return.
     {top && <> The highest 3-year return in this list is {formatPct(top.metrics.r3y)} ({top.name}).</>}
-    This is a data ordering, not a recommendation.
+    Median expense ratio {medTer === null ? 'is not available' : formatTer(medTer)}. This is a data ordering, not a recommendation.
   </p>
   <p class="mt-3 text-sm"><a class="underline" href={`/?cat=${encodeURIComponent(name)}`}>Open these funds in the screener</a> to filter by plan, fund house, returns or risk.</p>
 

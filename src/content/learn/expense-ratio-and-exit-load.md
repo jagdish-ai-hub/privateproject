@@ -44,4 +44,4 @@ Points to know:
 
 ## Where to look
 
-The scheme information document and the fund house's factsheet list the expense ratio and the exit load. This site does not show them in its tables because there is no free, consistent data feed for them; fund pages show a dash rather than a made-up number.
+The scheme information document and the fund house's factsheet list the expense ratio and the exit load. This site shows the expense ratio (TER) of every scheme it can match, for the Regular and the Direct plan side by side on fund pages, and as a column in the screener, as disclosed to AMFI. It does not show exit load, because there is no consistent feed for it. A scheme without a matched TER shows a dash rather than a made-up number.

@@ -3,7 +3,7 @@
  * Static table of funds (used on category, AMC and "similar funds" blocks).
  * Numbers use the shared formatters; missing values show a dash, never 0.
  */
-import { formatNav, formatPct, signClass } from '../lib/format.ts';
+import { formatNav, formatPct, formatTer, signClass } from '../lib/format.ts';
 import type { Fund } from '../lib/data.ts';
 interface Props { funds: Fund[]; caption: string; showCategory?: boolean }
 const { funds, caption, showCategory = false } = Astro.props;
@@ -18,6 +18,7 @@ const cols = [['r1y', '1Y'], ['r3y', '3Y'], ['r5y', '5Y'], ['sip3y', 'SIP 3Y']] 
         {showCategory && <th scope="col" class="px-3 py-2.5 text-left font-medium">Category</th>}
         <th scope="col" class="px-3 py-2.5 text-right font-medium">NAV (₹)</th>
         {cols.map(([, label]) => <th scope="col" class="px-3 py-2.5 text-right font-medium">{label}</th>)}
+        <th scope="col" class="px-3 py-2.5 text-right font-medium">TER</th>
       </tr>
     </thead>
     <tbody>
@@ -27,6 +28,7 @@ const cols = [['r1y', '1Y'], ['r3y', '3Y'], ['r5y', '5Y'], ['sip3y', 'SIP 3Y']] 
           {showCategory && <td class="whitespace-nowrap px-3 py-2.5 text-muted">{f.category}</td>}
           <td class="num px-3 py-2.5">{formatNav(f.nav)}</td>
           {cols.map(([k]) => <td class={`num px-3 py-2.5 ${signClass(f.metrics[k])}`}>{formatPct(f.metrics[k])}</td>)}
+          <td class="num px-3 py-2.5">{formatTer(f.ter)}</td>
         </tr>
       ))}
     </tbody>
