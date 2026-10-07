@@ -23,14 +23,14 @@ function esc(v: string | number | null): string {
 export function toCsv(p: Prepared, rows: readonly number[], columns: readonly Column[]): string {
   const { data } = p;
   const isPct = (c: Column): boolean => c.kind === 'pct' || c.kind === 'plainPct';
-  const header = ['Scheme code', 'Fund', 'Plan', 'Option', ...columns.map((c) => (isPct(c) ? `${c.label} (%)` : c.label))];
+  const header = ['Scheme code', 'Fund', 'Plan', 'Option', ...columns.map((c) => (isPct(c) || c.kind === 'ter' ? `${c.label} (%)` : c.label))];
   const lines = [header.map(esc).join(',')];
   for (const i of rows) {
     const cells = columns.map((c) => {
       const v = rawValue(p, i, c.key);
       if (v === null || typeof v === 'string') return esc(v);
       if (isPct(c)) return esc(Math.round(v * 10_000) / 100);
-      return esc(c.kind === 'nav' ? Math.round(v * 10_000) / 10_000 : Math.round(v * 100) / 100);
+      return esc(c.kind === 'nav' ? Math.round(v * 10_000) / 10_000 : Math.round(v * 100) / 100); // ter and aum are already in their display units
     });
     lines.push([data.code[i], data.name[i], data.dict.plan[data.plan[i]], data.dict.option[data.option[i]]].map(esc).concat(cells).join(','));
   }

@@ -93,5 +93,5 @@ function num(v: string | null): number | undefined {
 
 /** Is this string a sortable column key? */
 function isSortKey(k: string): k is SortKey {
-  return k === 'name' || k === 'amc' || k === 'category' || k === 'nav' || k === 'age' || isMetricKey(k);
+  return k === 'name' || k === 'amc' || k === 'category' || k === 'nav' || k === 'age' || k === 'ter' || k === 'aum' || isMetricKey(k);
 }

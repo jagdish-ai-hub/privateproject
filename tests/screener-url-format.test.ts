@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_VIEW, parseView, serializeView } from '../src/lib/screener/url.ts';
 import type { ViewState } from '../src/lib/screener/types.ts';
-import { DASH, formatNav, formatNum, formatPct, formatPlainPct, formatRupees, signClass } from '../src/lib/format.ts';
+import { DASH, formatAum, formatNav, formatNum, formatPct, formatPlainPct, formatRupees, formatTer, signClass } from '../src/lib/format.ts';
 
 describe('URL state', () => {
   it('the default view serialises to an empty query and parses back to itself', () => {
@@ -50,7 +50,7 @@ describe('formatters', () => {
     expect(formatPct(0.12345, 1)).toBe('+12.3%');
   });
   it('missing values are a dash, never zero', () => {
-    for (const f of [formatPct, formatPlainPct, formatNav, formatNum, formatRupees]) {
+    for (const f of [formatPct, formatPlainPct, formatNav, formatNum, formatRupees, formatTer, formatAum]) {
       expect(f(null)).toBe(DASH);
       expect(f(undefined)).toBe(DASH);
       expect(f(NaN)).toBe(DASH);
@@ -69,5 +69,33 @@ describe('formatters', () => {
     expect(signClass(-0.1)).toBe('neg');
     expect(signClass(0)).toBe('');
     expect(signClass(null)).toBe('');
+  });
+});
+
+describe('TER and AUM formatting', () => {
+  it('TER is a plain percent with two decimals and no sign', () => {
+    expect(formatTer(1.1)).toBe('1.10%');
+    expect(formatTer(0.05)).toBe('0.05%');
+    expect(formatTer(2.315)).toBe('2.32%');
+  });
+  it('AUM uses Indian grouping and gets more precise as the fund gets smaller', () => {
+    expect(formatAum(98544.61)).toBe('₹98,545 Cr');
+    expect(formatAum(123456.4)).toBe('₹1,23,456 Cr');
+    expect(formatAum(12.34)).toBe('₹12.3 Cr');
+    expect(formatAum(0.37)).toBe('₹0.37 Cr');
+  });
+});
+
+describe('URL state with TER and AUM', () => {
+  it('round-trips range filters and sorting on the new columns', () => {
+    const v: ViewState = { ...DEFAULT_VIEW, filters: { ...DEFAULT_VIEW.filters, ranges: { ter: { max: 1 }, aum: { min: 500, max: 50000 } } }, sort: { key: 'ter', dir: 'asc' } };
+    const qs = serializeView(v);
+    expect(qs).toContain('max_ter=1');
+    expect(qs).toContain('min_aum=500');
+    expect(qs).toContain('sort=ter%3Aasc');
+    expect(parseView(qs)).toEqual(v);
+  });
+  it('sorting by aum is a valid sort key', () => {
+    expect(parseView('?sort=aum:desc').sort).toEqual({ key: 'aum', dir: 'desc' });
   });
 });

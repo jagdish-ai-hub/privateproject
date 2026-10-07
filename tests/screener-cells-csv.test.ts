@@ -7,7 +7,7 @@ import { makeData } from './screener-helpers.ts';
 
 const col = (key: Column['key']): Column => COLUMNS.find((c) => c.key === key) as Column;
 const data = makeData([
-  { name: 'Alpha, "Best" Fund - Direct Plan - Growth', category: 'Large Cap', nav: 205.754, m: { r1y: 0.1234, r3y: -0.031, vol3y: 0.152, sharpe3y: 0.5 } },
+  { name: 'Alpha, "Best" Fund - Direct Plan - Growth', category: 'Large Cap', nav: 205.754, ter: 1.1, aum: 98544.61, m: { r1y: 0.1234, r3y: -0.031, vol3y: 0.152, sharpe3y: 0.5 } },
   { name: 'Beta Fund', amc: 'Beta Mutual Fund', m: {} },
 ]);
 const p = prepare(data);
@@ -42,5 +42,20 @@ describe('toCsv', () => {
   it('writes missing values as empty cells and one line per row', () => {
     expect(lines).toHaveLength(3);
     expect(lines[2]).toBe('1001,Beta Fund,direct,growth,Large Cap,10,,');
+  });
+});
+
+describe('TER and AUM cells and CSV', () => {
+  it('format as 1.10% and ₹98,545 Cr; missing is a dash with no colour', () => {
+    expect(cellFor(p, 0, col('ter'))).toEqual({ text: '1.10%', cls: '', numeric: true });
+    expect(cellFor(p, 0, col('aum')).text).toBe('₹98,545 Cr');
+    expect(cellFor(p, 1, col('ter'))).toEqual({ text: '—', cls: '', numeric: true });
+    expect(cellFor(p, 1, col('aum')).text).toBe('—');
+  });
+  it('CSV: TER is written in percent (1.1), AUM in crore (98544.61), missing as empty cells', () => {
+    const lines = toCsv(p, [0, 1], [col('ter'), col('aum')]).split('\r\n');
+    expect(lines[0]).toBe('Scheme code,Fund,Plan,Option,TER (%),AUM (₹ Cr)');
+    expect(lines[1].endsWith(',1.1,98544.61')).toBe(true);
+    expect(lines[2].endsWith(',,')).toBe(true);
   });
 });

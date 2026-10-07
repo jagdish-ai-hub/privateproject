@@ -1,5 +1,5 @@
-import { RANGE_SCALE, isMetricKey } from './columns.ts';
-import type { Filters, MetricKey, RangeKey, ScreenerData, SortKey, ViewState } from './types.ts';
+import { RANGE_SCALE } from './columns.ts';
+import type { Filters, RangeKey, ScreenerData, SortKey, ViewState } from './types.ts';
 
 /** Seconds-free constant: days in a year, for fund age. */
 const DAYS_PER_YEAR = 365.25;
@@ -11,6 +11,26 @@ export interface Prepared {
   haystack: string[];
   /** Fund age in years per row (as of the dataset's newest NAV date). */
   age: Float64Array;
+}
+
+/**
+ * The number behind a numeric column for one row (before display scaling), or `null` if missing.
+ * One accessor for every numeric column keeps filtering, sorting, cells and CSV in agreement.
+ *
+ * @param p - Prepared dataset.
+ * @param i - Row index.
+ * @param key - A numeric column key (anything except the text columns).
+ * @returns The value or `null`.
+ */
+export function numericValue(p: Prepared, i: number, key: RangeKey | 'nav'): number | null {
+  const d = p.data;
+  switch (key) {
+    case 'age': return p.age[i];
+    case 'nav': return d.nav[i];
+    case 'ter': return d.ter[i] ?? null;
+    case 'aum': return d.aum[i] ?? null;
+    default: return d.metrics[key][i] ?? null;
+  }
 }
 
 /**
@@ -63,13 +83,7 @@ export function filterIndices(p: Prepared, f: Filters): number[] {
   const words = f.q.toLowerCase().split(/\s+/).filter(Boolean);
   const ranges = (Object.entries(f.ranges) as [RangeKey, { min?: number; max?: number }][])
     .filter(([, r]) => r.min !== undefined || r.max !== undefined)
-    .map(([key, r]) => ({
-      key,
-      min: r.min ?? -Infinity,
-      max: r.max ?? Infinity,
-      scale: RANGE_SCALE[key],
-      col: key === 'age' ? null : data.metrics[key as MetricKey],
-    }));
+    .map(([key, r]) => ({ key, min: r.min ?? -Infinity, max: r.max ?? Infinity, scale: RANGE_SCALE[key] }));
 
   const out: number[] = [];
   for (let i = 0; i < data.count; i++) {
@@ -81,8 +95,8 @@ export function filterIndices(p: Prepared, f: Filters): number[] {
     if (words.length && !words.every((w) => p.haystack[i].includes(w))) continue;
     let ok = true;
     for (const r of ranges) {
-      const raw = r.col ? r.col[i] : p.age[i];
-      if (raw === null || raw === undefined) { ok = false; break; }
+      const raw = numericValue(p, i, r.key);
+      if (raw === null) { ok = false; break; }
       const v = raw * r.scale;
       if (v < r.min || v > r.max) { ok = false; break; }
     }
@@ -110,8 +124,7 @@ export function sortIndices(p: Prepared, idx: readonly number[], key: SortKey, d
       case 'amc': return data.dict.amc[data.amc[i]].toLowerCase();
       case 'category': return data.dict.category[data.category[i]].toLowerCase();
       case 'nav': return data.nav[i];
-      case 'age': return p.age[i];
-      default: return isMetricKey(key) ? data.metrics[key][i] : null;
+      default: return numericValue(p, i, key);
     }
   };
   return [...idx].sort((a, b) => {

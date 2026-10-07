@@ -45,7 +45,7 @@ export interface ScreenerData {
 }
 
 /** Keys the table can sort by. */
-export type SortKey = 'name' | 'amc' | 'category' | 'nav' | 'age' | MetricKey;
+export type SortKey = 'name' | 'amc' | 'category' | 'nav' | 'age' | 'ter' | 'aum' | MetricKey;
 
 /** Numeric range filter; either end may be omitted. */
 export interface Range {
@@ -54,7 +54,7 @@ export interface Range {
 }
 
 /** Keys a numeric range filter can target. */
-export type RangeKey = 'age' | MetricKey;
+export type RangeKey = 'age' | 'ter' | 'aum' | MetricKey;
 
 /** All user-controlled filters. Categorical values are the human-readable strings from `dict`. */
 export interface Filters {
@@ -65,7 +65,7 @@ export interface Filters {
   category: string[];
   plan: string[];
   option: string[];
-  /** Range filters in display units: percent for returns/volatility/drawdown, plain for Sharpe/Sortino, years for age. */
+  /** Range filters in display units: percent for returns/volatility/drawdown/TER, plain for Sharpe/Sortino, years for age, Rs crore for AUM. */
   ranges: Partial<Record<RangeKey, Range>>;
 }
 

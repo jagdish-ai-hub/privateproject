@@ -25,6 +25,30 @@ export function formatPct(fraction: number | null | undefined, dp: 0 | 1 | 2 = 2
 }
 
 /**
+ * Format an expense ratio that is already in percent: 1.1 -> "1.10%". No sign: a cost is not a gain or a loss.
+ *
+ * @param percent - Value in percent (not a fraction).
+ * @returns Text, or {@link DASH}. A missing TER is a dash, never "0.00%".
+ */
+export function formatTer(percent: number | null | undefined): string {
+  if (percent === null || percent === undefined || Number.isNaN(percent)) return DASH;
+  return `${FORMATTERS[2].format(percent)}%`;
+}
+
+/**
+ * Format AUM given in Rs crore: 98544.61 -> "₹98,545 Cr"; 12.34 -> "₹12.3 Cr"; 0.37 -> "₹0.37 Cr".
+ * Precision shrinks as the amount grows so small funds stay readable.
+ *
+ * @param crore - AUM in Rs crore.
+ * @returns Text, or {@link DASH}.
+ */
+export function formatAum(crore: number | null | undefined): string {
+  if (crore === null || crore === undefined || Number.isNaN(crore)) return DASH;
+  const dp = crore >= 100 ? 0 : crore >= 1 ? 1 : 2;
+  return `₹${FORMATTERS[dp].format(crore)} Cr`;
+}
+
+/**
  * Format an unsigned percentage (e.g. share of positive windows): 0.5 -> "50.0%".
  *
  * @param fraction - Value as a fraction.

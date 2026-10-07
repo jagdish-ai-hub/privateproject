@@ -60,7 +60,7 @@ export function Screener() {
   const onFilters = (patch: Partial<Filters>, mode: 'push' | 'replace' = 'push'): void =>
     update((v) => ({ ...v, filters: { ...v.filters, ...patch }, page: 1 }), mode);
   const onSort = (key: SortKey): void =>
-    update((v) => ({ ...v, page: 1, sort: v.sort.key === key ? { key, dir: v.sort.dir === 'desc' ? 'asc' : 'desc' } : { key, dir: key === 'name' || key === 'amc' || key === 'category' ? 'asc' : 'desc' } }));
+    update((v) => ({ ...v, page: 1, sort: v.sort.key === key ? { key, dir: v.sort.dir === 'desc' ? 'asc' : 'desc' } : { key, dir: key === 'name' || key === 'amc' || key === 'category' || key === 'ter' ? 'asc' : 'desc' } }));
 
   const prepared = state.status === 'ready' ? state.prepared : null;
   const result = useMemo(() => (prepared ? applyView(prepared, view) : null), [prepared, view]);

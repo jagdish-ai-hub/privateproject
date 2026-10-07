@@ -1,6 +1,6 @@
-import { DASH, formatNav, formatNum, formatPct, formatPlainPct, signClass } from '../format.ts';
-import { isMetricKey, type Column } from './columns.ts';
-import type { Prepared } from './query.ts';
+import { DASH, formatAum, formatNav, formatNum, formatPct, formatPlainPct, formatTer, signClass } from '../format.ts';
+import type { Column } from './columns.ts';
+import { numericValue, type Prepared } from './query.ts';
 
 /** What a table cell shows. */
 export interface Cell {
@@ -26,9 +26,7 @@ export function rawValue(p: Prepared, i: number, key: Column['key']): number | s
     case 'name': return data.name[i];
     case 'amc': return data.dict.amc[data.amc[i]];
     case 'category': return data.dict.category[data.category[i]];
-    case 'nav': return data.nav[i];
-    case 'age': return p.age[i];
-    default: return isMetricKey(key) ? data.metrics[key][i] : null;
+    default: return numericValue(p, i, key);
   }
 }
 
@@ -46,6 +44,8 @@ export function cellFor(p: Prepared, i: number, col: Column): Cell {
     case 'text': return { text: v === null ? DASH : String(v), cls: '', numeric: false };
     case 'nav': return { text: formatNav(v as number), cls: '', numeric: true };
     case 'age': return { text: v === null ? DASH : `${formatNum(v as number, 1)} yrs`, cls: '', numeric: true };
+    case 'ter': return { text: formatTer(v as number | null), cls: '', numeric: true };
+    case 'aum': return { text: formatAum(v as number | null), cls: '', numeric: true };
     case 'pct': return { text: formatPct(v as number | null), cls: signClass(v as number | null), numeric: true };
     case 'plainPct': return { text: formatPlainPct(v as number | null), cls: '', numeric: true };
     case 'num': return { text: formatNum(v as number | null), cls: signClass(v as number | null), numeric: true };

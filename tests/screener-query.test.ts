@@ -72,6 +72,31 @@ describe('filterIndices', () => {
   });
 });
 
+describe('TER and AUM columns', () => {
+  const d = makeData([
+    { name: 'Cheap Big', ter: 0.2, aum: 90_000 },
+    { name: 'Mid Mid', ter: 1.1, aum: 5_000 },
+    { name: 'Pricey Tiny', ter: 2.4, aum: 12.5 },
+    { name: 'No Cost Data', ter: null, aum: null },
+  ]);
+  const pc = prepare(d);
+  it('range filters work in display units (percent, Rs crore) and exclude funds with no value only when filtered', () => {
+    expect(names2(filterIndices(pc, { ...noFilters, ranges: { ter: { max: 1.5 } } }))).toEqual(['Cheap Big', 'Mid Mid']);
+    expect(names2(filterIndices(pc, { ...noFilters, ranges: { aum: { min: 1_000 } } }))).toEqual(['Cheap Big', 'Mid Mid']);
+    expect(filterIndices(pc, noFilters)).toHaveLength(4); // not filtering on TER keeps the fund without one
+  });
+  it('a missing TER is never treated as 0, so it does not slip into a "TER at most 0.5" filter', () => {
+    expect(names2(filterIndices(pc, { ...noFilters, ranges: { ter: { max: 0.5 } } }))).toEqual(['Cheap Big']);
+  });
+  it('sorts ascending by TER (cheapest first) and descending by AUM, with missing values last both ways', () => {
+    const all = [0, 1, 2, 3];
+    expect(names2(sortIndices(pc, all, 'ter', 'asc'))).toEqual(['Cheap Big', 'Mid Mid', 'Pricey Tiny', 'No Cost Data']);
+    expect(names2(sortIndices(pc, all, 'ter', 'desc'))).toEqual(['Pricey Tiny', 'Mid Mid', 'Cheap Big', 'No Cost Data']);
+    expect(names2(sortIndices(pc, all, 'aum', 'desc'))).toEqual(['Cheap Big', 'Mid Mid', 'Pricey Tiny', 'No Cost Data']);
+  });
+  function names2(idx: number[]): string[] { return idx.map((i) => d.name[i]); }
+});
+
 describe('sortIndices', () => {
   const all = [0, 1, 2, 3, 4];
   it('descending puts the highest first and nulls last', () => {

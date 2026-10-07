@@ -1,7 +1,7 @@
-import type { MetricKey, RangeKey, SortKey } from './types.ts';
+import { METRIC_KEYS, type MetricKey, type RangeKey, type SortKey } from './types.ts';
 
 /** How a column's values are shown. */
-export type ColumnKind = 'text' | 'nav' | 'pct' | 'plainPct' | 'num' | 'age';
+export type ColumnKind = 'text' | 'nav' | 'pct' | 'plainPct' | 'num' | 'age' | 'ter' | 'aum';
 
 /** A table column definition. */
 export interface Column {
@@ -14,13 +14,15 @@ export interface Column {
   /** Shown by default. */
   defaultVisible: boolean;
   /** Group heading in the column picker. */
-  group: 'Fund' | 'Returns' | 'SIP returns' | 'Risk' | 'Rolling returns';
+  group: 'Fund' | 'Costs and size' | 'Returns' | 'SIP returns' | 'Risk' | 'Rolling returns';
 }
 
 export const COLUMNS: Column[] = [
   { key: 'category', label: 'Category', help: 'SEBI category (old and new naming merged)', kind: 'text', defaultVisible: true, group: 'Fund' },
   { key: 'amc', label: 'Fund house', help: 'Asset management company', kind: 'text', defaultVisible: false, group: 'Fund' },
   { key: 'nav', label: 'NAV (₹)', help: 'Latest net asset value per unit', kind: 'nav', defaultVisible: true, group: 'Fund' },
+  { key: 'ter', label: 'TER', help: 'Total expense ratio: the yearly cost the fund charges, as a percentage of assets, for this plan (Direct or Regular). Latest AMFI disclosure.', kind: 'ter', defaultVisible: true, group: 'Costs and size' },
+  { key: 'aum', label: 'AUM (₹ Cr)', help: 'Average assets under management in Rs crore, for the latest quarter AMFI has published', kind: 'aum', defaultVisible: true, group: 'Costs and size' },
   { key: 'age', label: 'Age', help: 'Years since the first NAV', kind: 'age', defaultVisible: false, group: 'Fund' },
   { key: 'r1m', label: '1M', help: '1-month absolute return', kind: 'pct', defaultVisible: false, group: 'Returns' },
   { key: 'r3m', label: '3M', help: '3-month absolute return', kind: 'pct', defaultVisible: false, group: 'Returns' },
@@ -50,13 +52,13 @@ export const COLUMNS: Column[] = [
  * Sharpe / Sortino are plain numbers.
  */
 export const RANGE_SCALE: Record<RangeKey, number> = {
-  age: 1, r1m: 100, r3m: 100, r6m: 100, r1y: 100, r3y: 100, r5y: 100, r10y: 100, rInc: 100,
+  age: 1, ter: 1, aum: 1, r1m: 100, r3m: 100, r6m: 100, r1y: 100, r3y: 100, r5y: 100, r10y: 100, rInc: 100,
   sip1y: 100, sip3y: 100, sip5y: 100, vol3y: 100, sharpe3y: 1, sortino3y: 1, mdd3y: 100,
   roll1yPos: 100, roll1yAvg: 100, roll1yMin: 100, roll3yAvg: 100, roll3yMin: 100,
 };
 
 /** Metric keys that make sense as range filters in the UI, with their labels and units. */
-export const RANGE_FILTERS: { key: RangeKey; label: string; unit: '%' | '' | 'yrs' }[] = [
+export const RANGE_FILTERS: { key: RangeKey; label: string; unit: '%' | '' | 'yrs' | 'Cr' }[] = [
   { key: 'r1y', label: '1Y return', unit: '%' },
   { key: 'r3y', label: '3Y return', unit: '%' },
   { key: 'r5y', label: '5Y return', unit: '%' },
@@ -64,10 +66,12 @@ export const RANGE_FILTERS: { key: RangeKey; label: string; unit: '%' | '' | 'yr
   { key: 'vol3y', label: 'Volatility 3Y', unit: '%' },
   { key: 'mdd3y', label: 'Max drawdown 3Y (negative)', unit: '%' },
   { key: 'sharpe3y', label: 'Sharpe 3Y', unit: '' },
+  { key: 'ter', label: 'Expense ratio (TER)', unit: '%' },
+  { key: 'aum', label: 'AUM (Rs crore)', unit: 'Cr' },
   { key: 'age', label: 'Fund age', unit: 'yrs' },
 ];
 
 /** Type guard: is this sort key a computed metric? */
 export function isMetricKey(k: string): k is MetricKey {
-  return k in RANGE_SCALE && k !== 'age';
+  return (METRIC_KEYS as readonly string[]).includes(k);
 }
