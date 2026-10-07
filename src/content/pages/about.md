@@ -1,9 +1,9 @@
 ---
-title: "About MF Screener"
-description: "MF Screener is a free, independent mutual fund screener for India, built on official AMFI NAV data. No sign-up, no recommendations."
+title: "About Mutual Fund Compare"
+description: "Mutual Fund Compare is a free, independent mutual fund screener for India, built on official AMFI NAV data. No sign-up, no recommendations."
 dateModified: "2026-10-02"
 ---
-MF Screener is a free tool for comparing mutual funds in India. It takes the official daily NAV of every scheme and calculates returns, SIP returns and risk measures so that you can filter and compare funds without signing up for anything.
+Mutual Fund Compare is a free tool for comparing mutual funds in India. It takes the official daily NAV of every scheme and calculates returns, SIP returns and risk measures so that you can filter and compare funds without signing up for anything.
 
 ## What it does
 

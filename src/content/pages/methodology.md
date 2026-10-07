@@ -1,6 +1,6 @@
 ---
 title: "Methodology: how every number is calculated"
-description: "How MF Screener gets its data and calculates returns, CAGR, SIP XIRR, volatility, Sharpe, drawdown and rolling returns, and how bad data is handled."
+description: "How Mutual Fund Compare gets its data and calculates returns, CAGR, SIP XIRR, volatility, Sharpe, drawdown and rolling returns, and how bad data is handled."
 dateModified: "2026-10-02"
 ---
 This page describes exactly what the site does with the data, so you can check any number. The same rules are implemented in one tested code module that is used both when the data is prepared and in your browser.

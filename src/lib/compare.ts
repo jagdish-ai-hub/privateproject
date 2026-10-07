@@ -80,3 +80,15 @@ export function rebase(funds: readonly CompareInput[], months: number): CompareR
 export function defaultWindow(funds: readonly CompareInput[], candidates: readonly number[] = [60, 36, 12, 6, 3, 1]): number {
   return candidates.find((m) => rebase(funds, m) !== null) ?? 0;
 }
+
+/**
+ * Shorten a scheme name for tight spaces (legends, tooltips): drops the plan / option tail.
+ * "Parag Parikh Flexi Cap Fund - Direct Plan - Growth" -> "Parag Parikh Flexi Cap Fund".
+ *
+ * @param name - Full scheme name.
+ * @returns The name without "- Direct Plan - Growth" style suffixes (never empty).
+ */
+export function shortName(name: string): string {
+  const cut = name.replace(/\s*-\s*(direct|regular)\b.*$/i, '').replace(/\s*-\s*(growth|idcw|dividend)\b.*$/i, '').trim();
+  return cut || name;
+}

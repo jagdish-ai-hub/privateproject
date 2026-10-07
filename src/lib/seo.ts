@@ -16,7 +16,7 @@ export interface Crumb {
 }
 
 /** Site name used in structured data and titles. */
-export const SITE_NAME = 'MF Screener';
+export const SITE_NAME = 'Mutual Fund Compare';
 
 /**
  * `Organization` + `WebSite` markup for the home page.

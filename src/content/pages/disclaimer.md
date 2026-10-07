@@ -1,13 +1,13 @@
 ---
 title: "Disclaimer"
-description: "MF Screener provides educational information only, not investment advice. Mutual fund investments are subject to market risks. Read the full disclaimer."
+description: "Mutual Fund Compare provides educational information only, not investment advice. Mutual fund investments are subject to market risks. Read the full disclaimer."
 dateModified: "2026-10-02"
 ---
 **Mutual fund investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future returns.**
 
 ## Not investment advice
 
-MF Screener provides general information and calculation tools for education. Nothing on this site is a recommendation, offer or solicitation to buy or sell any mutual fund or other security. Lists that are sorted or ranked, including "top" lists by return, show data in an order and do not mean a fund is suitable for you. We are not registered with SEBI as an investment adviser or research analyst. Please consider your goals, time horizon and risk tolerance, and speak to a SEBI-registered adviser before investing.
+Mutual Fund Compare provides general information and calculation tools for education. Nothing on this site is a recommendation, offer or solicitation to buy or sell any mutual fund or other security. Lists that are sorted or ranked, including "top" lists by return, show data in an order and do not mean a fund is suitable for you. We are not registered with SEBI as an investment adviser or research analyst. Please consider your goals, time horizon and risk tolerance, and speak to a SEBI-registered adviser before investing.
 
 ## Data and accuracy
 

@@ -1,4 +1,4 @@
-# MF Screener
+# Mutual Fund Compare
 
 A free, no-sign-up screener for Indian mutual funds, built with [Astro](https://astro.build) on
 official AMFI NAV data (via [MFapi.in](https://www.mfapi.in)), plus expense ratio (TER) and AUM from AMFI's own site.

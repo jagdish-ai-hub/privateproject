@@ -1,6 +1,6 @@
 ---
 title: "Privacy policy"
-description: "MF Screener has no accounts and collects no personal data. This page explains what is stored in your browser, what the host may log, and what changes if ads are added."
+description: "Mutual Fund Compare has no accounts and collects no personal data. What is stored in your browser, what the host may log, and what changes if ads are added."
 dateModified: "2026-10-02"
 ---
 **Summary:** there is nothing to sign up for, and the site does not ask for or store your name, email, phone number or financial details.

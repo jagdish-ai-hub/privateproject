@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { NavSeries } from '../../lib/calc/series.ts';
 import { defaultWindow, rebase, type CompareInput } from '../../lib/compare.ts';
 import { cellFor } from '../../lib/screener/cells.ts';
@@ -31,6 +31,15 @@ export function Compare() {
   const [navs, setNavs] = useState<Record<number, NavState>>({});
   const [query, setQuery] = useState('');
   const [months, setMonths] = useState<number | null>(null);
+  // A fund keeps its colour slot while it stays selected: removing one fund must not repaint the others.
+  const slots = useRef(new Map<number, number>());
+  for (const c of [...slots.current.keys()]) if (!codes.includes(c)) slots.current.delete(c);
+  for (const c of codes) {
+    if (slots.current.has(c)) continue;
+    const used = new Set(slots.current.values());
+    slots.current.set(c, [0, 1, 2, 3].find((n) => !used.has(n)) ?? 0);
+  }
+  const slotOf = (code: number): number => slots.current.get(code) ?? 0;
 
   useEffect(() => {
     setCodes(codesFromUrl());
@@ -124,6 +133,7 @@ export function Compare() {
         <ul class="flex flex-wrap gap-2" aria-label="Selected funds">
           {selected.map((s) => (
             <li key={s.code} class="flex items-center gap-2 rounded-md border border-line px-3 py-1.5 text-sm">
+              <svg class="shrink-0" width="14" height="6" aria-hidden="true"><line x1="0" y1="3" x2="14" y2="3" stroke={`var(--s${slotOf(s.code) + 1})`} stroke-width="2" stroke-linecap="round" /></svg>
               <span class="max-w-72 truncate">{d.name[s.row]}</span>
               <button type="button" class="text-muted hover:text-fg" aria-label={`Remove ${d.name[s.row]}`} onClick={() => setSelection(codes.filter((c) => c !== s.code))}>×</button>
             </li>
@@ -158,7 +168,7 @@ export function Compare() {
           {inputs.length < codes.length && !Object.values(navs).some((n) => n.status === 'error') && <div class="skeleton h-96 w-full" aria-busy="true" aria-label="Loading chart" />}
           {Object.values(navs).some((n) => n.status === 'error') && <p role="alert" class="rounded-md border border-line p-6 text-sm text-muted">Chart data for one of the funds could not be loaded. Reload the page to try again.</p>}
           {allLoaded && !result && <p class="rounded-md border border-line p-6 text-sm text-muted">One of these funds is too new for this window. Choose a shorter one.</p>}
-          {result && d && <CompareChart lines={result.lines.map((l) => ({ ...l, name: d.name[rowOf.get(l.code) as number] }))} />}
+          {result && d && <CompareChart lines={result.lines.map((l) => ({ ...l, name: d.name[rowOf.get(l.code) as number], slot: slotOf(l.code) }))} />}
         </section>
       )}
 
