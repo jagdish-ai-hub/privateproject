@@ -1,4 +1,6 @@
 import { cellFor } from '../../lib/screener/cells.ts';
+import { COLUMN_TERM, type TermKey } from '../../lib/glossary.ts';
+import { InfoTip } from '../InfoTip.tsx';
 import { fundSlug } from '../../lib/slug.ts';
 import type { Column } from '../../lib/screener/columns.ts';
 import type { Prepared } from '../../lib/screener/query.ts';
@@ -26,6 +28,7 @@ export function ResultsTable({ prepared, rows, columns, sort, onSort, compact }:
   const header = (key: SortKey, label: string, help: string, numeric: boolean, first = false) => (
     <th scope="col" aria-sort={ariaSort(key)} class={`${th} ${numeric ? 'text-right' : 'text-left'} ${first ? 'left-0 z-20 min-w-64' : ''}`} title={help}>
       <button type="button" class="font-medium hover:text-fg" onClick={() => onSort(key)}>{label}{arrow(key)}</button>
+      {COLUMN_TERM[key] && <InfoTip term={COLUMN_TERM[key] as TermKey} instance={`col-${key}`} />}
     </th>
   );
 

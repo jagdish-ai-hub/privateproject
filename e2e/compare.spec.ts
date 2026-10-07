@@ -85,3 +85,19 @@ test('on a phone the chart still shows the whole comparison window (nothing cut 
     }).toPass({ timeout: 5000 });
   }
 });
+
+test('insights: the cost and size sentences quote the same numbers as the table, and an (i) explains the term', async ({ page }) => {
+  const d = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+  const picks = Array.from({ length: d.count }, (_, i) => i)
+    .filter((i) => d.dict.plan[d.plan[i]] === 'direct' && d.dict.option[d.option[i]] === 'growth' && d.ter[i] !== null && d.aum[i] !== null && d.metrics.r3y[i] !== null && d.metrics.vol3y[i] !== null)
+    .filter((i, k, a) => d.ter[i] !== d.ter[a[0]] || k === 0).slice(0, 2);
+  expect(picks.length).toBe(2);
+  await page.goto(`/compare/?f=${picks.map((i) => d.code[i]).join(',')}`);
+  const panel = page.getByTestId('insights');
+  await expect(panel).toBeVisible({ timeout: 10_000 });
+  const cheaper = picks.reduce((a, b) => ((d.ter[a] as number) <= (d.ter[b] as number) ? a : b));
+  await expect(panel.locator('[data-insight="cost"]')).toContainText(`${(d.ter[cheaper] as number).toFixed(2)}%`);
+  await expect(page.getByTestId('insights-headline')).toContainText('leads on');
+  await panel.locator('[data-insight="cost"]').getByRole('button', { name: /What is TER/ }).click();
+  await expect(page.locator('.info-pop:popover-open')).toContainText('Total Expense Ratio');
+});

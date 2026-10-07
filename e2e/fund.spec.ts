@@ -115,3 +115,20 @@ test('fund page: costs block shows this plan\'s TER and AUM from the data, and a
     await expect(page.getByTestId('costs')).not.toContainText('0.00%');
   }
 });
+
+test('fund page: an (i) opens a plain-language explanation, Escape closes it, and peers insight quotes real numbers', async ({ page }) => {
+  const data = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+  const i = Array.from({ length: Math.min(30, data.count) }, (_, k) => k).find((k) => data.ter[k] !== null && data.metrics.r1y[k] !== null) ?? 0;
+  await page.goto(`/fund/${fundSlug(data.name[i], data.code[i])}/`);
+  const costs = page.getByTestId('costs');
+  await costs.getByRole('button', { name: /What is TER/ }).click();
+  const pop = page.locator('.info-pop:popover-open');
+  await expect(pop).toBeVisible();
+  await expect(pop).toContainText('yearly cost of running the fund');
+  await expect(pop.getByRole('link', { name: 'Expense ratio explained' })).toHaveAttribute('href', '/learn/expense-ratio-and-exit-load/');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.info-pop:popover-open')).toHaveCount(0);
+  // The peers sentence about cost must quote this fund's own TER.
+  const peerCost = page.locator('[data-insight="peer-cost"]');
+  if (await peerCost.count()) await expect(peerCost).toContainText(`${(data.ter[i] as number).toFixed(2)}%`);
+});

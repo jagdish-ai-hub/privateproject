@@ -7,6 +7,10 @@ import { filterIndices } from '../../lib/screener/query.ts';
 import { fundSlug } from '../../lib/slug.ts';
 import type { Filters } from '../../lib/screener/types.ts';
 import { CompareChart } from './CompareChart.tsx';
+import { COLUMN_TERM, type TermKey } from '../../lib/glossary.ts';
+import { InfoTip } from '../InfoTip.tsx';
+import { InsightsPanel } from '../InsightsPanel.tsx';
+import { compareInsights, insightFundAt } from '../../lib/insights.ts';
 import { useScreenerData } from '../screener/useScreenerData.ts';
 
 const MAX_FUNDS = 4;
@@ -100,6 +104,11 @@ export function Compare() {
 
   const d = prepared?.data;
   const categories = new Set(selected.map((s) => d?.category[s.row]));
+  const insights = useMemo(() => {
+    if (!d || selected.length < 2) return null;
+    const newest = Math.max(...d.navDate);
+    return compareInsights(selected.map((s) => insightFundAt(d, s.row, newest)));
+  }, [d, codes]);
   const rangeAvailable = (m: number): boolean => allLoaded && inputs.length >= 2 && rebase(inputs, m) !== null;
 
   return (
@@ -172,6 +181,8 @@ export function Compare() {
         </section>
       )}
 
+      {insights && <InsightsPanel title="What the numbers say" headline={insights.headline} items={insights.items} caveats={insights.caveats} idPrefix="cmp" />}
+
       {selected.length >= 2 && prepared && (
         <section aria-label="Metrics comparison" class="overflow-auto rounded-md border border-line">
           <table class="w-full text-sm">
@@ -185,7 +196,7 @@ export function Compare() {
             <tbody>
               {COLUMNS.map((c) => (
                 <tr key={c.key} class="border-b border-line last:border-0">
-                  <th scope="row" class="sticky left-0 bg-bg px-3 py-2 text-left font-normal text-muted" title={c.help}>{c.label}</th>
+                  <th scope="row" class="sticky left-0 bg-bg px-3 py-2 text-left font-normal text-muted" title={c.help}>{c.label}{COLUMN_TERM[c.key] && <InfoTip term={COLUMN_TERM[c.key] as TermKey} instance={`cmp-${c.key}`} />}</th>
                   {selected.map((s) => {
                     const cell = cellFor(prepared, s.row, c);
                     return <td key={s.code} class={`px-3 py-2 ${cell.numeric ? 'num' : 'text-right'} ${cell.cls}`}>{cell.text}</td>;

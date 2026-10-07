@@ -22,7 +22,7 @@ export const COLUMNS: Column[] = [
   { key: 'amc', label: 'Fund house', help: 'Asset management company', kind: 'text', defaultVisible: false, group: 'Fund' },
   { key: 'nav', label: 'NAV (₹)', help: 'Latest net asset value per unit', kind: 'nav', defaultVisible: true, group: 'Fund' },
   { key: 'ter', label: 'TER', help: 'Total expense ratio: the yearly cost the fund charges, as a percentage of assets, for this plan (Direct or Regular). Latest AMFI disclosure.', kind: 'ter', defaultVisible: true, group: 'Costs and size' },
-  { key: 'aum', label: 'AUM (₹ Cr)', help: 'Average assets under management in Rs crore, for the latest quarter AMFI has published', kind: 'aum', defaultVisible: true, group: 'Costs and size' },
+  { key: 'aum', label: 'AUM (₹ Cr)', help: 'Fund size: average assets under management of the whole scheme (all plans and options added up) in Rs crore, for the latest quarter AMFI has published', kind: 'aum', defaultVisible: true, group: 'Costs and size' },
   { key: 'age', label: 'Age', help: 'Years since the first NAV', kind: 'age', defaultVisible: false, group: 'Fund' },
   { key: 'r1m', label: '1M', help: '1-month absolute return', kind: 'pct', defaultVisible: false, group: 'Returns' },
   { key: 'r3m', label: '3M', help: '3-month absolute return', kind: 'pct', defaultVisible: false, group: 'Returns' },

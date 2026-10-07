@@ -6,6 +6,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Faq from '../../components/Faq.astro';
+import InfoTip from '../../components/InfoTip.astro';
+import { InsightsPanel } from '../../components/InsightsPanel.tsx';
+import { fundVsPeers, insightFundAt, peerMedians } from '../../lib/insights.ts';
 import FundTable from '../../components/FundTable.astro';
 import { NavChart } from '../../components/NavChart.tsx';
 import { fundAt, loadNav, loadScreener, peersOf } from '../../lib/data.ts';
@@ -33,6 +36,14 @@ const nav = loadNav(f.code);
 const m = f.metrics;
 const peers = peersOf(data, f).map((i) => fundAt(data, i));
 const faqs = fundFaqs(f);
+// The whole peer group (same category, plan and option), for medians; `peers` above is only the six shown in the table.
+const newestNav = data.navDate.reduce((a, b) => (b > a ? b : a), 0);
+const groupRows: number[] = [];
+for (let i = 0; i < data.count; i++) {
+  if (data.category[i] === data.category[index] && data.plan[i] === data.plan[index] && data.option[i] === data.option[index]) groupRows.push(i);
+}
+const groupWords = [{ direct: 'Direct', regular: 'Regular' }[f.plan as string], { growth: 'Growth', idcw: 'IDCW' }[f.option as string], f.category, 'funds'].filter(Boolean).join(' ');
+const vsPeers = fundVsPeers(insightFundAt(data, index, newestNav), peerMedians(groupRows.map((i) => insightFundAt(data, i, newestNav))), groupWords);
 const path = `/fund/${f.slug}/`;
 const url = new URL(path, Astro.site).toString();
 const catSlug = slugify(f.category);
@@ -55,7 +66,7 @@ const adjDate = (d: number) => formatDay(d);
 const gap = terGap(f.terDetail);
 const levNote = leviesNote(f.terParts);
 const partRows = f.terParts
-  ? ([['Base expense ratio', f.terParts.ber], ['Brokerage', f.terParts.brokerage], ['Transaction cost', f.terParts.transaction], ['Statutory levies (GST etc.)', f.terParts.levies]] as const)
+  ? ([['Base expense ratio', f.terParts.ber, 'ber'], ['Brokerage', f.terParts.brokerage, null], ['Transaction cost', f.terParts.transaction, null], ['Statutory levies (GST etc.)', f.terParts.levies, 'levies']] as const)
   : [];
 ---
 <BaseLayout
@@ -81,7 +92,7 @@ const partRows = f.terParts
     </p>
     <p class="mt-4 flex flex-wrap items-baseline gap-x-3">
       <span class="num text-3xl font-semibold tracking-tight">₹{formatNav(f.nav)}</span>
-      <span class="text-sm text-muted">NAV as on {formatDay(f.navDate)}</span>
+      <span class="text-sm text-muted">NAV as on {formatDay(f.navDate)}<InfoTip term="nav" /></span>
       <a href={`/compare/?f=${f.code}`} class="text-sm underline hover:no-underline">Compare with other funds</a>
     </p>
   </header>
@@ -114,6 +125,12 @@ const partRows = f.terParts
       : <p class="rounded-md border border-line p-6 text-sm text-muted">Chart data is not available for this scheme.</p>}
   </section>
 
+  {vsPeers.length > 0 && (
+    <div class="mt-8">
+      <InsightsPanel title="How it compares with similar funds" items={vsPeers} idPrefix="peer" />
+    </div>
+  )}
+
   <div class="mt-8 grid gap-6 lg:grid-cols-2">
     <section aria-labelledby="ret-h">
       <h2 id="ret-h" class="mb-2 text-lg font-semibold tracking-tight">Returns</h2>
@@ -123,8 +140,8 @@ const partRows = f.terParts
           <thead><tr class="border-b border-line text-xs text-muted">
             <th scope="col" class="px-3 py-2 text-left font-medium">Period</th>
             <th scope="col" class="px-3 py-2 text-left font-medium">Basis</th>
-            <th scope="col" class="px-3 py-2 text-right font-medium">Return</th>
-            <th scope="col" class="px-3 py-2 text-right font-medium">Rank in peers</th>
+            <th scope="col" class="px-3 py-2 text-right font-medium">Return<InfoTip term="cagr" instance="ret" /></th>
+            <th scope="col" class="px-3 py-2 text-right font-medium">Rank in peers<InfoTip term="rank" /></th>
           </tr></thead>
           <tbody>
             {returnsRows.map(([label, key, basis, rank]) => (
@@ -146,7 +163,7 @@ const partRows = f.terParts
 
     <div class="space-y-6">
       <section aria-labelledby="sip-h">
-        <h2 id="sip-h" class="mb-2 text-lg font-semibold tracking-tight">SIP returns (XIRR)</h2>
+        <h2 id="sip-h" class="mb-2 text-lg font-semibold tracking-tight">SIP returns (XIRR)<InfoTip term="sip" /></h2>
         <div class="overflow-auto rounded-md border border-line">
           <table class="w-full text-sm">
             <caption class="sr-only">SIP returns of {f.name}</caption>
@@ -168,10 +185,10 @@ const partRows = f.terParts
           <table class="w-full text-sm">
             <caption class="sr-only">Risk measures of {f.name}</caption>
             <tbody>
-              <tr class="border-b border-line"><td class="px-3 py-2">Volatility (annualised)</td><td class="num px-3 py-2">{formatPlainPct(m.vol3y)}</td></tr>
-              <tr class="border-b border-line"><td class="px-3 py-2">Max drawdown</td><td class={`num px-3 py-2 ${signClass(m.mdd3y)}`}>{formatPct(m.mdd3y)}</td></tr>
-              <tr class="border-b border-line"><td class="px-3 py-2">Sharpe ratio</td><td class="num px-3 py-2">{formatNum(m.sharpe3y)}</td></tr>
-              <tr><td class="px-3 py-2">Sortino ratio</td><td class="num px-3 py-2">{formatNum(m.sortino3y)}</td></tr>
+              <tr class="border-b border-line"><td class="px-3 py-2">Volatility (annualised)<InfoTip term="volatility" /></td><td class="num px-3 py-2">{formatPlainPct(m.vol3y)}</td></tr>
+              <tr class="border-b border-line"><td class="px-3 py-2">Max drawdown<InfoTip term="drawdown" /></td><td class={`num px-3 py-2 ${signClass(m.mdd3y)}`}>{formatPct(m.mdd3y)}</td></tr>
+              <tr class="border-b border-line"><td class="px-3 py-2">Sharpe ratio<InfoTip term="sharpe" /></td><td class="num px-3 py-2">{formatNum(m.sharpe3y)}</td></tr>
+              <tr><td class="px-3 py-2">Sortino ratio<InfoTip term="sortino" /></td><td class="num px-3 py-2">{formatNum(m.sortino3y)}</td></tr>
             </tbody>
           </table>
         </div>
@@ -180,7 +197,7 @@ const partRows = f.terParts
   </div>
 
   <section class="mt-8" aria-labelledby="roll-h">
-    <h2 id="roll-h" class="mb-2 text-lg font-semibold tracking-tight">Rolling returns</h2>
+    <h2 id="roll-h" class="mb-2 text-lg font-semibold tracking-tight">Rolling returns<InfoTip term="rollingAvg" instance="roll" /></h2>
     <div class="overflow-auto rounded-md border border-line">
       <table class="w-full text-sm">
         <caption class="sr-only">Rolling returns of {f.name}</caption>
@@ -206,16 +223,16 @@ const partRows = f.terParts
         <table class="w-full text-sm">
           <caption class="sr-only">Expense ratio and AUM of {f.name}</caption>
           <tbody>
-            <tr class="border-b border-line"><td class="px-3 py-2">Total expense ratio (this plan)</td><td class="num px-3 py-2" data-testid="ter">{formatTer(f.ter)}</td></tr>
+            <tr class="border-b border-line"><td class="px-3 py-2">Total expense ratio (this plan)<InfoTip term="ter" /></td><td class="num px-3 py-2" data-testid="ter">{formatTer(f.ter)}</td></tr>
             {gap && (
               <>
-                <tr class="border-b border-line"><td class="px-3 py-2">Regular plan TER</td><td class="num px-3 py-2" data-testid="ter-regular">{formatTer(gap.regular)}</td></tr>
+                <tr class="border-b border-line"><td class="px-3 py-2">Regular plan TER<InfoTip term="plan" /></td><td class="num px-3 py-2" data-testid="ter-regular">{formatTer(gap.regular)}</td></tr>
                 <tr class="border-b border-line"><td class="px-3 py-2">Direct plan TER</td><td class="num px-3 py-2" data-testid="ter-direct">{formatTer(gap.direct)}</td></tr>
                 <tr class="border-b border-line"><td class="px-3 py-2">Difference (Regular minus Direct)</td><td class="num px-3 py-2" data-testid="ter-gap">{gap.gap.toFixed(2)} pts a year</td></tr>
               </>
             )}
-            <tr class="border-b border-line"><td class="px-3 py-2">Fund size, all plans (AUM{f.aumPeriod && `, ${f.aumPeriod}`})</td><td class="num px-3 py-2" data-testid="aum">{formatAum(f.aum)}</td></tr>
-            <tr><td class="px-3 py-2">AUM of this plan alone</td><td class="num px-3 py-2" data-testid="plan-aum">{formatAum(f.planAum)}</td></tr>
+            <tr class="border-b border-line"><td class="px-3 py-2">Fund size, all plans (AUM{f.aumPeriod && `, ${f.aumPeriod}`})<InfoTip term="aum" /></td><td class="num px-3 py-2" data-testid="aum">{formatAum(f.aum)}</td></tr>
+            <tr><td class="px-3 py-2">AUM of this plan alone<InfoTip term="planAum" /></td><td class="num px-3 py-2" data-testid="plan-aum">{formatAum(f.planAum)}</td></tr>
           </tbody>
         </table>
       </div>
@@ -224,8 +241,8 @@ const partRows = f.terParts
           <table class="w-full text-sm">
             <caption class="sr-only">What the expense ratio is made of</caption>
             <tbody>
-              {partRows.map(([label, v]) => (
-                <tr class="border-b border-line"><td class="px-3 py-2">{label}</td><td class="num px-3 py-2">{formatTer(v)}</td></tr>
+              {partRows.map(([label, v, tip]) => (
+                <tr class="border-b border-line"><td class="px-3 py-2">{label}{tip && <InfoTip term={tip} />}</td><td class="num px-3 py-2">{formatTer(v)}</td></tr>
               ))}
               <tr><td class="px-3 py-2 font-medium">Total</td><td class="num px-3 py-2 font-medium">{formatTer(f.terParts!.total)}</td></tr>
             </tbody>
@@ -249,7 +266,7 @@ const partRows = f.terParts
       <dt class="text-muted">Category</dt><dd><a class="hover:underline" href={`/category/${catSlug}/`}>{f.category}</a> ({f.assetClass})</dd>
       <dt class="text-muted">Scheme type</dt><dd>{f.schemeType}</dd>
       <dt class="text-muted">Plan / option</dt><dd>{[planText, optionText].filter(Boolean).join(' · ') || '—'}</dd>
-      <dt class="text-muted">First NAV</dt><dd class="num text-left">{formatDay(f.inception)}</dd>
+      <dt class="text-muted">First NAV<InfoTip term="age" /></dt><dd class="num text-left">{formatDay(f.inception)}</dd>
       <dt class="text-muted">AMFI scheme code</dt><dd class="num text-left">{f.code}</dd>
       <dt class="text-muted">ISIN</dt><dd class="num text-left">{f.isin ?? '—'}</dd>
     </dl>

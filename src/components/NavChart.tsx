@@ -4,6 +4,7 @@ import { periodReturn } from '../lib/calc/returns.ts';
 import { indexOnOrBefore } from '../lib/calc/series.ts';
 import { formatNav, formatPct, signClass } from '../lib/format.ts';
 import { readTheme, type ChartTheme } from '../lib/chart/colors.ts';
+import { InfoTip } from './InfoTip.tsx';
 import { dropFromPeak, windowStats, withAlpha } from '../lib/chart/stats.ts';
 
 interface Props {
@@ -215,6 +216,7 @@ function NavChartInner({ days, navs, name }: InnerProps) {
                 class={`h-8 rounded-md border px-2.5 text-sm ${view === k ? 'border-fg bg-subtle font-medium' : 'border-line text-muted hover:bg-subtle'}`}
               >{label}</button>
             ))}
+            {view === 'drop' && <InfoTip term="dropChart" />}
           </div>
         </div>
         <p class="num text-sm" aria-live="polite">

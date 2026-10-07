@@ -1,0 +1,23 @@
+---
+/**
+ * (i) button with a plain-language explanation, for static pages. Same markup as `InfoTip.tsx`
+ * (used inside interactive islands); the text comes from `src/lib/glossary.ts`.
+ *
+ * Props: `term` (a glossary key) and `instance` (only needed if the same term appears twice on a page).
+ */
+import { GLOSSARY, type TermKey } from '../lib/glossary.ts';
+interface Props { term: TermKey; instance?: string }
+const { term, instance = '' } = Astro.props;
+const t = GLOSSARY[term];
+const id = `tip-${term}${instance ? `-${instance}` : ''}`;
+---
+<button type="button" class="info-btn" aria-label={`What is ${t.title}?`} popovertarget={id}>i</button>
+<div id={id} class="info-pop" popover="auto">
+  <p class="font-semibold">{t.title}</p>
+  <p class="mt-2">{t.what}</p>
+  <p class="mt-2 text-muted">{t.read}</p>
+  <div class="mt-3 flex items-center justify-between gap-3">
+    {t.learn ? <a class="underline" href={t.learn.href}>{t.learn.label}</a> : <span />}
+    <button type="button" class="h-8 rounded-md border border-line px-3 text-sm hover:bg-subtle" popovertarget={id} popovertargetaction="hide">Close</button>
+  </div>
+</div>

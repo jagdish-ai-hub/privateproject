@@ -48,7 +48,7 @@ test('sorting toggles direction and orders the rows', async ({ page }) => {
   await page.goto('/');
   await expect(showing(page)).toBeVisible();
   const header = page.getByRole('columnheader', { name: /^5Y/ });
-  await header.getByRole('button').click();
+  await header.getByRole('button', { name: /^5Y/ }).click();
   await expect(header).toHaveAttribute('aria-sort', 'descending');
   await expect(page).toHaveURL(/sort=r5y%3Adesc/);
   const col = async (): Promise<number[]> => {
@@ -58,7 +58,7 @@ test('sorting toggles direction and orders the rows', async ({ page }) => {
   };
   const desc = await col();
   expect(desc.slice(0, 10)).toEqual([...desc.slice(0, 10)].sort((a, b) => b - a));
-  await header.getByRole('button').click();
+  await header.getByRole('button', { name: /^5Y/ }).click();
   await expect(header).toHaveAttribute('aria-sort', 'ascending');
   const asc = await col();
   expect(asc.slice(0, 10)).toEqual([...asc.slice(0, 10)].sort((a, b) => a - b));
