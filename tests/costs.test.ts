@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatIsoDate, terGap } from '../src/lib/costs.ts';
+import { formatIsoDate, leviesNote, terGap } from '../src/lib/costs.ts';
 import { fundFaqs } from '../src/lib/faq.ts';
 import { fund } from './seo-faq.test.ts';
 
@@ -48,5 +48,22 @@ describe('TER and AUM FAQs', () => {
   });
   it('no advice words', () => {
     for (const f of fundFaqs(fund)) expect(f.answer).not.toMatch(/recommend|should buy|best/i);
+  });
+});
+
+describe('leviesNote', () => {
+  it('explains a large levies part with the base expense ratio', () => {
+    const n = leviesNote({ ber: 0.13, brokerage: 0.2, transaction: 0.09, levies: 2.06, total: 2.48 });
+    expect(n).toContain('2.06% of this total is statutory levies');
+    expect(n).toContain('0.13%');
+  });
+  it('is silent for small or missing levies', () => {
+    expect(leviesNote({ ber: 0.28, brokerage: 0.01, transaction: 0, levies: 0.05, total: 0.34 })).toBeNull();
+    expect(leviesNote(null)).toBeNull();
+  });
+  it('shows up in the TER FAQ only when levies are large', () => {
+    const big = { ...fund, terParts: { ber: 0.13, brokerage: 0.2, transaction: 0.09, levies: 2.06, total: 2.48 } };
+    expect(fundFaqs(big).find((f) => f.question.includes('expense ratio'))?.answer).toContain('statutory levies');
+    expect(fundFaqs({ ...fund, terParts: { ber: 0.6, brokerage: 0.06, transaction: 0.05, levies: 0.06, total: 0.77 } }).find((f) => f.question.includes('expense ratio'))?.answer).not.toContain('statutory levies');
   });
 });

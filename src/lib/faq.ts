@@ -1,4 +1,4 @@
-import { terGap, formatIsoDate } from './costs.ts';
+import { terGap, formatIsoDate, leviesNote } from './costs.ts';
 import { formatAum, formatDay, formatNav, formatPct, formatTer } from './format.ts';
 import type { Fund } from './data.ts';
 import type { Faq } from './seo.ts';
@@ -50,7 +50,7 @@ export function fundFaqs(f: Fund): Faq[] {
     const planWord = f.plan === 'direct' ? 'Direct' : f.plan === 'regular' ? 'Regular' : '';
     out.push({
       question: `What is the expense ratio of ${f.name}?`,
-      answer: `The total expense ratio (TER) of ${f.name}${planWord ? ` (${planWord} plan)` : ''} is ${formatTer(f.ter)} a year${f.terDetail ? `, as disclosed by the fund house to AMFI on ${formatIsoDate(f.terDetail.date)}` : ''}. The TER is charged inside the fund every day and is already reflected in the NAV.${gap ? ` For the same scheme the Regular plan is ${formatTer(gap.regular)} and the Direct plan is ${formatTer(gap.direct)}, a difference of ${gap.gap.toFixed(2)} percentage points a year (about ₹${gap.perLakh.toLocaleString('en-IN')} a year on ₹1,00,000 invested).` : ''}`,
+      answer: `The total expense ratio (TER) of ${f.name}${planWord ? ` (${planWord} plan)` : ''} is ${formatTer(f.ter)} a year${f.terDetail ? `, as disclosed by the fund house to AMFI on ${formatIsoDate(f.terDetail.date)}` : ''}. The TER is charged inside the fund every day and is already reflected in the NAV.${gap ? ` For the same scheme the Regular plan is ${formatTer(gap.regular)} and the Direct plan is ${formatTer(gap.direct)}, a difference of ${gap.gap.toFixed(2)} percentage points a year (about ₹${gap.perLakh.toLocaleString('en-IN')} a year on ₹1,00,000 invested).` : ''}${leviesNote(f.terParts) ? ` ${leviesNote(f.terParts)}` : ''}`,
     });
   } else {
     out.push({

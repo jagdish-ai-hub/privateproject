@@ -11,7 +11,7 @@ import { NavChart } from '../../components/NavChart.tsx';
 import { fundAt, loadNav, loadScreener, peersOf } from '../../lib/data.ts';
 import { fundFaqs } from '../../lib/faq.ts';
 import { formatAum, formatDay, formatNav, formatNum, formatPct, formatPlainPct, formatTer, signClass } from '../../lib/format.ts';
-import { formatIsoDate, terGap } from '../../lib/costs.ts';
+import { formatIsoDate, leviesNote, terGap } from '../../lib/costs.ts';
 import { breadcrumbLd, faqLd, fundLd } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
 import { clip } from '../../lib/stats.ts';
@@ -53,6 +53,7 @@ const returnsRows = [
 ] as const;
 const adjDate = (d: number) => formatDay(d);
 const gap = terGap(f.terDetail);
+const levNote = leviesNote(f.terParts);
 const partRows = f.terParts
   ? ([['Base expense ratio', f.terParts.ber], ['Brokerage', f.terParts.brokerage], ['Transaction cost', f.terParts.transaction], ['Statutory levies (GST etc.)', f.terParts.levies]] as const)
   : [];
@@ -235,7 +236,7 @@ const partRows = f.terParts
       {f.ter === null
         ? 'We could not match this scheme to an expense ratio in the data AMFI publishes, so it is left blank rather than guessed. '
         : `Expense ratio as disclosed by the fund house to AMFI${f.terDetail ? ` on ${formatIsoDate(f.terDetail.date)}` : ''}; it is charged inside the fund and already reflected in the NAV. `}
-      AUM is the quarterly average reported by AMFI, in ₹ crore.
+      {levNote && <>{levNote} </>}AUM is the quarterly average reported by AMFI, in ₹ crore.
       See <a class="underline" href="/learn/direct-vs-regular-mutual-funds/">Direct vs Regular</a> and <a class="underline" href="/learn/expense-ratio-and-exit-load/">expense ratio</a>.
     </p>
   </section>

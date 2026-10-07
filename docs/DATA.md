@@ -33,6 +33,10 @@ if a call fails the previous cached values are used and flagged stale; the build
 - **Cache:** `data/cache/ter/{mfId}.json` (refreshed after 7 days) and `data/cache/aum-*.json`. Same
   store-interface idea as [CACHING.md](CACHING.md) (`TerStore`, `AumStore`).
 - **Flags:** `--ter=auto|refresh|cached|skip`, `--aum=skip`, `--min-ter-coverage=0.9`.
+- **Cross-checks (7 Oct 2026):** AUM equals TigZig's `aaum_cr_quarterly_avg` for all 8,034 schemes both
+  report for the same quarter. TER differs from the old-format GitHub tracker for many arbitrage and quant
+  funds because AMFI's total now includes statutory levies (STT), not only the base expense ratio; fund pages
+  say so. Neither check is an automated test (they need third-party downloads).
 - **Quality gate:** the build fails if fewer than 90% of Direct plan Growth schemes get a TER, so a
   silent AMFI change cannot ship blank columns. Measured on 6 Oct 2026: 96.8% (1,752 of 1,810);
   AUM matched 8,493 of 8,650 schemes. `report.json` lists the numbers by asset class, any unmatched fund

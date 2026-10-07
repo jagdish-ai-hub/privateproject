@@ -48,7 +48,7 @@ const faqs: FaqItem[] = [
     question: `What is the typical expense ratio of ${name} funds?`,
     answer: medTer === null
       ? `We could not match enough ${name} Direct Growth funds to an expense ratio in the data AMFI publishes to give a typical figure.`
-      : `Among Direct Growth ${name} funds that have a disclosed expense ratio, the median total expense ratio (TER) is ${formatTer(medTer)} a year. Regular plans of the same funds cost more because they include distributor commission. TER is disclosed by each fund house to AMFI and is already reflected in the NAV.`,
+      : `Among Direct Growth ${name} funds that have a disclosed expense ratio, the median total expense ratio (TER) is ${formatTer(medTer)} a year. Regular plans of the same funds cost more because they include distributor commission. The total includes statutory levies such as STT, so categories that trade a lot (arbitrage, for example) show a higher figure. TER is disclosed by each fund house to AMFI and is already reflected in the NAV.`,
   },
   {
     question: `What does the ${name} category mean?`,
