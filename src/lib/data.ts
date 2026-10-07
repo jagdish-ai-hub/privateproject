@@ -7,6 +7,25 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fundSlug } from './slug.ts';
 import { METRIC_KEYS, type MetricKey, type ScreenerData } from './screener/types.ts';
 
+/** One plan's expense ratio and its parts, in percent of assets per year. */
+export interface TerParts {
+  /** Base expense ratio. */
+  ber: number;
+  brokerage: number;
+  transaction: number;
+  /** Statutory levies (GST, STT and similar). */
+  levies: number;
+  total: number;
+}
+
+/** Both plans' latest disclosed expense ratio for one scheme. */
+export interface TerDetail {
+  regular: TerParts | null;
+  direct: TerParts | null;
+  /** ISO date of the disclosure. */
+  date: string;
+}
+
 /** Everything the fund page needs about one scheme. */
 export interface Fund {
   /** Row index in the columnar data. */
@@ -28,6 +47,18 @@ export interface Fund {
   /** Day number of the first NAV. */
   inception: number;
   isin: string | null;
+  /** Total expense ratio of this plan in percent; null when AMFI's TER data has no match. */
+  ter: number | null;
+  /** Average AUM in Rs crore for the AUM quarter; null when not reported. */
+  aum: number | null;
+  /** Both plans of this scheme side by side (null when the scheme has no TER match). */
+  terDetail: TerDetail | null;
+  /** Breakdown of this plan's TER. */
+  terParts: TerParts | null;
+  /** Label of the TER disclosure date, as written by the data build. */
+  terAsOf: string | null;
+  /** AUM quarter label, e.g. "Apr-Jun 2026". */
+  aumPeriod: string | null;
   metrics: Record<MetricKey, number | null>;
   /** Rank among peers (same category + plan + option), where available. */
   ranks: Record<'r1y' | 'r3y' | 'r5y', { rank: number; of: number } | null>;
@@ -47,14 +78,21 @@ function duplicateNames(data: ScreenerData): Set<string> {
   cachedDupes = dupes;
   return dupes;
 }
-let cachedIsin: (string | null)[] | null = null;
 
-/** ISINs aligned with the dataset rows (kept out of the public file; static pages only). */
-function loadIsins(): (string | null)[] {
-  if (cachedIsin) return cachedIsin;
+/** Per-scheme extras kept out of the public file (static pages only), aligned with the dataset rows. */
+interface Extra {
+  isin: (string | null)[];
+  terDetail: (TerDetail | null)[];
+  terParts: (TerParts | null)[];
+}
+let cachedExtra: Extra | null = null;
+
+function loadExtra(): Extra {
+  if (cachedExtra) return cachedExtra;
   const path = 'data/generated/extra.json';
-  cachedIsin = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as { isin: (string | null)[] }).isin : [];
-  return cachedIsin;
+  const raw = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Extra>) : {};
+  cachedExtra = { isin: raw.isin ?? [], terDetail: raw.terDetail ?? [], terParts: raw.terParts ?? [] };
+  return cachedExtra;
 }
 
 /**
@@ -99,7 +137,13 @@ export function fundAt(data: ScreenerData, i: number): Fund {
     nav: data.nav[i],
     navDate: data.navDate[i],
     inception: data.inception[i],
-    isin: loadIsins()[i] ?? null,
+    isin: loadExtra().isin[i] ?? null,
+    ter: data.ter?.[i] ?? null,
+    aum: data.aum?.[i] ?? null,
+    terDetail: loadExtra().terDetail[i] ?? null,
+    terParts: loadExtra().terParts[i] ?? null,
+    terAsOf: data.terAsOf ?? null,
+    aumPeriod: data.aumPeriod ?? null,
     adj: data.adj[i],
     metrics: Object.fromEntries(METRIC_KEYS.map((k) => [k, data.metrics[k][i]])) as Fund['metrics'],
     ranks: { r1y: rank('r1y'), r3y: rank('r3y'), r5y: rank('r5y') },

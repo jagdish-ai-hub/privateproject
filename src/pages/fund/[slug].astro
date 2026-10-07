@@ -10,7 +10,8 @@ import FundTable from '../../components/FundTable.astro';
 import { NavChart } from '../../components/NavChart.tsx';
 import { fundAt, loadNav, loadScreener, peersOf } from '../../lib/data.ts';
 import { fundFaqs } from '../../lib/faq.ts';
-import { formatDay, formatNav, formatNum, formatPct, formatPlainPct, signClass } from '../../lib/format.ts';
+import { formatAum, formatDay, formatNav, formatNum, formatPct, formatPlainPct, formatTer, signClass } from '../../lib/format.ts';
+import { formatIsoDate, terGap } from '../../lib/costs.ts';
 import { breadcrumbLd, faqLd, fundLd } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
 import { clip } from '../../lib/stats.ts';
@@ -51,6 +52,10 @@ const returnsRows = [
   ['10 years', 'r10y', 'CAGR', null], ['Since launch', 'rInc', 'CAGR', null],
 ] as const;
 const adjDate = (d: number) => formatDay(d);
+const gap = terGap(f.terDetail);
+const partRows = f.terParts
+  ? ([['Base expense ratio', f.terParts.ber], ['Brokerage', f.terParts.brokerage], ['Transaction cost', f.terParts.transaction], ['Statutory levies (GST etc.)', f.terParts.levies]] as const)
+  : [];
 ---
 <BaseLayout
   title={title}
@@ -191,6 +196,48 @@ const adjDate = (d: number) => formatDay(d);
       </table>
     </div>
     <p class="mt-2 text-xs text-muted">Rolling returns look at every possible start date, so they show how consistent returns were rather than one lucky or unlucky period.</p>
+  </section>
+
+  <section class="mt-8" aria-labelledby="cost-h" data-testid="costs">
+    <h2 id="cost-h" class="mb-2 text-lg font-semibold tracking-tight">Costs and size</h2>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="overflow-auto rounded-md border border-line">
+        <table class="w-full text-sm">
+          <caption class="sr-only">Expense ratio and AUM of {f.name}</caption>
+          <tbody>
+            <tr class="border-b border-line"><td class="px-3 py-2">Total expense ratio (this plan)</td><td class="num px-3 py-2" data-testid="ter">{formatTer(f.ter)}</td></tr>
+            {gap && (
+              <>
+                <tr class="border-b border-line"><td class="px-3 py-2">Regular plan TER</td><td class="num px-3 py-2" data-testid="ter-regular">{formatTer(gap.regular)}</td></tr>
+                <tr class="border-b border-line"><td class="px-3 py-2">Direct plan TER</td><td class="num px-3 py-2" data-testid="ter-direct">{formatTer(gap.direct)}</td></tr>
+                <tr class="border-b border-line"><td class="px-3 py-2">Difference (Regular minus Direct)</td><td class="num px-3 py-2" data-testid="ter-gap">{gap.gap.toFixed(2)} pts a year</td></tr>
+              </>
+            )}
+            <tr><td class="px-3 py-2">Average AUM{f.aumPeriod && ` (${f.aumPeriod})`}</td><td class="num px-3 py-2" data-testid="aum">{formatAum(f.aum)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      {partRows.length > 0 && (
+        <div class="overflow-auto rounded-md border border-line">
+          <table class="w-full text-sm">
+            <caption class="sr-only">What the expense ratio is made of</caption>
+            <tbody>
+              {partRows.map(([label, v]) => (
+                <tr class="border-b border-line"><td class="px-3 py-2">{label}</td><td class="num px-3 py-2">{formatTer(v)}</td></tr>
+              ))}
+              <tr><td class="px-3 py-2 font-medium">Total</td><td class="num px-3 py-2 font-medium">{formatTer(f.terParts!.total)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+    <p class="mt-2 text-xs text-muted">
+      {f.ter === null
+        ? 'We could not match this scheme to an expense ratio in the data AMFI publishes, so it is left blank rather than guessed. '
+        : `Expense ratio as disclosed by the fund house to AMFI${f.terDetail ? ` on ${formatIsoDate(f.terDetail.date)}` : ''}; it is charged inside the fund and already reflected in the NAV. `}
+      AUM is the quarterly average reported by AMFI, in ₹ crore.
+      See <a class="underline" href="/learn/direct-vs-regular-mutual-funds/">Direct vs Regular</a> and <a class="underline" href="/learn/expense-ratio-and-exit-load/">expense ratio</a>.
+    </p>
   </section>
 
   <section class="mt-8" aria-labelledby="about-h">

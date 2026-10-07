@@ -1,4 +1,5 @@
-import { formatDay, formatNav, formatPct } from './format.ts';
+import { terGap, formatIsoDate } from './costs.ts';
+import { formatAum, formatDay, formatNav, formatPct, formatTer } from './format.ts';
 import type { Fund } from './data.ts';
 import type { Faq } from './seo.ts';
 
@@ -42,6 +43,25 @@ export function fundFaqs(f: Fund): Faq[] {
     out.push({
       question: `Is ${f.name} a Direct or Regular plan, Growth or IDCW?`,
       answer: `${f.name} is ${PLAN_TEXT[f.plan] ?? 'a plan whose type is not stated in the data we use.'}${OPTION_TEXT[f.option] ? ` It is ${OPTION_TEXT[f.option]}` : ''}`,
+    });
+  }
+  if (f.ter !== null) {
+    const gap = terGap(f.terDetail);
+    const planWord = f.plan === 'direct' ? 'Direct' : f.plan === 'regular' ? 'Regular' : '';
+    out.push({
+      question: `What is the expense ratio of ${f.name}?`,
+      answer: `The total expense ratio (TER) of ${f.name}${planWord ? ` (${planWord} plan)` : ''} is ${formatTer(f.ter)} a year${f.terDetail ? `, as disclosed by the fund house to AMFI on ${formatIsoDate(f.terDetail.date)}` : ''}. The TER is charged inside the fund every day and is already reflected in the NAV.${gap ? ` For the same scheme the Regular plan is ${formatTer(gap.regular)} and the Direct plan is ${formatTer(gap.direct)}, a difference of ${gap.gap.toFixed(2)} percentage points a year (about ₹${gap.perLakh.toLocaleString('en-IN')} a year on ₹1,00,000 invested).` : ''}`,
+    });
+  } else {
+    out.push({
+      question: `What is the expense ratio of ${f.name}?`,
+      answer: `We could not match ${f.name} to a total expense ratio in the data AMFI publishes, so it is shown as a dash rather than a guess. Check the scheme's factsheet or the fund house website for its current TER.`,
+    });
+  }
+  if (f.aum !== null) {
+    out.push({
+      question: `What is the AUM of ${f.name}?`,
+      answer: `The average assets under management (AUM) of ${f.name} was ${formatAum(f.aum)}${f.aumPeriod ? ` for ${f.aumPeriod}` : ''}, as reported by AMFI. Average AUM is for a whole quarter, so it can differ from the fund size on any one day.`,
     });
   }
   out.push({
