@@ -69,10 +69,10 @@ export function CompareChart({ lines }: Props) {
     <div>
       <ul class="mb-2 flex flex-wrap gap-x-5 gap-y-1 text-sm" aria-label="Legend">
         {lines.map((l, i) => (
-          <li key={l.code} class="flex items-center gap-2">
-            <svg width="22" height="8" aria-hidden="true"><line x1="0" y1="4" x2="22" y2="4" stroke={styles[i]?.color} stroke-width="2" stroke-dasharray={['', '', '5 3', '1.5 3'][i]} /></svg>
-            <span class="truncate">{l.name}</span>
-            <span class="num text-muted">{hover ? (hover.values[i] === null ? '—' : (hover.values[i] as number).toFixed(1)) : (100 * (1 + l.change)).toFixed(1)}</span>
+          <li key={l.code} class="flex max-w-full items-center gap-2">
+            <svg class="shrink-0" width="22" height="8" aria-hidden="true"><line x1="0" y1="4" x2="22" y2="4" stroke={styles[i]?.color} stroke-width="2" stroke-dasharray={['', '', '5 3', '1.5 3'][i]} /></svg>
+            <span class="min-w-0 truncate" title={l.name}>{l.name}</span>
+            <span class="num shrink-0 text-muted">{hover ? (hover.values[i] === null ? '—' : (hover.values[i] as number).toFixed(1)) : (100 * (1 + l.change)).toFixed(1)}</span>
           </li>
         ))}
       </ul>
