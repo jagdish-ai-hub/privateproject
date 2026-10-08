@@ -1,0 +1,64 @@
+---
+/**
+ * Home page hero band: what the site is, two calls to action, a few real numbers from the dataset,
+ * and quick links to compare the largest funds in popular categories. All figures come from the
+ * data build, so nothing here can go stale or be made up.
+ *
+ * Props: `schemes` (count), `fundHouses` (count), `asOf` (ISO date of the newest NAV), `pairs` (popular comparisons).
+ */
+import { formatIsoDate } from '../lib/costs.ts';
+import type { PopularPair } from '../lib/popular.ts';
+interface Props { schemes: number; fundHouses: number; asOf: string; pairs: PopularPair[] }
+const { schemes, fundHouses, asOf, pairs } = Astro.props;
+const stats = [
+  { value: schemes.toLocaleString('en-IN'), label: 'active schemes' },
+  { value: String(fundHouses), label: 'fund houses' },
+  { value: formatIsoDate(asOf), label: 'latest NAV date' },
+  { value: 'AMFI', label: 'official source for NAV, TER and AUM' },
+];
+---
+<section class="hero relative overflow-hidden border-b border-line" aria-labelledby="hero-h">
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:py-16">
+    <p class="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-3 py-1 text-xs text-muted">
+      <span class="h-1.5 w-1.5 rounded-full" style="background: var(--pos)" aria-hidden="true"></span>
+      Free · No sign-up · Official AMFI data
+    </p>
+    <h1 id="hero-h" class="mt-5 max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl">
+      Compare mutual funds in India.
+      <span class="block text-muted">Returns, risk, cost and size, side by side.</span>
+    </h1>
+    <p class="mt-5 max-w-2xl text-base text-muted sm:text-lg">
+      Filter every active scheme, line up up to four funds on one chart, and see what the numbers say in plain English.
+      Every figure is calculated from official NAV history, and every term has an (i) that explains it.
+    </p>
+    <div class="mt-7 flex flex-wrap items-center gap-3">
+      <a href="#screener" class="inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-sm font-medium text-accent-fg hover:opacity-90">Compare mutual funds <span aria-hidden="true">↓</span></a>
+      <a href="/compare/" class="inline-flex h-11 items-center rounded-md border border-line bg-bg px-5 text-sm font-medium hover:bg-subtle">Pick funds side by side</a>
+    </div>
+
+    <dl class="mt-10 grid grid-cols-2 overflow-hidden rounded-md border border-line bg-bg sm:grid-cols-4" data-testid="hero-stats">
+      {stats.map((s, i) => (
+        <div class={`px-4 py-3 ${i % 2 === 1 ? 'border-l border-line' : ''} ${i > 0 ? 'sm:border-l sm:border-line' : ''} ${i > 1 ? 'border-t border-line sm:border-t-0' : ''}`}>
+          <dd class="num text-left text-lg font-semibold tracking-tight">{s.value}</dd>
+          <dt class="text-xs text-muted">{s.label}</dt>
+        </div>
+      ))}
+    </dl>
+
+    {pairs.length > 0 && (
+      <div class="mt-8" data-testid="popular">
+        <p class="text-xs font-medium uppercase tracking-wide text-muted">Compare the two largest funds in a category</p>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          {pairs.map((p) => (
+            <li>
+              <a href={`/compare/?f=${p.a.code},${p.b.code}`} class="flex flex-col rounded-md border border-line bg-bg px-3 py-2 text-sm hover:bg-subtle">
+                <span class="text-xs text-muted">{p.category}</span>
+                <span>{p.a.name} <span class="text-muted">vs</span> {p.b.name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</section>

@@ -21,9 +21,10 @@ interface Props {
 const { title, description, path = Astro.url.pathname, jsonLd = [] } = Astro.props;
 const canonical = new URL(path, Astro.site).toString();
 const fullTitle = title.includes('Mutual Fund Compare') ? title : `${title} | Mutual Fund Compare`;
+// The first item is the main call to action: it goes straight to the screener on the home page.
 const nav = [
-  { href: '/', label: 'Screener' },
-  { href: '/compare/', label: 'Compare' },
+  { href: '/#screener', label: 'Compare Mutual Funds', cta: true },
+  { href: '/compare/', label: 'Side by side', cta: false },
   { href: '/tools/', label: 'Calculators' },
   { href: '/learn/', label: 'Learn' },
 ];
@@ -66,11 +67,12 @@ const nav = [
       <div class="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2">
         <a href="/" class="font-semibold tracking-tight">Mutual Fund Compare</a>
         <nav class="order-3 flex w-full gap-4 overflow-x-auto text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
-          {nav.map((n) => <a href={n.href} class="hover:text-fg">{n.label}</a>)}
+          {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'whitespace-nowrap py-1 hover:text-fg'}>{n.label}</a>)}
         </nav>
         <div class="ml-auto"><ThemeToggle /></div>
       </div>
     </header>
+    <slot name="hero" />
     <main class="mx-auto max-w-7xl px-4 py-6"><slot /></main>
     <footer class="border-t border-line mt-12">
       <div class="mx-auto max-w-7xl px-4 py-6 text-xs text-muted space-y-2">
