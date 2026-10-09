@@ -174,3 +174,33 @@ test('TER column: filter max_ter matches the pure function and every shown row i
     expect(parseFloat(c)).toBeLessThanOrEqual(1);
   }
 });
+
+test.describe('phone results', () => {
+  test.use({ viewport: { width: 375, height: 800 } });
+
+  test('funds show as cards with every visible number, no table and no sideways scroll', async ({ page }) => {
+    await page.goto('/');
+    await expect(showing(page)).toBeVisible();
+    await expect(page.locator('table').first()).toBeHidden();
+    const cards = page.getByTestId('result-card');
+    await expect(cards.first()).toBeVisible();
+    const d = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+    await expect(cards).toHaveCount(applyView(prepare(d), parseView('')).rows.length);
+    for (const label of ['TER', '1Y', '3Y', '5Y']) await expect(cards.first().locator('dt', { hasText: new RegExp(`^${label}`) })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  });
+
+  test('Sort by changes the order, the URL and the direction, and agrees with the pure function', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('result-card').first()).toBeVisible();
+    await page.getByLabel('Sort by').selectOption('ter');
+    await expect(page).toHaveURL(/sort=ter%3Aasc/);
+    const d = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+    const first = applyView(prepare(d), parseView('?sort=ter:asc')).rows[0];
+    await expect(page.getByTestId('result-card').first()).toContainText(d.name[first]);
+    await page.getByRole('button', { name: /Sorted low to high/ }).click();
+    await expect(page).toHaveURL(/sort=ter%3Adesc/);
+    const top = applyView(prepare(d), parseView('?sort=ter:desc')).rows[0];
+    await expect(page.getByTestId('result-card').first()).toContainText(d.name[top]);
+  });
+});

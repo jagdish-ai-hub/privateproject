@@ -11,6 +11,7 @@
  */
 import '../styles/global.css';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import Logo from '../components/Logo.astro';
 
 interface Props {
   title: string;
@@ -47,7 +48,12 @@ const nav = [
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
     <!-- Runs before paint so the saved / system theme never flashes. -->
     <script is:inline>
       (function () {
@@ -65,7 +71,7 @@ const nav = [
   <body>
     <header class="border-b border-line">
       <div class="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2">
-        <a href="/" class="font-semibold tracking-tight">Mutual Fund Compare</a>
+        <a href="/" class="flex items-center gap-2 font-semibold tracking-tight" aria-label="Mutual Fund Compare, home"><Logo size={24} /><span>Mutual Fund Compare</span></a>
         <nav class="order-3 flex w-full gap-4 overflow-x-auto text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
           {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'whitespace-nowrap py-1 hover:text-fg'}>{n.label}</a>)}
         </nav>

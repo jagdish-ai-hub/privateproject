@@ -1,0 +1,15 @@
+---
+/**
+ * Brand mark: a rupee sign with a small upward tick ("money that grows"). Drawn with the theme's
+ * colour tokens so it inverts in dark mode; the same shape is in public/favicon.svg and the PNG icons.
+ *
+ * Props: `size` in px (default 24).
+ */
+interface Props { size?: number }
+const { size = 24 } = Astro.props;
+---
+<svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true" class="shrink-0">
+  <rect width="32" height="32" rx="8" style="fill: var(--fg)" />
+  <path d="M8.5 8.5h11.5M8.5 13.5h11.5M8.5 8.5h4.25a5 5 0 0 1 0 10H8.5l8.5 7" fill="none" style="stroke: var(--bg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M20 25l3.6-4.2 3 2.6" fill="none" style="stroke: var(--pos)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

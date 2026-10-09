@@ -50,3 +50,16 @@ test('robots.txt and the sitemap index are served', async ({ request }) => {
   const sm = await request.get('/sitemap-index.xml');
   expect(sm.status()).toBe(200);
 });
+
+test('every icon the page links to is served, and the manifest points at real icons', async ({ page }) => {
+  await page.goto('/');
+  const hrefs = await page.locator('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="manifest"], meta[property="og:image"]').evaluateAll((els) => els.map((e) => e.getAttribute('href') ?? e.getAttribute('content') ?? ''));
+  expect(hrefs.length).toBeGreaterThanOrEqual(5);
+  for (const h of hrefs) {
+    const path = new URL(h, 'http://x').pathname; // og:image is absolute on the production domain; check the same path here
+    expect((await page.request.get(path)).status(), path).toBe(200);
+  }
+  const manifest = await (await page.request.get('/site.webmanifest')).json() as { icons: { src: string }[] };
+  for (const i of manifest.icons) expect((await page.request.get(i.src)).status(), i.src).toBe(200);
+  await expect(page.getByRole('link', { name: 'Mutual Fund Compare, home' }).locator('svg')).toBeVisible();
+});
