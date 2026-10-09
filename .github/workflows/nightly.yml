@@ -1,6 +1,11 @@
 name: Nightly data and deploy
 
 # AMFI publishes the day's NAVs in the evening (IST). This runs shortly after midnight IST.
+#
+# It only does anything once Cloudflare is configured (repository variable CLOUDFLARE_PROJECT plus the
+# secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, see docs/DEPLOY.md). Until then the scheduled run is
+# skipped, so it does not burn ~20 minutes of runner time every night just to fail at the deploy step.
+# A manual run (Actions tab -> Run workflow) always builds and checks the site; it deploys only if configured.
 on:
   schedule:
     - cron: "40 18 * * *"
@@ -12,8 +17,11 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || vars.CLOUDFLARE_PROJECT != ''
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      CF_READY: ${{ vars.CLOUDFLARE_PROJECT != '' && secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,11 +30,13 @@ jobs:
           cache: npm
       - run: npm ci
 
-      # The per-scheme NAV history cache. The first run downloads everything (~10 minutes);
-      # later runs only append the newest day, with no API call per scheme. Each run saves a new
-      # cache entry and restores the most recent one.
-      - name: Restore NAV history cache
-        uses: actions/cache@v4
+      # The per-scheme NAV history plus the TER and AUM caches. The first run downloads everything (~20 minutes);
+      # later runs only append the newest day. Restore and save are separate steps so the cache is saved even
+      # when a later step fails (a single actions/cache step saves only if the whole job succeeds, which made a
+      # failing run redo the 20-minute download every night).
+      - name: Restore data cache
+        id: cache
+        uses: actions/cache/restore@v4
         with:
           path: data/cache
           key: nav-cache-${{ github.run_id }}
@@ -34,6 +44,13 @@ jobs:
 
       - name: Build data (AMFI + MFapi)
         run: npm run data:build
+
+      - name: Save data cache
+        if: always() && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: data/cache
+          key: nav-cache-${{ github.run_id }}
 
       - name: Build the site
         run: npm run build
@@ -46,8 +63,14 @@ jobs:
         run: node scripts/check-site.mjs
 
       - name: Deploy to Cloudflare Pages
+        if: env.CF_READY == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT }}
+
+      - name: Note when deploy was skipped
+        if: env.CF_READY != 'true'
+        run: |
+          echo "::notice::Built and checked the site, but did not deploy. Cloudflare is not configured (see docs/DEPLOY.md)."

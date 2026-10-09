@@ -26,6 +26,8 @@ test('the hero button and the nav item both take you straight to the screener', 
 
 test('a popular comparison opens the compare page with both funds already chosen', async ({ page }) => {
   await page.goto('/');
+  // The block only exists when a category has two Direct Growth funds with a known size; a small CI sample may have none.
+  test.skip((await page.getByTestId('popular').count()) === 0, 'no popular comparisons in this dataset');
   const chip = page.getByTestId('popular').getByRole('link').first();
   const href = (await chip.getAttribute('href')) as string;
   expect(href).toMatch(/^\/compare\/\?f=\d+,\d+$/);

@@ -6,7 +6,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 // SITE_URL is set in CI / hosting; the placeholder keeps canonical URLs valid locally.
-const site = process.env.SITE_URL ?? 'https://mf-screener.example.com';
+// `||`, not `??`: GitHub Actions passes an unset variable as an empty string, which is not nullish and is not a valid URL.
+const site = process.env.SITE_URL || 'https://mf-screener.example.com';
 
 export default defineConfig({
   trailingSlash: 'always',

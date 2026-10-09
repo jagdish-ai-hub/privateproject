@@ -21,8 +21,25 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
+      # Without this cache every push re-crawls AMFI's expense-ratio pages for all fund houses (about 12 minutes).
+      # With it, TER is refreshed only when the cache is older than 7 days. Saved even if a later step fails.
+      - name: Restore data cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/cache
+          key: ci-data-${{ github.run_id }}
+          restore-keys: |
+            ci-data-
+            nav-cache-
       - name: Build a small real dataset (400 funds, polite to the free API)
         run: npm run data:build -- --limit=400 --rps=8
+      - name: Save data cache
+        if: always() && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: data/cache
+          key: ci-data-${{ github.run_id }}
       - name: Build the site (30 fund pages) and check links / SEO basics
         run: |
           MAX_FUND_PAGES=30 npm run build
