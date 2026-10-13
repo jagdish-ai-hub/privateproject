@@ -1,7 +1,7 @@
 ---
 title: "Privacy policy"
-description: "Mutual Fund Compare has no accounts and collects no personal data. What is stored in your browser, what the host may log, and what changes if ads are added."
-dateModified: "2026-10-02"
+description: "No accounts and no personal details asked. What is stored in your browser, what the host and Microsoft Clarity analytics record, and what changes if ads are added."
+dateModified: "2026-10-13"
 ---
 **Summary:** there is nothing to sign up for, and the site does not ask for or store your name, email, phone number or financial details.
 
@@ -19,7 +19,7 @@ Like any website, the hosting provider receives your IP address, browser type an
 
 ## Analytics and cookies
 
-The site does not currently use analytics or advertising cookies. If this changes, this page will be updated first and a consent notice will be shown where the law requires it.
+The site uses Microsoft Clarity, a free analytics service from Microsoft, to understand how pages are used: where visitors click and scroll, which pages they open and where they get stuck. Clarity sets cookies and records anonymised interaction data (clicks, scrolling, mouse movement, device and browser type, approximate location and the pages visited). It masks what you type into form fields, and we do not send it your name, email or financial details because the site never asks for them. The data is processed by Microsoft under the [Microsoft Privacy Statement](https://privacy.microsoft.com/en-us/privacystatement). The site does not currently use advertising cookies. If that changes, this page will be updated first and a consent notice will be shown where the law requires it.
 
 ## Advertising
 
@@ -27,7 +27,7 @@ The site does not currently show advertising. If it does in future, advertising 
 
 ## Third parties
 
-Fund data is fetched from public sources (AMFI and MFapi.in) when the site's data is prepared. Your browser does not contact these services when you use the site. Fonts are served from this site, not from a third party.
+Fund data is fetched from public sources (AMFI and MFapi.in) when the site's data is prepared. Your browser does not contact these services when you use the site. Fonts are served from this site, not from a third party. The one exception is Microsoft Clarity analytics, described above, which your browser contacts while you use the site.
 
 ## Your rights and contact
 

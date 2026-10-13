@@ -58,6 +58,7 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL }}
           PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL }}
           PUBLIC_ADSENSE_CLIENT: ${{ vars.PUBLIC_ADSENSE_CLIENT }}
+          PUBLIC_CLARITY_ID: ${{ vars.PUBLIC_CLARITY_ID }}
 
       - name: Check links and SEO basics
         run: node scripts/check-site.mjs

@@ -23,6 +23,9 @@ interface Props {
   lang?: 'en' | 'hi';
   alternates?: { lang: 'en' | 'hi'; path: string }[];
 }
+// Only a plausible Clarity project id (letters and digits) turns the script on.
+const clarityRaw = import.meta.env.PUBLIC_CLARITY_ID;
+const clarityId = typeof clarityRaw === 'string' && /^[a-z0-9]{6,20}$/i.test(clarityRaw) ? clarityRaw : '';
 const { title, description, path = Astro.url.pathname, jsonLd = [], lang = 'en', alternates = [] } = Astro.props;
 const hi = lang === 'hi';
 const other = alternates.find((a) => a.lang !== lang);
@@ -82,6 +85,18 @@ const nav = hi
     </script>
     {import.meta.env.PUBLIC_ADSENSE_CLIENT && (
       <script is:inline async crossorigin="anonymous" src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${import.meta.env.PUBLIC_ADSENSE_CLIENT}`}></script>
+    )}
+    {clarityId && (
+      <script is:inline define:vars={{ clarityId }}>
+        // Microsoft Clarity (free heatmaps and session replays). Loaded after the page has finished loading so it never delays first paint.
+        addEventListener('load', function () {
+          (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+            t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+          })(window, document, 'clarity', 'script', clarityId);
+        });
+      </script>
     )}
     {jsonLd.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
   </head>

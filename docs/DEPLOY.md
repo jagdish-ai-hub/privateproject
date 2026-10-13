@@ -44,6 +44,13 @@ know where data comes from; everything downstream reads `screener.json` and the 
   update it to match what you actually run.
 - Some weeks of indexed traffic.
 
+## Turning on Microsoft Clarity
+
+1. Create a free project at clarity.microsoft.com and copy the project id (the short code in the install snippet).
+2. Set the repository variable `PUBLIC_CLARITY_ID` to it. Without it, no analytics script is on the page.
+3. The script loads after the page `load` event, so it does not affect first paint. The privacy page already describes it.
+4. Visitors from the EEA / UK need a consent choice before analytics runs; add the consent banner (see below) before you target them.
+
 ## Turning ads on
 
 1. Set the variable `PUBLIC_ADSENSE_CLIENT` (for example `ca-pub-1234567890123456`).
