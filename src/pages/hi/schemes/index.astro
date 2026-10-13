@@ -1,0 +1,18 @@
+---
+/** Government savings schemes hub (hi). */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import SchemesHub from '../../../components/schemes/SchemesHub.astro';
+import { SCHEMES_HI as PAGES, SCHEME_SUMMARY_HI as SUMMARY } from '../../../lib/schemeContent.hi.ts';
+import { breadcrumbLd } from '../../../lib/seo.ts';
+import { SMALL_SAVINGS } from '../../../data/small-savings.ts';
+
+const path = '/hi/schemes/';
+const title = 'सरकारी बचत योजना कैलकुलेटर और ब्याज दरें: PPF, SSY, पोस्ट ऑफिस';
+const description = `${SMALL_SAVINGS.period.labelHi} की PPF, सुकन्या समृद्धि, SCSS, NSC, KVP, MIS, RD और पोस्ट ऑफिस FD की ब्याज दरें, सरकारी अधिसूचना के साथ, और हर योजना का मुफ़्त कैलकुलेटर।`;
+---
+<BaseLayout title={title} description={description} path={path} lang="hi" alternates={[{ lang: 'en', path: '/schemes/' }, { lang: 'hi', path: '/hi/schemes/' }]}
+  jsonLd={[breadcrumbLd([{ name: 'होम', url: new URL('/', Astro.site).toString() }, { name: 'सरकारी योजनाएँ', url: new URL(path, Astro.site).toString() }])]}>
+  <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'सरकारी योजनाएँ' }]} />
+  <SchemesHub lang="hi" pages={PAGES} summary={SUMMARY} />
+</BaseLayout>

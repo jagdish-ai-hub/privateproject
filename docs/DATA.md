@@ -42,6 +42,23 @@ if a call fails the previous cached values are used and flagged stale; the build
   AUM matched 8,493 of 8,650 schemes. `report.json` lists the numbers by asset class, any unmatched fund
   house, samples of unmatched names and sanity violations (TER outside 0 to 5%, Regular below Direct).
 
+## Government scheme rates (`src/data/small-savings.ts`)
+
+The `/schemes/` and `/hi/schemes/` pages do not use AMFI data. Their rates are typed by hand from the
+Ministry of Finance notice (Department of Economic Affairs, Budget Division) and live in one file,
+`src/data/small-savings.ts`, together with the quarter they apply to, the notice number and date,
+the date we checked, and the sources.
+
+**Every quarter** (the Ministry announces rates near the end of March, June, September and December):
+
+1. Find the new notice (DEA Budget Division page, or two independent copies if the official site is unreachable).
+2. Update `period`, `notice`, `checked`, `sources`, `rates` and `kvpMonths` in `small-savings.ts`.
+3. Run `npx vitest run tests/schemes.test.ts` (rate sanity tests), then rebuild.
+
+If the date passes `period.to`, the pages show a "rates may have changed" warning automatically
+(`ratesMayBeStale`). The maths is in `src/lib/schemes.ts`; the convention each scheme uses is shown
+on its page and tested against published worked figures.
+
 ## Pipeline (`npm run data:build`)
 
 `scripts/build-data.ts`, with the logic in `scripts/pipeline/` and the maths in `src/lib/calc/`.

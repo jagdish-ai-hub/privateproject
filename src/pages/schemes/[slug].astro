@@ -1,0 +1,30 @@
+---
+/** One Government savings scheme calculator page (en). */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SchemePageBody from '../../components/schemes/SchemePageBody.astro';
+import { SCHEMES_EN as PAGES, SCHEME_SUMMARY_EN as SUMMARY } from '../../lib/schemeContent.ts';
+import { breadcrumbLd, calculatorLd, faqLd } from '../../lib/seo.ts';
+
+export function getStaticPaths() {
+  return PAGES.map((p) => ({ params: { slug: p.slug }, props: { slug: p.slug } }));
+}
+const { slug } = Astro.props;
+const page = PAGES.find((p) => p.slug === slug)!;
+const path = `/schemes/${page.slug}/`;
+const url = new URL(path, Astro.site).toString();
+---
+<BaseLayout title={page.title} description={page.description} path={path} lang="en"
+  alternates={[{ lang: 'en', path: `/schemes/${page.slug}/` }, { lang: 'hi', path: `/hi/schemes/${page.slug}/` }]}
+  jsonLd={[
+    breadcrumbLd([
+      { name: 'Home', url: new URL('/', Astro.site).toString() },
+      { name: 'Govt schemes', url: new URL('/schemes/', Astro.site).toString() },
+      { name: page.name, url },
+    ]),
+    calculatorLd(page.name, url, page.description),
+    faqLd(page.faqs),
+  ]}>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Govt schemes', href: '/schemes/' }, { name: page.name }]} />
+  <SchemePageBody page={page} lang="en" others={PAGES.filter((p) => p.slug !== page.slug).map((p) => ({ slug: p.slug, name: p.name }))} />
+</BaseLayout>

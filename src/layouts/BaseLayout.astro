@@ -8,6 +8,8 @@
  * - description: meta description
  * - path: canonical path, e.g. "/learn/direct-vs-regular"
  * - jsonLd: optional array of schema.org objects emitted as JSON-LD
+ * - lang: 'en' (default) or 'hi'; sets <html lang>, Open Graph locale and the nav / footer language
+ * - alternates: the same page in each language, emitted as hreflang links and shown as a language switch
  */
 import '../styles/global.css';
 import ThemeToggle from '../components/ThemeToggle.astro';
@@ -18,32 +20,47 @@ interface Props {
   description: string;
   path?: string;
   jsonLd?: Record<string, unknown>[];
+  lang?: 'en' | 'hi';
+  alternates?: { lang: 'en' | 'hi'; path: string }[];
 }
-const { title, description, path = Astro.url.pathname, jsonLd = [] } = Astro.props;
+const { title, description, path = Astro.url.pathname, jsonLd = [], lang = 'en', alternates = [] } = Astro.props;
+const hi = lang === 'hi';
+const other = alternates.find((a) => a.lang !== lang);
 const canonical = new URL(path, Astro.site).toString();
 const fullTitle = title.includes('Mutual Fund Compare') ? title : `${title} | Mutual Fund Compare`;
 // The first item is the main call to action: it goes straight to the screener on the home page.
-const nav = [
-  { href: '/#screener', label: 'Compare Mutual Funds', cta: true },
-  { href: '/compare/', label: 'Side by side', cta: false },
-  { href: '/tools/', label: 'Calculators' },
-  { href: '/learn/', label: 'Learn' },
-];
+const nav = hi
+  ? [
+      { href: '/#screener', label: 'म्यूचुअल फंड तुलना', cta: true },
+      { href: '/compare/', label: 'आमने-सामने', cta: false },
+      { href: '/hi/schemes/', label: 'सरकारी योजनाएँ', cta: false },
+      { href: '/tools/', label: 'कैलकुलेटर', cta: false },
+      { href: '/learn/', label: 'सीखें', cta: false },
+    ]
+  : [
+      { href: '/#screener', label: 'Compare Mutual Funds', cta: true },
+      { href: '/compare/', label: 'Side by side', cta: false },
+      { href: '/schemes/', label: 'Govt schemes', cta: false },
+      { href: '/tools/', label: 'Calculators', cta: false },
+      { href: '/learn/', label: 'Learn', cta: false },
+    ];
 ---
 <!doctype html>
-<html lang="en-IN" data-theme="light">
+<html lang={hi ? 'hi-IN' : 'en-IN'} data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang === 'hi' ? 'hi-IN' : 'en-IN'} href={new URL(a.path, Astro.site).toString()} />)}
+    {alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={new URL((alternates.find((a) => a.lang === 'en') ?? alternates[0]).path, Astro.site).toString()} />}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="Mutual Fund Compare" />
-    <meta property="og:locale" content="en_IN" />
+    <meta property="og:locale" content={hi ? 'hi_IN' : 'en_IN'} />
     <meta property="og:image" content={new URL('/og.png', Astro.site).toString()} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -75,15 +92,27 @@ const nav = [
         <nav class="order-3 flex w-full gap-4 overflow-x-auto text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
           {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'whitespace-nowrap py-1 hover:text-fg'}>{n.label}</a>)}
         </nav>
-        <div class="ml-auto"><ThemeToggle /></div>
+        <div class="ml-auto flex items-center gap-3">
+          {other && <a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="rounded-md border border-line px-2.5 py-1 text-sm hover:bg-subtle" data-testid="lang-switch">{other.lang === 'hi' ? 'हिंदी' : 'English'}</a>}
+          <ThemeToggle />
+        </div>
       </div>
     </header>
     <slot name="hero" />
     <main class="mx-auto max-w-7xl px-4 py-6"><slot /></main>
     <footer class="border-t border-line mt-12">
       <div class="mx-auto max-w-7xl px-4 py-6 text-xs text-muted space-y-2">
-        <p>Mutual fund investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future returns.</p>
-        <p>Educational information only; not investment advice. Data: NAV from AMFI via <a class="underline" href="https://www.mfapi.in">MFapi.in</a>; expense ratio and AUM from AMFI.</p>
+        {hi ? (
+          <>
+            <p>म्यूचुअल फंड निवेश बाज़ार जोखिमों के अधीन है। योजना से जुड़े सभी दस्तावेज़ ध्यान से पढ़ें। पिछला प्रदर्शन भविष्य के रिटर्न का संकेत नहीं है।</p>
+            <p>यह जानकारी सिर्फ़ शिक्षा के लिए है, निवेश सलाह नहीं। सरकारी योजनाओं की दरें वित्त मंत्रालय की अधिसूचना से ली गई हैं।</p>
+          </>
+        ) : (
+          <>
+            <p>Mutual fund investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future returns.</p>
+            <p>Educational information only; not investment advice. Data: NAV from AMFI via <a class="underline" href="https://www.mfapi.in">MFapi.in</a>; expense ratio and AUM from AMFI; Government scheme rates from Ministry of Finance notices.</p>
+          </>
+        )}
         <p><a class="underline" href="/methodology/">Methodology</a> · <a class="underline" href="/about/">About</a> · <a class="underline" href="/privacy/">Privacy</a> · <a class="underline" href="/disclaimer/">Disclaimer</a></p>
       </div>
     </footer>

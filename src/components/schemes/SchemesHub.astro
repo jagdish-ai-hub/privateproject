@@ -1,0 +1,46 @@
+---
+/**
+ * Government savings schemes hub, shared by /schemes/ and /hi/schemes/: the notified rate of every
+ * scheme in one table, with how interest is paid, the term and a link to each calculator.
+ */
+import { SMALL_SAVINGS, ratesMayBeStale } from '../../data/small-savings.ts';
+import type { SchemeKind, SchemePage } from '../../lib/schemeContent.ts';
+
+interface Props { lang: 'en' | 'hi'; pages: SchemePage[]; summary: Record<SchemeKind, { rate: string; how: string; term: string }> }
+const { lang, pages, summary } = Astro.props;
+const hi = lang === 'hi';
+const base = hi ? '/hi/schemes/' : '/schemes/';
+const L = hi
+  ? { h1: 'सरकारी बचत योजना कैलकुलेटर', intro: 'PPF, सुकन्या समृद्धि, SCSS, NSC, KVP और पोस्ट ऑफिस की योजनाओं की मौजूदा ब्याज दरें और कैलकुलेटर। हर दर वित्त मंत्रालय की अधिसूचना से ली गई है और हर कैलकुलेटर साफ़ बताता है कि ब्याज कैसे जुड़ता है।', scheme: 'योजना', rate: 'ब्याज दर', how: 'ब्याज कैसे', term: 'अवधि', open: 'कैलकुलेटर खोलें', caption: 'सरकारी बचत योजनाओं की मौजूदा ब्याज दरें', notice: 'अधिसूचना', stale: 'यह तिमाही ख़त्म हो चुकी है, इसलिए दरें बदल गई हो सकती हैं।' }
+  : { h1: 'Government savings scheme calculators', intro: 'Current interest rates and calculators for PPF, Sukanya Samriddhi, SCSS, NSC, KVP and Post Office schemes. Every rate is taken from the Finance Ministry notice, and every calculator shows exactly how the interest is worked out.', scheme: 'Scheme', rate: 'Rate (p.a.)', how: 'How interest works', term: 'Term', open: 'Open calculator', caption: 'Current interest rates of Government small savings schemes', notice: 'Notice', stale: 'This quarter has ended, so the rates may have changed.' };
+const stale = ratesMayBeStale(new Date().toISOString().slice(0, 10));
+---
+<h1 class="text-2xl font-semibold tracking-tight">{L.h1}</h1>
+<p class="mt-2 max-w-3xl text-sm text-muted">{L.intro}</p>
+<p class="mt-3 text-sm"><strong class="font-medium">{hi ? SMALL_SAVINGS.period.labelHi : SMALL_SAVINGS.period.label}</strong> · {L.notice} {SMALL_SAVINGS.notice.number}, {SMALL_SAVINGS.notice.date.split('-').reverse().join('.')}</p>
+{stale && <p class="mt-2 text-sm font-medium" style="color: var(--neg)" role="status">{L.stale}</p>}
+
+<div class="mt-5 overflow-auto rounded-md border border-line">
+  <table class="w-full text-sm" data-testid="rates-table">
+    <caption class="sr-only">{L.caption}</caption>
+    <thead><tr class="border-b border-line text-xs text-muted">
+      <th scope="col" class="px-3 py-2.5 text-left font-medium">{L.scheme}</th>
+      <th scope="col" class="px-3 py-2.5 text-right font-medium">{L.rate}</th>
+      <th scope="col" class="hidden px-3 py-2.5 text-left font-medium md:table-cell">{L.how}</th>
+      <th scope="col" class="hidden px-3 py-2.5 text-left font-medium md:table-cell">{L.term}</th>
+    </tr></thead>
+    <tbody>
+      {pages.map((p) => (
+        <tr class="border-b border-line last:border-0 hover:bg-subtle">
+          <td class="px-3 py-2.5">
+            <a class="font-medium hover:underline" href={`${base}${p.slug}/`}>{p.h1}</a>
+            <span class="mt-0.5 block text-xs text-muted md:hidden">{summary[p.kind].how} · {summary[p.kind].term}</span>
+          </td>
+          <td class="num whitespace-nowrap px-3 py-2.5 text-right">{summary[p.kind].rate}</td>
+          <td class="hidden px-3 py-2.5 text-muted md:table-cell">{summary[p.kind].how}</td>
+          <td class="hidden whitespace-nowrap px-3 py-2.5 text-muted md:table-cell">{summary[p.kind].term}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

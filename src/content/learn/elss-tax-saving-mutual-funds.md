@@ -4,7 +4,7 @@ description: "ELSS funds are equity funds with a 3-year lock-in that qualify for
 group: "Fund types"
 order: 12
 datePublished: "2026-10-02"
-dateModified: "2026-10-02"
+dateModified: "2026-10-12"
 related: ["mutual-fund-taxation-india", "mutual-fund-categories-india", "what-is-sip"]
 faqs:
   - question: "What is an ELSS fund?"
@@ -22,7 +22,7 @@ faqs:
 
 - **Equity exposure**: at least 80% of the money is invested in equities.
 - **Lock-in**: each investment is locked for three years from the date of purchase. This is the shortest lock-in among tax-saving investments in India.
-- **Tax deduction**: investments of up to ₹1.5 lakh a year can be deducted from taxable income, but only under the **old tax regime**. The new regime does not allow this deduction. Tax rules are rewritten from time to time, so check the current position before relying on it.
+- **Tax deduction**: investments of up to ₹1.5 lakh a year can be deducted from taxable income under Section 123 of the Income-tax Act, 2025 (formerly Section 80C; the new Act applies from 1 April 2026), but only under the **old tax regime**. The new regime does not allow this deduction. Tax rules are rewritten from time to time, so check the current position before relying on it.
 - **Tax on gains**: when you redeem after the lock-in, gains are taxed like those of other equity funds. See [mutual fund taxation](/learn/mutual-fund-taxation-india/).
 
 ## How a SIP in ELSS works
