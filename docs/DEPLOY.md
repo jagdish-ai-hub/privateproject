@@ -49,7 +49,7 @@ know where data comes from; everything downstream reads `screener.json` and the 
 1. Create a free project at clarity.microsoft.com and copy the project id (the short code in the install snippet).
 2. Set the repository variable `PUBLIC_CLARITY_ID` to it. Without it, no analytics script is on the page.
 3. The script loads after the page `load` event, so it does not affect first paint. The privacy page already describes it.
-4. Visitors from the EEA / UK need a consent choice before analytics runs; add the consent banner (see below) before you target them.
+4. The site targets India only, so there is no consent banner. If you ever target the EEA / UK, add one before analytics and ads run.
 
 ## Turning ads on
 
@@ -57,8 +57,9 @@ know where data comes from; everything downstream reads `screener.json` and the 
 2. Add your slot ids where `AdSlot` is used (fund pages and guides) or add more placements. The component
    reserves a fixed minimum height so ads never shift the layout.
 3. Add `public/ads.txt` with the line Google gives you.
-4. Add a consent banner where required (EEA / UK visitors) **before** enabling, and update
-   `src/content/pages/privacy.md`.
+4. Update `src/content/pages/privacy.md` to match the ads you run. No consent banner is planned because the
+   site targets India only; add one first if that changes. Some EEA / UK visitors may still arrive, and Google
+   limits the ads it shows them without a consent tool; this does not affect Indian visitors.
 5. Keep the wording neutral on ranked lists ("sorted by 3-year return"), as it is now, and keep the
    disclaimer in the footer.
 
