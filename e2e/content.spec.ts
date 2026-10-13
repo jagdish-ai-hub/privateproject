@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-test('learn index lists every guide in four groups, and each link works', async ({ page }) => {
+test('learn index lists every guide in six groups, and each link works', async ({ page }) => {
   await page.goto('/learn/');
-  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(4);
+  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(6);
   const links = page.locator('ul.grid li a');
-  expect(await links.count()).toBeGreaterThanOrEqual(15);
+  expect(await links.count()).toBeGreaterThanOrEqual(21);
   const first = await links.first().getAttribute('href');
   await page.goto(first as string);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

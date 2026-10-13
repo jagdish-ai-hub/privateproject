@@ -5,7 +5,7 @@ group: "Fund types"
 order: 12
 datePublished: "2026-10-02"
 dateModified: "2026-10-12"
-related: ["mutual-fund-taxation-india", "mutual-fund-categories-india", "what-is-sip"]
+related: ["mutual-fund-taxation-india", "mutual-fund-categories-india", "what-is-sip", "ppf-vs-mutual-funds"]
 faqs:
   - question: "What is an ELSS fund?"
     answer: "An Equity Linked Savings Scheme is a diversified equity mutual fund that invests at least 80% in equities and has a compulsory three-year lock-in. Investments qualify for a deduction from taxable income under the old tax regime, up to a yearly limit."

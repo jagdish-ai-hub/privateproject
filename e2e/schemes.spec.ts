@@ -77,3 +77,21 @@ test('scheme pages fit a phone without sideways scrolling', async ({ page }) => 
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
 });
+
+test('English scheme pages link to their guides, and the guides link back to the calculators', async ({ page }) => {
+  await page.goto('/schemes/ppf-calculator/');
+  await expect(page.getByTestId('scheme-guides').getByRole('link', { name: 'PPF explained' })).toBeVisible();
+  await page.getByTestId('scheme-guides').getByRole('link', { name: 'PPF explained' }).click();
+  await expect(page).toHaveURL(/\/learn\/ppf-explained\/$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('PPF explained');
+  await expect(page.locator('main a[href="/schemes/ppf-calculator/"]').first()).toBeVisible();
+  await page.goto('/hi/schemes/ppf-calculator/');
+  await expect(page.getByTestId('scheme-guides')).toHaveCount(0);
+});
+
+test('the rent vs buy page links to its guide', async ({ page }) => {
+  await page.goto('/tools/rent-vs-buy-calculator/');
+  await page.getByTestId('tool-guide').getByRole('link').click();
+  await expect(page).toHaveURL(/\/learn\/rent-vs-buy-house-india\/$/);
+  await expect(page.locator('main a[href="/tools/rent-vs-buy-calculator/"]').first()).toBeVisible();
+});

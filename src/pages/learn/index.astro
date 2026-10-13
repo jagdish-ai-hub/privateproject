@@ -5,17 +5,17 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import { breadcrumbLd } from '../../lib/seo.ts';
 
 const guides = (await getCollection('learn')).sort((a, b) => a.data.order - b.data.order);
-const groups = ['Basics', 'Returns and risk', 'Fund types', 'Tax'] as const;
+const groups = ['Basics', 'Returns and risk', 'Fund types', 'Tax', 'Government schemes', 'Planning'] as const;
 ---
 <BaseLayout
-  title="Learn Mutual Funds: Guides for Indian Investors"
-  description="Plain-language guides to mutual funds in India: Direct vs Regular, Growth vs IDCW, NAV, expense ratio, SIP, CAGR vs XIRR, risk measures, categories, ELSS, debt funds and tax."
+  title="Learn: Mutual Funds, PPF, Savings Schemes, Rent vs Buy"
+  description="Plain-language guides for Indian savers: mutual funds, SIP, expense ratio and tax, plus PPF, Sukanya Samriddhi, Post Office schemes and renting vs buying a home."
   path="/learn/"
   jsonLd={[breadcrumbLd([{ name: 'Home', url: new URL('/', Astro.site).toString() }, { name: 'Learn', url: new URL('/learn/', Astro.site).toString() }])]}
 >
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Learn' }]} />
-  <h1 class="text-2xl font-semibold tracking-tight">Learn mutual funds</h1>
-  <p class="mt-2 max-w-3xl text-sm text-muted">Short, plain-language guides on the terms and numbers you meet when choosing a mutual fund in India.</p>
+  <h1 class="text-2xl font-semibold tracking-tight">Learn</h1>
+  <p class="mt-2 max-w-3xl text-sm text-muted">Short, plain-language guides on the terms and numbers you meet when you save and invest in India.</p>
   {groups.map((g) => (
     <section class="mt-8" aria-labelledby={`g-${g}`}>
       <h2 id={`g-${g}`} class="mb-3 text-lg font-semibold tracking-tight">{g}</h2>

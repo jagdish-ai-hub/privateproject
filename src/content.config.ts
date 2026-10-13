@@ -11,7 +11,7 @@ const learn = defineCollection({
     title: z.string().max(70),
     description: z.string().max(170),
     /** Section on the index page. */
-    group: z.enum(['Basics', 'Returns and risk', 'Fund types', 'Tax']),
+    group: z.enum(['Basics', 'Returns and risk', 'Fund types', 'Tax', 'Government schemes', 'Planning']),
     /** Sort order within the index. */
     order: z.number(),
     /** ISO dates; `dateModified` is when the facts were last checked. */
