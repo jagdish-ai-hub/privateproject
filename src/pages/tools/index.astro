@@ -4,12 +4,12 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import { TOOLS } from '../../lib/tools.ts';
 ---
 <BaseLayout
-  title="Mutual Fund Calculators: SIP, Lumpsum, SWP, CAGR"
-  description="Free mutual fund calculators: SIP, step-up SIP, lumpsum, goal SIP, SWP and CAGR. No sign-up."
+  title="Investment Calculators: SIP, SWP, CAGR, Rent vs Buy"
+  description="Free calculators: SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR and rent vs buy. Every formula shown, no sign-up."
   path="/tools/"
 >
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Calculators' }]} />
-  <h1 class="text-2xl font-semibold tracking-tight">Mutual fund calculators</h1>
+  <h1 class="text-2xl font-semibold tracking-tight">Calculators</h1>
   <p class="mt-2 max-w-3xl text-sm text-muted">Plan investments with simple, transparent calculators. Every page shows the formula it uses.</p>
   <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {TOOLS.map((t) => (

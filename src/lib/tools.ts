@@ -1,11 +1,12 @@
 import { cagrBetween, lumpsumProjection, requiredSip, sipProjection, swpProjection } from './calculators.ts';
 import { formatPct, formatRupees } from './format.ts';
+import { RENT_VS_BUY_DEFAULTS, rentVsBuy } from './rentVsBuy.ts';
 import type { Faq } from './seo.ts';
 
 /** Content and metadata of one calculator page. */
 export interface Tool {
   slug: string;
-  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr';
+  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy';
   /** Short name, used in lists and breadcrumbs. */
   name: string;
   title: string;
@@ -143,6 +144,36 @@ export const TOOLS: Tool[] = [
       { question: 'What is the difference between CAGR and absolute return?', answer: 'Absolute return is the total percentage change over the whole period, with no regard for how long it took. CAGR converts that to a yearly rate, so a 100% gain over 3 years and over 10 years can be compared fairly.' },
       { question: 'When should I use XIRR instead of CAGR?', answer: 'Use CAGR for a single investment with one start and one end value. Use XIRR when money goes in or out at different dates, for example a monthly SIP.' },
       { question: 'Can CAGR be negative?', answer: 'Yes. If the ending value is lower than the starting value, the CAGR is negative.' },
+    ],
+  },
+  {
+    slug: 'rent-vs-buy-calculator', kind: 'rentbuy', name: 'Rent vs buy calculator',
+    title: 'Rent vs Buy Calculator India: Should You Buy a House?',
+    h1: 'Rent vs buy calculator',
+    description: 'Free rent vs buy calculator for India. Compare buying a home with a loan against renting and investing the difference, with EMI, stamp duty, rent growth, tax and the rent at which buying breaks even.',
+    intro: 'Is it cheaper to buy a home or to keep renting and invest the money? Enter the home price, your loan and the rent you pay today. The calculator compares what you would own after the years you choose, and shows the rent at which buying would break even.',
+    formula: 'Buyer = home value × (1 − selling cost) − loan left − tax on gain + savings;  Renter = investments − tax on gain.  Each month, whoever pays less (EMI + upkeep, or rent) invests the difference.',
+    how: [
+      'The comparison is fair because both people spend exactly the same money. On day one the buyer pays the down payment and the stamp duty and registration, and the renter invests that same amount. Every month the buyer pays the EMI plus maintenance and property tax, and the renter pays rent. Whoever pays less invests the difference, so the total spent is always equal.',
+      'At the end the buyer sells the home, pays the selling costs and the tax on the gain, and repays any loan still left. The renter cashes in the investments and pays the tax on their gain. The two final amounts are what each person owns, and the difference is the answer.',
+      'The EMI uses the standard formula with the yearly loan rate divided by 12. The home price and the investments grow at yearly rates, and rent rises once a year. If you stay longer than the loan tenure, the EMI stops when the loan ends. Interest deductions on a home loan are not included, so the result is a little pessimistic for a buyer who can claim them.',
+      'Rent at which buying breaks even is found by re-running the comparison with different starting rents until the two results are level. If the rent you pay is above it, buying comes out ahead on these assumptions; below it, renting does. Yearly rent as a percentage of the price (the rental yield) is the number that moves this answer most.',
+      'Everything depends on the assumptions. Change the home price growth, the investment return and the number of years to see how sensitive the result is. It is a projection from the numbers you enter, not a forecast, and it cannot value things like stability, freedom to move, or the risk of having most of your money in one property.',
+    ],
+    example: () => {
+      const d = RENT_VS_BUY_DEFAULTS;
+      const r = rentVsBuy(d);
+      const who = r.winner === 'buy' ? 'buying' : 'renting';
+      return `A ${formatRupees(d.price)} home with ${d.downPaymentPct * 100}% down and a ${d.loanYears}-year loan at ${(d.loanRate * 100).toFixed(2)}% has an EMI of about ${formatRupees(Math.round(r.emi))}. A similar home rents for ${formatRupees(d.monthlyRent)} a month (a ${(r.grossYield * 100).toFixed(0)}% yearly yield), rising ${d.rentGrowth * 100}% a year. If prices grow ${d.appreciation * 100}% a year and investments return ${d.investReturn * 100}%, then after ${d.horizonYears} years the buyer owns about ${formatRupees(Math.round(r.buyerNetWorth))} and the renter about ${formatRupees(Math.round(r.renterNetWorth))}, so ${who} comes out ahead on these assumptions.`;
+    },
+    faqs: [
+      { question: 'Is it better to rent or buy a house in India?', answer: 'There is no answer that fits everyone. Buying tends to win when rent is high compared with the price, when the home’s price grows faster than your investments would, and when you stay for many years. Renting tends to win when the rent is a small share of the price, as it often is in Indian cities, and when you would invest the saved money well. Enter your own numbers to see which side your situation falls on.' },
+      { question: 'What is rental yield and why does it matter?', answer: 'Rental yield is the yearly rent divided by the price of the home. A low yield means you pay a lot to own a home compared with what it would cost to rent, so buying needs strong price growth to catch up. The calculator shows your yield and the monthly rent at which buying would break even.' },
+      { question: 'Why do you add the money the renter saves to investments?', answer: 'Because a fair comparison needs both people to spend the same. A buyer usually pays more each month in EMI and upkeep than a tenant pays in rent, and also puts money down on day one. The tenant can invest that money. Ignoring it makes buying look better than it is.' },
+      { question: 'Does this include the tax benefit on a home loan?', answer: 'No. Deductions on home loan interest and principal depend on your tax regime, the limits that apply and whether the home is let out, so they are left out. They would improve the buyer’s result somewhat if you can claim them.' },
+      { question: 'What tax rate should I enter on gains?', answer: 'The default of 12.5% is the long-term capital gains rate that applied to property and listed equity funds when this page was written. Exemptions, the rules for homes bought long ago and changes to the law are not modelled, so check the current rules, or set the rate to 0 to see the result before tax.' },
+      { question: 'What home price growth and investment return should I assume?', answer: 'Use cautious numbers and test a few. Home prices in your area, not the country as a whole, are what matter, and past growth does not guarantee future growth. Investment returns are not guaranteed either; equity returns vary from year to year and can be negative. The default values are only examples.' },
+      { question: 'What does this calculator not include?', answer: 'Home loan interest deductions, the equity gains tax exemption, rent that you receive if you let the home out, a loan prepayment plan, changes in your income, brokerage when you rent, and non-money factors such as security, freedom to move and having your money in a single property. Treat the result as one input to the decision.' },
     ],
   },
 ];
