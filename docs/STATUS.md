@@ -29,6 +29,8 @@ licence allow.
 
 ## Known limits (read these)
 
+(Car and EV fuel, electricity and vehicle prices are not a limit: by design the visitor types in their own prices and mileage, and the defaults are only starting examples.)
+
 - **Hindi text was written by an AI assistant and has not been read by a native speaker.** The
   maths, numbers and links are checked by tests, but the wording, tone and finance terms need one
   careful read by a Hindi speaker who knows personal finance before the Hindi pages are promoted.
@@ -39,8 +41,6 @@ licence allow.
 - **Gold and silver have no live prices.** The two calculators use a rate you type in; there is no
   price page and no price history, because a feed needs a licensed source. Choosing one is a
   decision for later (see "Waiting on the owner").
-- **Car and EV defaults are examples**, not today's prices. The user types in their own fuel and
-  electricity prices and mileage.
 - **Facts written from general knowledge** (not from a primary source), to be checked once by a
   person: PPF and Sukanya Samriddhi withdrawal rules, the rental yield remark in the rent vs buy
   guide, GST on jewellery (3%), the 12.5% gains-tax default in rent vs buy, and the wording about
