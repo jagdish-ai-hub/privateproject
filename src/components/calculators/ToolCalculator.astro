@@ -4,6 +4,8 @@ import { Calculator } from './Calculator.tsx';
 import { RentVsBuy } from './RentVsBuy.tsx';
 import { VehicleCalculator } from './VehicleCalculator.tsx';
 import { MetalCalculator } from './MetalCalculator.tsx';
+import { LoanCalculator } from './LoanCalculator.tsx';
+import { DepositCalculator } from './DepositCalculator.tsx';
 import type { Tool } from '../../lib/tools.ts';
 
 interface Props { kind: Tool['kind']; lang: 'en' | 'hi' }
@@ -12,4 +14,6 @@ const { kind, lang } = Astro.props;
 {kind === 'rentbuy' ? <RentVsBuy client:load lang={lang} />
   : kind === 'car' || kind === 'evpetrol' ? <VehicleCalculator client:load kind={kind} lang={lang} />
   : kind === 'jewellery' || kind === 'metalreturn' ? <MetalCalculator client:load kind={kind === 'jewellery' ? 'jewellery' : 'return'} lang={lang} />
+  : kind === 'homeloan' || kind === 'carloan' || kind === 'personalloan' ? <LoanCalculator client:load kind={kind} lang={lang} />
+  : kind === 'fd' || kind === 'inflation' ? <DepositCalculator client:load kind={kind} lang={lang} />
   : <Calculator client:load kind={kind} lang={lang} />}

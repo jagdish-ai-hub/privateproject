@@ -61,8 +61,8 @@ on its page and tested against published worked figures.
 
 ## What has no data feed
 
-The calculators for rent vs buy, car running cost, EV vs petrol, and gold and silver do not use any
-data source. Every price, rate and mileage is typed in by the visitor, and the defaults are examples
+The calculators for rent vs buy, car running cost, EV vs petrol, gold and silver, home, car and
+personal loans, fixed deposits and inflation do not use any data source. Every price, rate and mileage is typed in by the visitor, and the defaults are examples
 (they are labelled as such on the pages). In particular there is **no gold or silver price feed**: a
 live or historical price page needs a licensed source, which has not been chosen. Do not add a price
 scraped from a website or from an API whose terms do not allow public display.

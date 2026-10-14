@@ -12,5 +12,10 @@ export const TOOL_GUIDES: Record<Tool['kind'], { slug: string; title: string; ti
   car: { slug: 'ev-vs-petrol-running-cost-india', title: 'EV vs petrol car in India: running cost, payback and what to check', titleHi: 'भारत में EV बनाम पेट्रोल कार: चलाने का खर्च, वसूली और क्या जाँचें' },
   evpetrol: { slug: 'ev-vs-petrol-running-cost-india', title: 'EV vs petrol car in India: running cost, payback and what to check', titleHi: 'भारत में EV बनाम पेट्रोल कार: चलाने का खर्च, वसूली और क्या जाँचें' },
   jewellery: { slug: 'gold-and-silver-jewellery-coins-or-funds', title: 'Buying gold and silver: jewellery, coins, funds and what each costs', titleHi: 'सोना-चाँदी ख़रीदना: गहने, सिक्के, फंड और हर एक का खर्च' },
+  homeloan: { slug: 'how-emi-works-home-car-personal-loans', title: 'How an EMI works: home, car and personal loans, flat vs reducing rate', titleHi: 'EMI कैसे काम करती है: होम, कार और पर्सनल लोन, फ़्लैट बनाम घटता बैलेंस' },
+  carloan: { slug: 'how-emi-works-home-car-personal-loans', title: 'How an EMI works: home, car and personal loans, flat vs reducing rate', titleHi: 'EMI कैसे काम करती है: होम, कार और पर्सनल लोन, फ़्लैट बनाम घटता बैलेंस' },
+  personalloan: { slug: 'how-emi-works-home-car-personal-loans', title: 'How an EMI works: home, car and personal loans, flat vs reducing rate', titleHi: 'EMI कैसे काम करती है: होम, कार और पर्सनल लोन, फ़्लैट बनाम घटता बैलेंस' },
+  fd: { slug: 'fixed-deposit-returns-after-tax-and-inflation', title: 'Fixed deposit returns after tax and inflation: what you really earn', titleHi: 'फ़िक्स्ड डिपॉज़िट का रिटर्न टैक्स और महँगाई के बाद: असल कमाई' },
+  inflation: { slug: 'fixed-deposit-returns-after-tax-and-inflation', title: 'Fixed deposit returns after tax and inflation: what you really earn', titleHi: 'फ़िक्स्ड डिपॉज़िट का रिटर्न टैक्स और महँगाई के बाद: असल कमाई' },
   metalreturn: { slug: 'gold-and-silver-jewellery-coins-or-funds', title: 'Buying gold and silver: jewellery, coins, funds and what each costs', titleHi: 'सोना-चाँदी ख़रीदना: गहने, सिक्के, फंड और हर एक का खर्च' },
 };

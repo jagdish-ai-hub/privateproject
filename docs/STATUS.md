@@ -7,7 +7,7 @@ https://github.com/jagdish-ai-hub/privateproject (nothing is waiting to be pushe
 
 A free, no-sign-up Indian site to compare mutual funds and to calculate savings, home-buying,
 car and gold decisions, in English and Hindi. A static site (Astro), rebuilt nightly from AMFI and
-MFapi data. 8,810 pages. Plan for earning: Google AdSense, later, once traffic and the data
+MFapi data. 8,824 pages. Plan for earning: Google AdSense, later, once traffic and the data
 licence allow.
 
 ## Built
@@ -18,12 +18,12 @@ licence allow.
 | Fund pages | Returns, risk, NAV chart with drop-from-peak, costs and size (Direct vs Regular TER), peer comparison, FAQ |
 | Category and fund-house pages | Lists with median expense ratio |
 | Side-by-side compare | Up to several funds, chart, plain-language insights |
-| Calculators (11, English and Hindi) | SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR, rent vs buy, car running cost, EV vs petrol, gold and silver jewellery price, gold and silver return. Pages: `/tools/…` and `/hi/tools/…` |
+| Calculators (16, English and Hindi) | SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR, rent vs buy, car running cost, EV vs petrol, gold and silver jewellery price, gold and silver return, home loan EMI (with prepayment), car loan EMI (with flat-rate conversion), personal loan EMI, FD with tax and inflation, inflation. Pages: `/tools/…` and `/hi/tools/…` |
 | Government schemes (8, English and Hindi) | Hub with dated rates plus PPF, Sukanya Samriddhi, SCSS, NSC, KVP, Post Office MIS, RD and Time Deposit calculators, each stating its convention and a worked example. Pages: `/schemes/…` and `/hi/schemes/…` |
-| Guides (24, English and Hindi) | Mutual funds and tax (16), government schemes (PPF, Sukanya Samriddhi, Post Office schemes, schemes compared, PPF vs mutual funds), planning (rent vs buy, EV vs petrol, buying gold and silver). Pages: `/learn/…` and `/hi/learn/…` |
+| Guides (26, English and Hindi) | Mutual funds and tax (16), government schemes (PPF, Sukanya Samriddhi, Post Office schemes, schemes compared, PPF vs mutual funds), planning (rent vs buy, EV vs petrol, buying gold and silver, how an EMI works, FD returns after tax and inflation). Pages: `/learn/…` and `/hi/learn/…` |
 | Languages | `hreflang` links between each English page and its Hindi twin, a language switch in the header, Hindi navigation, Hindi page text |
 | SEO | Titles, descriptions, canonical links, hreflang (en-IN, hi-IN), JSON-LD, sitemap |
-| Quality | 393 unit tests, 115 end-to-end tests, lint, type check, site link check (about 11,700 links) |
+| Quality | 414 unit tests, 129 end-to-end tests, lint, type check, site link check (about 11,700 links) |
 | Delivery | CI on every push; nightly data build and deploy workflow (deploys only once Cloudflare is configured) |
 | Analytics | Microsoft Clarity, switched on by setting `PUBLIC_CLARITY_ID` |
 

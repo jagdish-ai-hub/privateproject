@@ -1,6 +1,7 @@
 import { cagrBetween, lumpsumProjection, requiredSip, sipProjection, swpProjection } from './calculators.ts';
 import { formatPct, formatRupees } from './format.ts';
 import { RENT_VS_BUY_DEFAULTS, rentVsBuy } from './rentVsBuy.ts';
+import { deposit, flatEmi, inflation, loan, rateFromEmi } from './loans.ts';
 import { jewelleryPrice, metalReturn } from './metals.ts';
 import { EV_DEFAULT, PETROL_DEFAULT, compareCars, runningCost } from './vehicle.ts';
 import type { Faq } from './seo.ts';
@@ -8,7 +9,7 @@ import type { Faq } from './seo.ts';
 /** Content and metadata of one calculator page. */
 export interface Tool {
   slug: string;
-  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy' | 'car' | 'evpetrol' | 'jewellery' | 'metalreturn';
+  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy' | 'car' | 'evpetrol' | 'jewellery' | 'metalreturn' | 'homeloan' | 'carloan' | 'personalloan' | 'fd' | 'inflation';
   /** Short name, used in lists and breadcrumbs. */
   name: string;
   title: string;
@@ -277,6 +278,128 @@ export const TOOLS: Tool[] = [
       { question: 'Does this include tax?', answer: 'No. Tax on the gain depends on how long you hold and the form you hold it in, and the rules change. Check the current rules before relying on the result.' },
       { question: 'Can I use it for silver?', answer: 'Yes. Choose silver and enter the silver price per gram; the maths is the same.' },
       { question: 'Do past gold returns predict future returns?', answer: 'No. Gold and silver prices rise and fall, sometimes for years. Use real prices you paid or want to test, and try a few scenarios, including a fall.' },
+    ],
+  },
+  {
+    slug: 'home-loan-emi-calculator', kind: 'homeloan', name: 'Home loan EMI calculator',
+    title: 'Home Loan EMI Calculator India: EMI, Interest and Prepayment',
+    h1: 'Home loan EMI calculator',
+    description: 'Free home loan EMI calculator for India. Enter the loan amount, interest rate and tenure to see the EMI, total interest, a year-by-year schedule, and how prepaying saves interest and time.',
+    intro: 'Enter the loan amount, the interest rate your lender quotes and the tenure, and see the monthly EMI, the total interest you will pay and how the loan is repaid year by year. Then try an extra monthly payment or a one-time prepayment to see how much interest and time it saves.',
+    formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = number of months.   Each month: interest = balance × i; principal repaid = EMI − interest',
+    how: [
+      'Each month the interest is worked out on the balance still owed, at one-twelfth of the yearly rate. Whatever is left of the EMI after paying that interest reduces the loan. In the early years most of the EMI is interest; over time the share that repays the loan grows. This is called the reducing-balance method and it is how home loans in India are normally calculated.',
+      'The total interest is the EMI times the number of months, less the amount you borrowed. A long tenure lowers the EMI but raises the total interest a lot, because the balance stays high for longer.',
+      'Prepayment here keeps your EMI the same and shortens the loan. An extra amount paid every month goes straight to the balance, and a one-time lump sum is paid at the end of the month you choose. The earlier you prepay, the more interest you save, because the balance falls while it is still large.',
+      'Many home loans have a floating rate, which can change when the lender’s benchmark changes, and then the EMI or the tenure changes too. The calculator assumes one rate for the whole loan. The processing fee you enter is added to the total cost but not to the EMI. Tax deductions on home loan interest and principal are not included.',
+    ],
+    example: () => {
+      const r = loan({ amount: 5_000_000, rate: 0.0875, years: 20, feePct: 0.005 });
+      const p = loan({ amount: 5_000_000, rate: 0.0875, years: 20, extraMonthly: 5_000 });
+      return `A ${formatRupees(5_000_000)} loan at 8.75% for 20 years has an EMI of about ${formatRupees(Math.round(r.emi))}. Over 240 months you pay about ${formatRupees(Math.round(r.totalInterest))} in interest, ${formatPct(r.interestShare)} of the loan. Paying an extra ${formatRupees(5_000)} every month ends the loan about ${Math.floor(p.monthsSaved / 12)} years ${p.monthsSaved % 12} months earlier and saves about ${formatRupees(Math.round(p.interestSaved))} in interest.`;
+    },
+    faqs: [
+      { question: 'How is a home loan EMI calculated?', answer: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1), where P is the loan amount, i is the yearly interest rate divided by 12 and n is the number of months. The calculator shows this formula on the page and applies it for you.' },
+      { question: 'Why is so much of my early EMI interest?', answer: 'Interest is charged on the balance you still owe, and the balance is highest at the start. So the first EMIs are mostly interest and repay little of the loan. As the balance falls, the interest part shrinks and the principal part grows.' },
+      { question: 'Is it better to prepay or to invest the money?', answer: 'Prepaying earns you a certain saving equal to the loan’s interest rate, with no risk. Investing may earn more or less and is not guaranteed. The right choice depends on your loan rate, your tax position, your other debts and how much risk you are comfortable with.' },
+      { question: 'Does prepaying a home loan cost a penalty?', answer: 'It depends on the loan. Rules in India have generally not allowed prepayment charges on floating-rate loans taken by individuals, but fixed-rate loans and other cases can differ, and rules change. Check your loan agreement and ask your lender before prepaying.' },
+      { question: 'Does the calculator include the effect of rate changes?', answer: 'No. It assumes one interest rate for the whole tenure. If your loan is floating and the rate changes, your EMI or tenure will change; enter the new rate and the balance left to see the effect from that point.' },
+    ],
+  },
+  {
+    slug: 'car-loan-emi-calculator', kind: 'carloan', name: 'Car loan EMI calculator',
+    title: 'Car Loan EMI Calculator India: EMI, Interest and Flat Rate',
+    h1: 'Car loan EMI calculator',
+    description: 'Free car loan EMI calculator for India. Enter the loan amount, rate and tenure to see the EMI, total interest and fee, and convert a flat rate into the real reducing-balance rate.',
+    intro: 'Work out the EMI of a car loan from the amount, the interest rate and the number of years. If your lender quotes a flat rate, switch the rate type to see the real yearly rate you are paying and compare it with other offers.',
+    formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = months.   Flat rate: EMI = (P + P × flat rate × years) ÷ months',
+    how: [
+      'A car loan on the reducing-balance method works like any other loan: interest each month is charged on what you still owe, so it falls as you repay. The EMI is fixed, and the calculator shows how much of each year’s payments is interest and how much repays the loan.',
+      'Some lenders quote a flat rate. A flat rate charges interest on the full original amount for the whole term, even though you repay part of it every month. The EMI is the amount plus all that interest, divided by the number of months. A flat rate therefore costs much more than the same number quoted on a reducing balance, roughly 1.8 times as much. Switch to Flat rate to see the equivalent reducing-balance rate that you can compare with other loans.',
+      'The processing fee is paid once and added to the total cost. Insurance, registration, other charges and any down payment are not included. Enter the loan amount after your down payment.',
+    ],
+    example: () => {
+      const r = loan({ amount: 800_000, rate: 0.09, years: 5, feePct: 0.01 });
+      const e = flatEmi(800_000, 0.08, 5);
+      const eff = rateFromEmi(800_000, e, 5) ?? 0;
+      return `A ${formatRupees(800_000)} car loan at 9% on a reducing balance for 5 years has an EMI of about ${formatRupees(Math.round(r.emi))} and costs about ${formatRupees(Math.round(r.totalInterest))} in interest. The same loan quoted at an 8% flat rate has an EMI of ${formatRupees(Math.round(e))}, which is really a ${formatPct(eff)} yearly rate on a reducing balance.`;
+    },
+    faqs: [
+      { question: 'How do I calculate a car loan EMI?', answer: 'Use EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1), where P is the loan, i is the yearly rate divided by 12 and n is the number of months. The calculator does this and shows each year’s breakdown.' },
+      { question: 'What is the difference between a flat rate and a reducing-balance rate?', answer: 'A flat rate charges interest on the full original loan for the whole tenure. A reducing-balance rate charges interest only on what you still owe. A flat rate of 8% is much more expensive than 8% reducing, and equals roughly 14% to 15% on a reducing balance for a typical 5-year loan.' },
+      { question: 'Should I take a longer tenure to lower the EMI?', answer: 'A longer tenure lowers the EMI but raises the total interest, and you owe money for longer on a car that loses value each year. Compare the total interest at different tenures before deciding.' },
+      { question: 'What does the calculator leave out?', answer: 'Down payment, insurance, registration, other charges and any change in rate. Enter the loan amount you will actually borrow.' },
+    ],
+  },
+  {
+    slug: 'personal-loan-emi-calculator', kind: 'personalloan', name: 'Personal loan EMI calculator',
+    title: 'Personal Loan EMI Calculator India: EMI, Interest and Total Cost',
+    h1: 'Personal loan EMI calculator',
+    description: 'Free personal loan EMI calculator for India. Enter the amount, interest rate, tenure and processing fee to see the EMI, total interest and the full cost, with a year-by-year schedule.',
+    intro: 'Personal loans are unsecured and usually carry a higher interest rate and a processing fee. Enter the amount, the rate, the tenure and the fee to see what the loan will really cost, and what prepaying would save.',
+    formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = months.   Total cost = EMI × n + processing fee',
+    how: [
+      'The EMI is worked out on the reducing-balance method: each month interest is charged on the balance you still owe and the rest of the EMI repays the loan. The calculator shows the EMI, the total interest and a year-by-year schedule.',
+      'Because personal loan rates are higher, the interest is a big share of what you repay, especially over a long tenure. Try a shorter tenure to see how much interest it saves, and check whether you can afford the higher EMI.',
+      'The processing fee, usually a percentage of the loan, is paid once and added to the total you pay. Taxes on the fee, insurance if you take it, and late fees are not included. If your lender quotes a flat rate, switch the rate type to see the true yearly rate.',
+      'Prepaying part of a personal loan can save a lot of interest. Rules on prepayment charges vary by lender and loan, so check your agreement first.',
+    ],
+    example: () => {
+      const r = loan({ amount: 300_000, rate: 0.14, years: 3, feePct: 0.02 });
+      return `A ${formatRupees(300_000)} personal loan at 14% for 3 years has an EMI of about ${formatRupees(Math.round(r.emi))}. You pay about ${formatRupees(Math.round(r.totalInterest))} in interest and ${formatRupees(Math.round(r.processingFee))} as a 2% processing fee, so the loan costs about ${formatRupees(Math.round(r.totalPaid))} in all.`;
+    },
+    faqs: [
+      { question: 'How is a personal loan EMI calculated?', answer: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1), where P is the amount, i is the yearly rate divided by 12 and n is the number of months. The formula is shown on this page.' },
+      { question: 'Why are personal loan rates higher?', answer: 'Personal loans are usually unsecured, with nothing pledged against them, so lenders charge more for the higher risk. Your rate depends on your credit record, income and the lender.' },
+      { question: 'How can I reduce the interest on a personal loan?', answer: 'Choose the shortest tenure you can afford, compare lenders on the true yearly rate and fees, and prepay when you have spare money. The calculator shows what a shorter tenure and prepayment save.' },
+      { question: 'Is the interest on a personal loan tax deductible?', answer: 'Generally not, unless the money is used for something the tax rules allow a deduction for. This calculator does not include any tax effect; check the current rules for your case.' },
+    ],
+  },
+  {
+    slug: 'fd-calculator', kind: 'fd', name: 'FD calculator with tax and inflation',
+    title: 'FD Calculator: Fixed Deposit Maturity After Tax and Inflation',
+    h1: 'FD calculator with tax and inflation',
+    description: 'Free fixed deposit calculator for India. See the maturity amount, then what you actually keep after tax on the interest and what it is worth after inflation.',
+    intro: 'A fixed deposit’s headline rate is not what you earn. Interest is taxed, and prices keep rising. Enter the amount, rate and term, your tax rate and expected inflation to see the maturity amount and your real return after both.',
+    formula: 'Maturity = P × (1 + r ÷ n)^(n × t)    where r = yearly rate, n = times interest is added a year, t = years.   After tax: interest × (1 − tax rate).   Real return = (1 + after-tax return) ÷ (1 + inflation) − 1',
+    how: [
+      'Banks usually add interest to a cumulative fixed deposit every quarter, which is why the yearly yield is a little higher than the quoted rate. Choose how often interest is added to match your deposit.',
+      'The interest is added to your income and taxed at your slab rate. The calculator takes your tax rate off all the interest earned. If your income is low enough that you pay no tax, set the tax rate to zero. Banks may also deduct tax at source when interest crosses a limit, which is not the same as the tax you finally owe.',
+      'Inflation lowers what the money will buy. The real return is how fast your buying power grows after tax and inflation; when it is below zero, the money buys less at the end than at the start even though the amount is bigger. The calculator shows the maturity amount after tax in today’s money so you can see this.',
+      'The rate, tax rate and inflation are all assumptions you enter. Early withdrawal penalties and changes in rates are not included.',
+    ],
+    example: () => {
+      const d = deposit({ amount: 100_000, rate: 0.07, years: 5, perYear: 4, taxRate: 0.3, inflation: 0.05 });
+      return `${formatRupees(100_000)} in a 5-year deposit at 7%, with interest added quarterly, grows to about ${formatRupees(Math.round(d.maturity))}. Taxed at 30%, you keep ${formatRupees(Math.round(d.interestAfterTax))} of the ${formatRupees(Math.round(d.interest))} interest, a return of about ${formatPct(d.afterTaxRate)} a year. With 5% inflation, the real return is about ${formatPct(d.realRate)} a year, and the ${formatRupees(Math.round(d.maturityAfterTax))} you end up with is worth about ${formatRupees(Math.round(d.maturityInTodaysMoney))} in today’s money.`;
+    },
+    faqs: [
+      { question: 'How is the maturity value of a fixed deposit calculated?', answer: 'Maturity = P × (1 + r ÷ n)^(n × t), where P is the amount, r the yearly rate, n how many times interest is added in a year and t the years. Banks commonly add interest quarterly.' },
+      { question: 'Is FD interest taxable?', answer: 'Yes. The interest is added to your income and taxed at your slab rate. Banks may deduct tax at source if the interest is above a limit, but what you owe depends on your total income. The calculator takes the tax rate you enter off all the interest.' },
+      { question: 'What is the real return on an FD?', answer: 'It is the return after tax and after inflation. If inflation is higher than your after-tax return, your money loses buying power even though the rupee amount grows.' },
+      { question: 'Why is the effective yield higher than the quoted rate?', answer: 'Because interest is added several times a year and then earns interest itself. A 7% rate with quarterly compounding gives an effective yearly yield of about 7.19%.' },
+    ],
+  },
+  {
+    slug: 'inflation-calculator', kind: 'inflation', name: 'Inflation calculator',
+    title: 'Inflation Calculator India: Future Cost and Buying Power',
+    h1: 'Inflation calculator',
+    description: 'Free inflation calculator. See what something that costs ₹1 lakh today will cost after a number of years, and how much less your money will buy, at an inflation rate you enter.',
+    intro: 'Prices rise, so the same money buys less each year. Enter an amount, a yearly inflation rate and a number of years to see what it will cost to buy the same things later, and how much of your money’s buying power is lost.',
+    formula: 'Future cost = amount × (1 + inflation)^years.   Buying power of the same amount = amount ÷ (1 + inflation)^years',
+    how: [
+      'Inflation compounds, like interest in reverse. At 6% a year, prices roughly double in 12 years. The calculator multiplies the amount by (1 + inflation) for every year to get the future cost, and divides by the same number to get what today’s amount will be worth then.',
+      'Use it to set a goal in future money. If a course costs ₹10 lakh today and fees rise 8% a year, it will cost much more when your child is ready for it. Use the future cost as the target in the goal SIP calculator.',
+      'The rate is an assumption you enter. Inflation differs for different things: education and medical costs have often risen faster than the general level of prices. Past inflation does not predict future inflation.',
+    ],
+    example: () => {
+      const r = inflation(100_000, 0.06, 10);
+      return `At 6% a year, something that costs ${formatRupees(100_000)} today will cost about ${formatRupees(Math.round(r.futureCost))} in 10 years. In the same time, ${formatRupees(100_000)} will only buy what about ${formatRupees(Math.round(r.buyingPower))} buys today, a loss of ${formatPct(r.lostShare)} of its buying power.`;
+    },
+    faqs: [
+      { question: 'How is the future cost of something calculated?', answer: 'Multiply today’s cost by (1 + inflation rate) for each year. At 6% for 10 years the multiplier is 1.06 to the power 10, about 1.79.' },
+      { question: 'What inflation rate should I use?', answer: 'There is no single right number. Use a cautious figure and try a few. Costs such as education and healthcare can rise faster than the general price level, so use a higher rate for those goals.' },
+      { question: 'Why does the buying power of my money fall?', answer: 'Because prices rise while the amount stays the same. After 10 years at 6% inflation, the same rupee amount buys only about 56% of what it does today.' },
+      { question: 'How do I use this for a financial goal?', answer: 'Work out the goal’s cost in today’s money, use this calculator to find what it will cost in the year you need it, and then use the goal SIP calculator to find the monthly amount to save.' },
     ],
   },
 ];
