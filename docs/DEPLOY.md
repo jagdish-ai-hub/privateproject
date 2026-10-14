@@ -36,6 +36,23 @@ widely republished by commercial sites, but that is not the same as a licence. B
 Switching data source is contained: only `scripts/pipeline/amfi.ts` and `scripts/pipeline/history.ts`
 know where data comes from; everything downstream reads `screener.json` and the nav files.
 
+## Moving to a new domain
+
+Use this when you change from a temporary address (for example a subdomain) to the final domain.
+
+1. Buy the new domain and add it to the same Cloudflare Pages project as a second custom domain.
+2. Set the repository variable `SITE_URL` to the new address and run the nightly workflow once. Every
+   canonical link, `hreflang` link and the sitemap then use it.
+3. Redirect the old address to the new one with a permanent (301) redirect that keeps the path, for
+   example `old.example.com/fund/abc/` to `new.example.com/fund/abc/`. In Cloudflare this is one
+   Redirect Rule on the old hostname; it needs the old domain's DNS to be managed in Cloudflare. Keep
+   it for at least a year.
+4. Add the new domain in Google Search Console, submit its sitemap and inspect the home page. If the
+   change-of-address tool is offered for the old address, use it; for a subdomain it may not be.
+5. Update the contact email domain, the AdSense site entry and `ads.txt` if ads are on.
+
+Expect a short dip in search traffic while Google follows the redirects. Do not move twice.
+
 ## Before applying for Google AdSense
 
 - A real domain, `SITE_URL` set, and `PUBLIC_CONTACT_EMAIL` set (the contact page needs a way to

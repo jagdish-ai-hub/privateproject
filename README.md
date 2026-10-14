@@ -7,7 +7,8 @@ official AMFI NAV data (via [MFapi.in](https://www.mfapi.in)), plus expense rati
   volatility, drawdown, expense ratio, AUM; sort, paginate, share a link, export CSV.
 - **Fund pages** (one per scheme): NAV chart, returns with peer rank, SIP returns, risk, rolling returns, costs and size (Direct vs Regular TER, AUM), FAQ.
 - **Compare** up to four funds on a rebased chart.
-- **Calculators**: SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR, and rent vs buy.
+- **Calculators** (English and Hindi): SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR, rent vs buy, car running cost, EV vs petrol, and gold and silver (jewellery price, return).
+- **Guides** (24, English `/learn/` and Hindi `/hi/learn/`).
 - **Government schemes** (English and Hindi, `/schemes/`, `/hi/schemes/`): PPF, Sukanya Samriddhi, SCSS, NSC, KVP and Post Office MIS, RD and FD calculators with the notified rates. Rates are updated by hand each quarter; see `docs/DATA.md`.
 - **Guides**: 16 plain-language articles with FAQs and JSON-LD.
 - Category and fund-house pages, methodology page, sitemap, light and dark themes.

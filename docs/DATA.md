@@ -59,6 +59,14 @@ If the date passes `period.to`, the pages show a "rates may have changed" warnin
 (`ratesMayBeStale`). The maths is in `src/lib/schemes.ts`; the convention each scheme uses is shown
 on its page and tested against published worked figures.
 
+## What has no data feed
+
+The calculators for rent vs buy, car running cost, EV vs petrol, and gold and silver do not use any
+data source. Every price, rate and mileage is typed in by the visitor, and the defaults are examples
+(they are labelled as such on the pages). In particular there is **no gold or silver price feed**: a
+live or historical price page needs a licensed source, which has not been chosen. Do not add a price
+scraped from a website or from an API whose terms do not allow public display.
+
 ## Pipeline (`npm run data:build`)
 
 `scripts/build-data.ts`, with the logic in `scripts/pipeline/` and the maths in `src/lib/calc/`.
