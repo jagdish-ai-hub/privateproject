@@ -78,7 +78,7 @@ test('scheme pages fit a phone without sideways scrolling', async ({ page }) => 
   }
 });
 
-test('English scheme pages link to their guides, and the guides link back to the calculators', async ({ page }) => {
+test('scheme pages link to their guides (Hindi pages to the Hindi guides), and the guides link back to the calculators', async ({ page }) => {
   await page.goto('/schemes/ppf-calculator/');
   await expect(page.getByTestId('scheme-guides').getByRole('link', { name: 'PPF explained' })).toBeVisible();
   await page.getByTestId('scheme-guides').getByRole('link', { name: 'PPF explained' }).click();
@@ -86,7 +86,7 @@ test('English scheme pages link to their guides, and the guides link back to the
   await expect(page.getByRole('heading', { level: 1 })).toContainText('PPF explained');
   await expect(page.locator('main a[href="/schemes/ppf-calculator/"]').first()).toBeVisible();
   await page.goto('/hi/schemes/ppf-calculator/');
-  await expect(page.getByTestId('scheme-guides')).toHaveCount(0);
+  await expect(page.getByTestId('scheme-guides').getByRole('link').first()).toHaveAttribute('href', /^\/hi\/learn\//);
 });
 
 test('the rent vs buy page links to its guide', async ({ page }) => {

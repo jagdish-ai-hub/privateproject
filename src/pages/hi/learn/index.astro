@@ -1,0 +1,43 @@
+---
+/** Guides index (hi). */
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import { breadcrumbLd } from '../../../lib/seo.ts';
+
+const guides = (await getCollection('learnHi')).sort((a, b) => a.data.order - b.data.order);
+const groups: [string, string][] = [
+  ['Basics', 'बुनियादी बातें'],
+  ['Returns and risk', 'रिटर्न और जोखिम'],
+  ['Fund types', 'फंड के प्रकार'],
+  ['Tax', 'टैक्स'],
+  ['Government schemes', 'सरकारी योजनाएँ'],
+  ['Planning', 'योजना'],
+];
+const path = '/hi/learn/';
+---
+<BaseLayout
+  title="सीखें: म्यूचुअल फंड, PPF, बचत योजनाएँ, किराया बनाम ख़रीद"
+  description="भारत के बचतकर्ताओं के लिए सरल हिंदी गाइड: म्यूचुअल फंड, SIP, एक्सपेंस रेशियो और टैक्स, साथ में PPF, सुकन्या समृद्धि, पोस्ट ऑफिस योजनाएँ और घर ख़रीदना या किराये पर रहना।"
+  path={path}
+  lang="hi"
+  alternates={[{ lang: 'en', path: '/learn/' }, { lang: 'hi', path }]}
+  jsonLd={[breadcrumbLd([{ name: 'होम', url: new URL('/', Astro.site).toString() }, { name: 'सीखें', url: new URL(path, Astro.site).toString() }])]}
+>
+  <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'सीखें' }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">सीखें</h1>
+  <p class="mt-2 max-w-3xl text-sm text-muted">बचत और निवेश करते समय जिन शब्दों और आँकड़ों से आपका सामना होता है, उन पर छोटे और सरल गाइड।</p>
+  {groups.map(([g, label]) => (
+    <section class="mt-8" aria-labelledby={`g-${g}`}>
+      <h2 id={`g-${g}`} class="mb-3 text-lg font-semibold tracking-tight">{label}</h2>
+      <ul class="grid gap-3 sm:grid-cols-2">
+        {guides.filter((x) => x.data.group === g).map((x) => (
+          <li><a href={`/hi/learn/${x.id}/`} class="block h-full rounded-md border border-line p-4 hover:bg-subtle">
+            <span class="font-medium">{x.data.title}</span>
+            <span class="mt-1 block text-sm text-muted">{x.data.description}</span>
+          </a></li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</BaseLayout>

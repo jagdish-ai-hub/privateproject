@@ -6,6 +6,7 @@ import Faq from '../../components/Faq.astro';
 import ToolCalculator from '../../components/calculators/ToolCalculator.astro';
 import { breadcrumbLd, calculatorLd, faqLd } from '../../lib/seo.ts';
 import { TOOLS } from '../../lib/tools.ts';
+import { TOOL_GUIDES } from '../../lib/toolGuides.ts';
 
 export function getStaticPaths() {
   return TOOLS.map((t) => ({ params: { slug: t.slug }, props: { slug: t.slug } }));
@@ -14,6 +15,7 @@ const { slug } = Astro.props;
 const tool = TOOLS.find((t) => t.slug === slug)!;
 const path = `/tools/${tool.slug}/`;
 const url = new URL(path, Astro.site).toString();
+const guide = TOOL_GUIDES[tool.kind];
 const others = TOOLS.filter((t) => t.slug !== tool.slug);
 ---
 <BaseLayout
@@ -44,9 +46,7 @@ const others = TOOLS.filter((t) => t.slug !== tool.slug);
     <p class="mt-3 text-sm leading-relaxed"><strong class="font-medium">Example.</strong> {tool.example()}</p>
   </section>
 
-  {tool.kind === 'rentbuy' && (
-    <p class="mt-8 max-w-3xl text-sm" data-testid="tool-guide">Read the guide: <a class="underline" href="/learn/rent-vs-buy-house-india/">Rent vs buy a house in India: how to decide</a>.</p>
-  )}
+  <p class="mt-8 max-w-3xl text-sm" data-testid="tool-guide">Read the guide: <a class="underline" href={`/learn/${guide.slug}/`}>{guide.title}</a>.</p>
 
   <Faq faqs={tool.faqs} />
 

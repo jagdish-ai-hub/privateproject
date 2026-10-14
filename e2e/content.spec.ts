@@ -4,7 +4,7 @@ test('learn index lists every guide in six groups, and each link works', async (
   await page.goto('/learn/');
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(6);
   const links = page.locator('ul.grid li a');
-  expect(await links.count()).toBeGreaterThanOrEqual(21);
+  expect(await links.count()).toBeGreaterThanOrEqual(24);
   const first = await links.first().getAttribute('href');
   await page.goto(first as string);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

@@ -11,6 +11,7 @@ const groups = ['Basics', 'Returns and risk', 'Fund types', 'Tax', 'Government s
   title="Learn: Mutual Funds, PPF, Savings Schemes, Rent vs Buy"
   description="Plain-language guides for Indian savers: mutual funds, SIP, expense ratio and tax, plus PPF, Sukanya Samriddhi, Post Office schemes and renting vs buying a home."
   path="/learn/"
+  alternates={[{ lang: 'en', path: '/learn/' }, { lang: 'hi', path: '/hi/learn/' }]}
   jsonLd={[breadcrumbLd([{ name: 'Home', url: new URL('/', Astro.site).toString() }, { name: 'Learn', url: new URL('/learn/', Astro.site).toString() }])]}
 >
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Learn' }]} />

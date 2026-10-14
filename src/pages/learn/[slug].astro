@@ -15,6 +15,7 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const all = await getCollection('learn');
 const related = entry.data.related.map((id) => all.find((g) => g.id === id)).filter((g) => g !== undefined);
+const hasHindi = (await getCollection('learnHi')).some((g) => g.id === entry.id);
 const path = `/learn/${entry.id}/`;
 const url = new URL(path, Astro.site).toString();
 const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -23,6 +24,7 @@ const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en
   title={entry.data.title}
   description={entry.data.description}
   path={path}
+  alternates={hasHindi ? [{ lang: 'en', path }, { lang: 'hi', path: `/hi/learn/${entry.id}/` }] : []}
   jsonLd={[
     breadcrumbLd([
       { name: 'Home', url: new URL('/', Astro.site).toString() },
