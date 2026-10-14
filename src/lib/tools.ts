@@ -1,12 +1,14 @@
 import { cagrBetween, lumpsumProjection, requiredSip, sipProjection, swpProjection } from './calculators.ts';
 import { formatPct, formatRupees } from './format.ts';
 import { RENT_VS_BUY_DEFAULTS, rentVsBuy } from './rentVsBuy.ts';
+import { jewelleryPrice, metalReturn } from './metals.ts';
+import { EV_DEFAULT, PETROL_DEFAULT, compareCars, runningCost } from './vehicle.ts';
 import type { Faq } from './seo.ts';
 
 /** Content and metadata of one calculator page. */
 export interface Tool {
   slug: string;
-  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy';
+  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy' | 'car' | 'evpetrol' | 'jewellery' | 'metalreturn';
   /** Short name, used in lists and breadcrumbs. */
   name: string;
   title: string;
@@ -174,6 +176,107 @@ export const TOOLS: Tool[] = [
       { question: 'What tax rate should I enter on gains?', answer: 'The default of 12.5% is the long-term capital gains rate that applied to property and listed equity funds when this page was written. Exemptions, the rules for homes bought long ago and changes to the law are not modelled, so check the current rules, or set the rate to 0 to see the result before tax.' },
       { question: 'What home price growth and investment return should I assume?', answer: 'Use cautious numbers and test a few. Home prices in your area, not the country as a whole, are what matter, and past growth does not guarantee future growth. Investment returns are not guaranteed either; equity returns vary from year to year and can be negative. The default values are only examples.' },
       { question: 'What does this calculator not include?', answer: 'Home loan interest deductions, the equity gains tax exemption, rent that you receive if you let the home out, a loan prepayment plan, changes in your income, brokerage when you rent, and non-money factors such as security, freedom to move and having your money in a single property. Treat the result as one input to the decision.' },
+    ],
+  },
+  {
+    slug: 'car-running-cost-calculator', kind: 'car', name: 'Car running cost calculator',
+    title: 'Car Running Cost Calculator: Cost per km for Petrol, Diesel, CNG and EV',
+    h1: 'Car running cost calculator',
+    description: 'Free car running cost calculator for India. Enter the fuel price, mileage and kilometres driven to get the cost per km, per month and per year for petrol, diesel, CNG and electric cars.',
+    intro: 'What does your car really cost to run? Pick the fuel, enter the price, the mileage and how far you drive each month, and see the cost per kilometre, per month and per year. For an electric car, enter the battery size, the range and what you pay for a unit of electricity.',
+    formula: 'Petrol, diesel, CNG: cost per km = price per litre (or kg) ÷ km per litre (or kg) + maintenance per km.   Electric: cost per km = (battery kWh ÷ range km) ÷ (1 − charging loss) × price per unit + maintenance per km',
+    how: [
+      'For a petrol, diesel or CNG car the fuel cost per kilometre is the price divided by the mileage. At ₹100 a litre and 15 km a litre, each kilometre costs about ₹6.67 in fuel. Use the mileage you actually get, not the figure on the brochure.',
+      'For an electric car the energy used per kilometre is the battery size divided by the real-world range. A 30 kWh battery that gives 200 km uses 0.15 kWh a km. Some energy is lost as heat while charging, so the energy drawn from the socket is a little higher. The price per unit is a mix of your home tariff and public charger price, weighted by how much of your charging happens in public.',
+      'Maintenance is a rupee amount per km that you can change: service, tyres and wear. Electric cars usually have fewer moving parts and lower servicing costs, but check your own garage’s quote.',
+      'Prices and mileage are not looked up for you: they differ by city and change often, so every value starts as an example. Insurance, road tax, parking, tolls, loan interest, resale value and battery replacement are not included. The EV vs petrol calculator lets you add insurance and compare the purchase price too.',
+    ],
+    example: () => {
+      const p = runningCost(PETROL_DEFAULT, 1000);
+      const e = runningCost(EV_DEFAULT, 1000);
+      return `A petrol car at ${formatRupees(PETROL_DEFAULT.fuelPrice)} a litre and ${PETROL_DEFAULT.kmPerUnit} km a litre, with ${formatRupees(PETROL_DEFAULT.maintenancePerKm, 2)} a km for maintenance, costs about ${formatRupees(p.perKm, 2)} a km, or ${formatRupees(Math.round(p.perMonth))} a month at 1,000 km. An electric car with a ${EV_DEFAULT.batteryKwh} kWh battery and ${EV_DEFAULT.rangeKm} km of range, charging mostly at home at ${formatRupees(EV_DEFAULT.homeRate)} a unit, costs about ${formatRupees(e.perKm, 2)} a km, or ${formatRupees(Math.round(e.perMonth))} a month.`;
+    },
+    faqs: [
+      { question: 'How do I calculate the running cost per km of my car?', answer: 'Divide the fuel price by your real mileage, then add maintenance per km. For an electric car, divide the battery size by the real range to get units per km, allow for charging loss, and multiply by the price per unit. The calculator does this for you and shows the formula on this page.' },
+      { question: 'Which mileage should I enter?', answer: 'The one you actually get. Fill the tank, note the kilometres on the trip meter, and divide by the litres it takes to fill up again. City driving, air-conditioning and speed lower the figure shown in the brochure.' },
+      { question: 'How much does it cost to charge an electric car?', answer: 'It depends on the tariff and where you charge. Home charging at your household tariff is usually the cheapest. Public fast chargers usually cost more per unit. Enter both prices and the share of charging you do in public, and the calculator blends them.' },
+      { question: 'Why is charging loss included?', answer: 'Not all the energy drawn from the socket reaches the battery; some is lost as heat in the charger and the battery. Allowing for it makes the cost per km realistic. The default is 10%, which you can change.' },
+      { question: 'What does this not include?', answer: 'Insurance, road tax, parking, tolls, loan interest, depreciation and battery replacement. These can be a large part of owning a car, so treat this as the running cost only, not the cost of ownership.' },
+    ],
+  },
+  {
+    slug: 'ev-vs-petrol-running-cost-calculator', kind: 'evpetrol', name: 'EV vs petrol car cost calculator',
+    title: 'EV vs Petrol Car Cost Calculator India: Running Cost and Payback',
+    h1: 'EV vs petrol car cost calculator',
+    description: 'Free EV vs petrol (or diesel, CNG) calculator for India. Compare running cost per km, monthly saving, how long the higher price of an electric car takes to pay back, and the total cost over the years you keep it.',
+    intro: 'Is an electric car cheaper than a petrol, diesel or CNG car? Enter how far you drive, the fuel and electricity prices, and the price of each car. The calculator shows the running cost of each, the monthly saving, how long the extra price of the electric car takes to pay back, and the total cost over the years you keep it.',
+    formula: 'Monthly saving = fuel car cost per month − electric car cost per month.   Payback (months) = (price of electric car − subsidy − price of fuel car) ÷ monthly saving.   Total cost = price + running cost × years + other yearly costs × years',
+    how: [
+      'Each car’s running cost is worked out per kilometre the same way as in the car running cost calculator: fuel price over mileage for a fuel car, and battery size over range, with charging loss and a mix of home and public charging, for an electric car. Maintenance per km is added to both.',
+      'The monthly saving is the difference between the two monthly costs at the distance you drive. If the electric car costs more to buy, the payback is how many months of that saving it takes to cover the extra price, after any subsidy or discount. The distance you drive matters a great deal: the more you drive, the faster the saving builds up.',
+      'The total cost over the years you keep the car adds the purchase price, the running cost and the other yearly costs you enter, such as insurance. Resale value, loan interest, road tax, parking and battery replacement are not included, so the real gap can be larger or smaller.',
+      'Every price and mileage is an example to replace with your own. Fuel and electricity prices differ by city and change over time, and the result changes with them.',
+    ],
+    example: () => {
+      const c = compareCars(PETROL_DEFAULT, EV_DEFAULT, 1000, 5, 1_000_000, 1_400_000, 0, 25_000, 35_000);
+      return `Driving 1,000 km a month, the petrol car costs about ${formatRupees(Math.round(c.a.perMonth))} a month to run and the electric car about ${formatRupees(Math.round(c.b.perMonth))}, a saving of ${formatRupees(Math.round(c.monthlySaving))} a month. With the electric car costing ${formatRupees(c.extraUpfront)} more, that extra price is paid back after about ${Math.ceil(c.paybackMonths ?? 0)} months. Over 5 years the petrol car costs about ${formatRupees(Math.round(c.totalA))} in total and the electric car about ${formatRupees(Math.round(c.totalB))}.`;
+    },
+    faqs: [
+      { question: 'Is an electric car cheaper than a petrol car in India?', answer: 'To run, usually yes, because a unit of electricity moves the car further than the same money spent on fuel. To buy, an electric car often costs more, so whether it is cheaper overall depends on how far you drive, how long you keep it and the prices where you live. Enter your own numbers.' },
+      { question: 'How long does an electric car take to pay for itself?', answer: 'The payback is the extra price divided by the monthly running-cost saving. A person who drives a lot saves more each month and pays it back sooner. The calculator shows the months and the kilometres driven by then.' },
+      { question: 'Does the calculator include subsidies?', answer: 'You can enter a subsidy or discount on the electric car, and it is taken off the price. Schemes and amounts change and differ by state, so check what applies to the car you are buying.' },
+      { question: 'What about the battery?', answer: 'Battery replacement is not included. Warranties differ between makers; check the battery warranty and what a replacement would cost before deciding.' },
+      { question: 'Why do the results change so much with the kilometres I drive?', answer: 'Running costs scale with distance but the price difference is fixed. A person who drives few kilometres takes much longer to recover a higher purchase price from running-cost savings.' },
+    ],
+  },
+  {
+    slug: 'gold-jewellery-price-calculator', kind: 'jewellery', name: 'Gold and silver jewellery price calculator',
+    title: 'Gold Jewellery Price Calculator India: Making Charges and GST',
+    h1: 'Gold and silver jewellery price calculator',
+    description: 'Free gold and silver jewellery price calculator for India. Enter the rate, weight and purity to see the metal value, making charges, GST and the total, plus what you would get back if you sold it.',
+    intro: 'The price on a jewellery bill is more than the weight times the rate. Enter today’s rate, the weight and the purity, then the making charges and GST, to see the total you pay, and how much of it you would not get back if you sold the piece.',
+    formula: 'Metal value = rate per gram × weight × purity.   Total = (metal value + making charges) × (1 + GST).   Making charges = % of metal value, or ₹ per gram × weight',
+    how: [
+      'The rate you enter is for 24 carat gold (99.9% pure) or 999 silver. Other purities are priced in proportion: 22 carat is 22 ÷ 24 of the 24 carat price, 18 carat is 18 ÷ 24, and 925 sterling silver is 925 ÷ 999 of the 999 price.',
+      'Jewellers add making charges for the work, either as a percentage of the metal value or as a rupee amount per gram. They vary by jeweller and by design, and they can often be negotiated. GST is then charged on the metal value plus the making charges; the default is 3%, which you can change.',
+      'If you sell the piece back, you generally get the value of the metal at that day’s rate, sometimes after a deduction. The making charges and GST you paid are usually not returned. The calculator shows how much that is, and how far the price per gram must rise before selling it back returns what you paid.',
+      'The rate is not looked up for you, because it changes through the day and differs by city. Enter the rate from your jeweller or a trusted rate board. Hallmarked gold jewellery carries a BIS hallmark and a six-character HUID code that you can check, and it is worth looking for.',
+    ],
+    example: () => {
+      const j = jewelleryPrice({ ratePerGram: 10_000, weightGrams: 10, purity: 22 / 24, makingType: 'percent', making: 0.1, gst: 0.03, buybackDeduction: 0 });
+      return `At an example rate of ${formatRupees(10_000)} a gram for 24 carat gold, 10 grams of 22 carat jewellery has a metal value of ${formatRupees(Math.round(j.metalValue))}. With 10% making charges (${formatRupees(Math.round(j.makingCharges))}) and 3% GST (${formatRupees(Math.round(j.gst))}) the bill is ${formatRupees(Math.round(j.total))}. Sold back at the same rate, it fetches the metal value of ${formatRupees(Math.round(j.sellBackValue))}, so about ${formatRupees(Math.round(j.lostOnSelling))} is not recovered.`;
+    },
+    faqs: [
+      { question: 'How is the price of gold jewellery calculated?', answer: 'Weight × the rate for the purity gives the metal value. The jeweller adds making charges, then GST on the total. The calculator does each step and shows the amounts separately.' },
+      { question: 'What is the GST on gold jewellery?', answer: 'GST on gold and gold jewellery has been 3%, charged on the metal value plus making charges. Rates can change, so check your bill; you can change the percentage in the calculator.' },
+      { question: 'What are making charges?', answer: 'They pay for the design and the work. They are shown as a percentage of the metal value or a rupee amount per gram, and they differ widely between jewellers and between plain and detailed designs. They are often negotiable.' },
+      { question: 'Do I get the making charges back if I sell?', answer: 'Usually not. Jewellers generally buy back at the value of the metal, sometimes after a deduction, so the making charges and GST are a cost. This is why jewellery is a poorer way to hold gold as an investment than coins, bars or gold funds.' },
+      { question: 'What is the difference between 24 carat and 22 carat gold?', answer: '24 carat gold is about 99.9% pure. 22 carat gold is 22 parts gold in 24, about 91.6% pure, mixed with other metals to make it harder for jewellery. A 22 carat piece is therefore priced at about 22/24 of the 24 carat rate.' },
+    ],
+  },
+  {
+    slug: 'gold-silver-return-calculator', kind: 'metalreturn', name: 'Gold and silver return calculator',
+    title: 'Gold and Silver Return Calculator: Your Return After Costs',
+    h1: 'Gold and silver return calculator',
+    description: 'Free gold and silver return calculator. Enter the buying and selling price per gram, the years held and your costs to see how much you really earn per year, and the price you need just to get your money back.',
+    intro: 'The price of gold or silver rising is not the same as you making money. GST, making charges, brokerage and holding costs all take a share. Enter what you paid, what it is worth now (or what you expect), the years held and your costs, to see the return you actually earn.',
+    formula: 'Grams = amount × (1 − buying cost) ÷ buying price.   Final value = grams × selling price × (1 − selling cost) − holding cost.   Net return per year = (final value ÷ amount)^(1 ÷ years) − 1',
+    how: [
+      'Of the money you invest, the buying cost (GST, making charges, brokerage) comes off first, so you get fewer grams than the amount divided by the price. When you sell, the selling cost (such as a buy-back deduction) comes off the sale value. A yearly holding cost, such as a locker or a fund’s expenses, is added up over the years you hold.',
+      'The price growth per year is the compound rate at which the price per gram rose, before any cost. The net return per year is the rate your own money grew at after all the costs. The gap between the two is what the costs took.',
+      'The break-even price is the price per gram you need on the day you sell just to get back what you invested. With meaningful costs it is above the price you paid, which shows how much the price must rise first.',
+      'Prices are not looked up for you. Enter the actual price you paid and the price at which you sold, or a price you expect. Past price rises do not predict future ones. Any tax on the gain is not included.',
+    ],
+    example: () => {
+      const r = metalReturn({ amount: 100_000, buyPrice: 6_000, sellPrice: 7_500, years: 5, buyCost: 0.03, sellCost: 0, holdingCostPerYear: 0 });
+      return `Investing ${formatRupees(100_000)} when gold is ${formatRupees(6_000)} a gram and selling at ${formatRupees(7_500)} five years later is a price rise of about ${formatPct(r.priceCagr)} a year. With 3% costs on buying, you get ${r.grams.toFixed(2)} grams, end with ${formatRupees(Math.round(r.finalValue))}, and your own return is about ${formatPct(r.netCagr)} a year. The price must reach ${formatRupees(Math.round(r.breakEvenPrice ?? 0))} a gram just to return your ${formatRupees(100_000)}.`;
+    },
+    faqs: [
+      { question: 'How do I calculate my return on gold?', answer: 'Work out the grams you bought after costs, multiply by the selling price after selling costs, subtract any holding costs, and compare with what you put in. The yearly return is that ratio raised to one divided by the years, minus one. The calculator does this.' },
+      { question: 'Why is my return lower than the rise in the gold price?', answer: 'Because costs take a share: GST and making charges when buying, a deduction when selling, and any locker or fund expenses. The calculator shows the price growth and your return after costs side by side.' },
+      { question: 'Does this include tax?', answer: 'No. Tax on the gain depends on how long you hold and the form you hold it in, and the rules change. Check the current rules before relying on the result.' },
+      { question: 'Can I use it for silver?', answer: 'Yes. Choose silver and enter the silver price per gram; the maths is the same.' },
+      { question: 'Do past gold returns predict future returns?', answer: 'No. Gold and silver prices rise and fall, sometimes for years. Use real prices you paid or want to test, and try a few scenarios, including a fall.' },
     ],
   },
 ];
