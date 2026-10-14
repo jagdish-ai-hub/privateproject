@@ -1,0 +1,30 @@
+---
+/** Calculators index (hi). */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import { breadcrumbLd } from '../../../lib/seo.ts';
+import { TOOLS } from '../../../lib/tools.ts';
+import { TOOLS_HI } from '../../../lib/toolsContent.hi.ts';
+
+const path = '/hi/tools/';
+---
+<BaseLayout
+  title="निवेश कैलकुलेटर: SIP, SWP, CAGR, किराया बनाम ख़रीद"
+  description="मुफ़्त कैलकुलेटर: SIP, स्टेप-अप SIP, लंपसम, गोल SIP, SWP, CAGR, किराया बनाम ख़रीद, कार का खर्च और सोना-चाँदी। हर फ़ॉर्मूला दिखाया गया है, साइन-अप नहीं।"
+  path={path}
+  lang="hi"
+  alternates={[{ lang: 'en', path: '/tools/' }, { lang: 'hi', path }]}
+  jsonLd={[breadcrumbLd([{ name: 'होम', url: new URL('/', Astro.site).toString() }, { name: 'कैलकुलेटर', url: new URL(path, Astro.site).toString() }])]}
+>
+  <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'कैलकुलेटर' }]} />
+  <h1 class="text-2xl font-semibold tracking-tight">कैलकुलेटर</h1>
+  <p class="mt-2 max-w-3xl text-sm text-muted">सरल और पारदर्शी कैलकुलेटर से निवेश और ख़र्च की योजना बनाएँ। हर पेज वह फ़ॉर्मूला दिखाता है जिसका वह इस्तेमाल करता है।</p>
+  <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {TOOLS.map((t) => (
+      <li><a href={`/hi/tools/${t.slug}/`} class="block h-full rounded-md border border-line p-4 hover:bg-subtle">
+        <span class="font-medium">{TOOLS_HI[t.slug].name}</span>
+        <span class="mt-1 block text-sm text-muted">{TOOLS_HI[t.slug].description}</span>
+      </a></li>
+    ))}
+  </ul>
+</BaseLayout>

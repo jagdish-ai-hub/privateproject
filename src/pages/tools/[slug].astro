@@ -3,10 +3,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Faq from '../../components/Faq.astro';
-import { Calculator } from '../../components/calculators/Calculator.tsx';
-import { RentVsBuy } from '../../components/calculators/RentVsBuy.tsx';
-import { VehicleCalculator } from '../../components/calculators/VehicleCalculator.tsx';
-import { MetalCalculator } from '../../components/calculators/MetalCalculator.tsx';
+import ToolCalculator from '../../components/calculators/ToolCalculator.astro';
 import { breadcrumbLd, calculatorLd, faqLd } from '../../lib/seo.ts';
 import { TOOLS } from '../../lib/tools.ts';
 
@@ -23,6 +20,7 @@ const others = TOOLS.filter((t) => t.slug !== tool.slug);
   title={tool.title}
   description={tool.description}
   path={path}
+  alternates={[{ lang: 'en', path }, { lang: 'hi', path: `/hi/tools/${tool.slug}/` }]}
   jsonLd={[
     breadcrumbLd([
       { name: 'Home', url: new URL('/', Astro.site).toString() },
@@ -37,10 +35,7 @@ const others = TOOLS.filter((t) => t.slug !== tool.slug);
   <h1 class="text-2xl font-semibold tracking-tight">{tool.h1}</h1>
   <p class="mt-2 mb-6 max-w-3xl text-sm text-muted">{tool.intro}</p>
 
-  {tool.kind === 'rentbuy' ? <RentVsBuy client:load />
-    : tool.kind === 'car' || tool.kind === 'evpetrol' ? <VehicleCalculator client:load kind={tool.kind} />
-    : tool.kind === 'jewellery' || tool.kind === 'metalreturn' ? <MetalCalculator client:load kind={tool.kind === 'jewellery' ? 'jewellery' : 'return'} />
-    : <Calculator client:load kind={tool.kind} />}
+  <ToolCalculator kind={tool.kind} lang="en" />
 
   <section class="mt-10 max-w-3xl" aria-labelledby="how-h">
     <h2 id="how-h" class="text-lg font-semibold tracking-tight">How it works</h2>
