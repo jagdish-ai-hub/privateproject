@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useId, useState } from 'preact/hooks';
 
 interface Props {
   label: string;
@@ -23,7 +23,8 @@ interface Props {
 export function NumberField({ label, value, onChange, min, max, step, unit, rupee, sliderMax }: Props) {
   const [text, setText] = useState(String(value));
   useEffect(() => { if (Number(text) !== value) setText(String(value)); }, [value]);
-  const id = `f-${label.replace(/\W+/g, '-').toLowerCase()}`;
+  // A generated id: building one from the label breaks for non-Latin labels (Hindi), which all collapse to the same string.
+  const id = `f-${useId()}`;
   const commit = (raw: string): void => {
     setText(raw);
     const n = Number(raw);

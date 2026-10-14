@@ -95,3 +95,12 @@ test('the rent vs buy page links to its guide', async ({ page }) => {
   await expect(page).toHaveURL(/\/learn\/rent-vs-buy-house-india\/$/);
   await expect(page.locator('main a[href="/tools/rent-vs-buy-calculator/"]').first()).toBeVisible();
 });
+
+test('every form control on the Hindi pages has its own id, and each label points at its own input', async ({ page }) => {
+  await page.goto('/hi/schemes/ppf-calculator/');
+  const ids = await page.locator('[data-testid="scheme-calculator"] input[id]').evaluateAll((els) => els.map((e) => e.id));
+  expect(ids.length).toBe(3);
+  expect(new Set(ids).size).toBe(ids.length);
+  const broken = await page.locator('[data-testid="scheme-calculator"] label[for]').evaluateAll((ls) => ls.filter((l) => document.getElementById((l as HTMLLabelElement).htmlFor) === null).length);
+  expect(broken).toBe(0);
+});
