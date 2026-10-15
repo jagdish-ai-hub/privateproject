@@ -47,7 +47,7 @@ export function DepositCalculator({ kind, lang = 'en' }: { kind: DepositKind; la
 
   if (kind === 'inflation') {
     return (
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputs}>
           <NumberField label={t.inflAmount} value={amount} onChange={setAmount} min={1} max={1_000_000_000} sliderMax={5_000_000} step={1000} rupee />
           <NumberField label={t.inflRate} value={infl} onChange={setInfl} min={0} max={30} step={0.5} unit="%" />
@@ -55,7 +55,7 @@ export function DepositCalculator({ kind, lang = 'en' }: { kind: DepositKind; la
         </form>
         <div class="space-y-4" aria-live="polite">
           <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="infl-verdict">{t.inflVerdict(rs(amount), years, rs(inf.futureCost), rs(inf.buyingPower))}</p>
-          <div class="grid gap-3 sm:grid-cols-3" data-testid="results">
+          <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3" data-testid="results">
             <Tile label={t.future} value={rs(inf.futureCost)} strong testid="infl-future" />
             <Tile label={t.power} value={rs(inf.buyingPower)} testid="infl-power" />
             <Tile label={t.lost} value={pc(inf.lostShare)} testid="infl-lost" />
@@ -67,7 +67,7 @@ export function DepositCalculator({ kind, lang = 'en' }: { kind: DepositKind; la
 
   const chart = fd.years.map((y) => ({ year: y.year, value: y.value, invested: amount }));
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputs}>
         <NumberField label={t.amount} value={amount} onChange={setAmount} min={1000} max={1_000_000_000} sliderMax={5_000_000} step={1000} rupee />
         <NumberField label={t.rate} value={rate} onChange={setRate} min={0} max={20} step={0.05} unit="%" />
@@ -83,7 +83,7 @@ export function DepositCalculator({ kind, lang = 'en' }: { kind: DepositKind; la
       </form>
       <div class="space-y-4" aria-live="polite">
         <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="fd-verdict">{t.fdVerdict(pc(fd.realRate))}</p>
-        <div class="grid gap-3 sm:grid-cols-2" data-testid="results">
+        <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2" data-testid="results">
           <Tile label={t.maturity} value={rs(fd.maturity)} strong testid="fd-maturity" />
           <Tile label={t.interest} value={rs(fd.interest)} testid="fd-interest" />
           <Tile label={t.taxAmt} value={rs(fd.tax)} testid="fd-tax" />

@@ -128,7 +128,7 @@ export function CompareChart({ lines }: Props) {
             return (
               <li key={l.code} class="flex max-w-full items-center gap-2">
                 <svg class="shrink-0" width="22" height="8" aria-hidden="true"><line x1="0" y1="4" x2="22" y2="4" stroke={`var(--s${(l.slot % 4) + 1})`} stroke-width="2" stroke-linecap="round" /></svg>
-                <span class="min-w-0 truncate" title={l.name}>{l.name}</span>
+                <span class="line-clamp-2 min-w-0 break-words sm:truncate" title={l.name}>{l.name}</span>
                 <span class="num shrink-0 font-medium" data-testid="legend-value">{fmt(v)}</span>
                 {!tip && <span class={`num shrink-0 text-xs ${signClass(l.change)}`}>{formatPct(l.change, 1)}</span>}
               </li>

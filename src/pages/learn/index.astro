@@ -20,7 +20,7 @@ const groups = ['Basics', 'Returns and risk', 'Fund types', 'Tax', 'Government s
   {groups.map((g) => (
     <section class="mt-8" aria-labelledby={`g-${g}`}>
       <h2 id={`g-${g}`} class="mb-3 text-lg font-semibold tracking-tight">{g}</h2>
-      <ul class="grid gap-3 sm:grid-cols-2">
+      <ul class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
         {guides.filter((x) => x.data.group === g).map((x) => (
           <li><a href={`/learn/${x.id}/`} class="block h-full rounded-md border border-line p-4 hover:bg-subtle">
             <span class="font-medium">{x.data.title}</span>

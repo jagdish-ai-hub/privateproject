@@ -19,7 +19,7 @@ const path = '/hi/tools/';
   <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'कैलकुलेटर' }]} />
   <h1 class="text-2xl font-semibold tracking-tight">कैलकुलेटर</h1>
   <p class="mt-2 max-w-3xl text-sm text-muted">सरल और पारदर्शी कैलकुलेटर से निवेश और ख़र्च की योजना बनाएँ। हर पेज वह फ़ॉर्मूला दिखाता है जिसका वह इस्तेमाल करता है।</p>
-  <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <ul class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {TOOLS.map((t) => (
       <li><a href={`/hi/tools/${t.slug}/`} class="block h-full rounded-md border border-line p-4 hover:bg-subtle">
         <span class="font-medium">{TOOLS_HI[t.slug].name}</span>

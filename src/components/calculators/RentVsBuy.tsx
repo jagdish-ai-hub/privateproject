@@ -72,7 +72,7 @@ export function RentVsBuy({ lang = 'en' }: { lang?: Lang }) {
   const chartRows = r.years.map((y) => ({ year: y.year, value: Math.max(0, y.buyer), invested: Math.max(0, y.renter) }));
 
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputs}>
         <NumberField label={t.price} value={price} onChange={setPrice} min={100_000} max={1_000_000_000} sliderMax={50_000_000} step={100_000} rupee />
         <NumberField label={t.down} value={down} onChange={setDown} min={0} max={100} step={1} unit="%" />
@@ -96,7 +96,7 @@ export function RentVsBuy({ lang = 'en' }: { lang?: Lang }) {
 
       <div class="space-y-4" aria-live="polite">
         <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="rvb-verdict">{verdict}</p>
-        <div class="grid gap-3 sm:grid-cols-2" data-testid="results">
+        <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2" data-testid="results">
           <Tile label={t.buyer(horizon)} value={formatRupees(r.buyerNetWorth)} strong testid="rvb-buyer" />
           <Tile label={t.renter(horizon)} value={formatRupees(r.renterNetWorth)} strong testid="rvb-renter" />
           <Tile label={t.emi} value={formatRupees(Math.round(r.emi))} />

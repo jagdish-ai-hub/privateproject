@@ -38,7 +38,7 @@ const T = {
 const Tile = ({ label, value, strong }: { label: string; value: string; strong?: boolean }) => (
   <div class="rounded-md border border-line p-4">
     <p class="text-xs text-muted">{label}</p>
-    <p class={`num mt-1 text-left ${strong ? 'text-2xl font-semibold' : 'text-lg'}`}>{value}</p>
+    <p class={`num mt-1 whitespace-normal break-words text-left ${strong ? 'text-2xl font-semibold' : 'text-lg'}`}>{value}</p>
   </div>
 );
 
@@ -141,10 +141,10 @@ export function Calculator({ kind, lang = 'en' }: Props) {
   }
 
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputsLabel}>{inputs}</form>
       <div class="space-y-4" aria-live="polite">
-        <div class="grid gap-3 sm:grid-cols-3" data-testid="results">{results}</div>
+        <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3" data-testid="results">{results}</div>
         {chartRows.length > 1 && <MiniChart rows={chartRows} labels={t.chart} />}
         {table && (
           <details class="rounded-md border border-line">

@@ -200,16 +200,16 @@ function NavChartInner({ days, navs, name }: InnerProps) {
     <div>
       <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <div role="group" aria-label="Chart range" class="flex gap-1">
+          <div role="group" aria-label="Chart range" class="flex flex-wrap gap-1">
             {RANGES.map((r) => (
               <button
                 key={r.label} type="button" disabled={!available(r.months)} aria-pressed={range === r.months}
                 onClick={() => setRange(r.months)}
-                class={`h-8 min-w-10 rounded-md border px-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-30 ${range === r.months ? 'border-accent bg-accent text-accent-fg' : 'border-line hover:bg-subtle'}`}
+                class={`h-10 min-w-11 rounded-md border px-2.5 text-sm sm:h-8 sm:min-w-10 disabled:cursor-not-allowed disabled:opacity-30 ${range === r.months ? 'border-accent bg-accent text-accent-fg' : 'border-line hover:bg-subtle'}`}
               >{r.label}</button>
             ))}
           </div>
-          <div role="group" aria-label="Chart type" class="flex gap-1">
+          <div role="group" aria-label="Chart type" class="flex flex-wrap gap-1">
             {([['price', 'Price'], ['drop', 'Drop from peak']] as const).map(([k, label]) => (
               <button
                 key={k} type="button" aria-pressed={view === k} onClick={() => setView(k)}
@@ -246,13 +246,13 @@ function NavChartInner({ days, navs, name }: InnerProps) {
         {status === 'error' && <p class="absolute inset-0 grid place-items-center text-sm text-muted">The chart could not be loaded. Reload the page to try again.</p>}
       </div>
       {win && (
-        <dl class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4" data-testid="chart-stats">
+        <dl class="mt-3 grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-6 gap-y-2 text-sm sm:grid-cols-4" data-testid="chart-stats">
           {[
             ['Start of period', win.start], ['Latest', win.end], ['Highest', win.high], ['Lowest', win.low],
           ].map(([label, p]) => (
             <div key={label as string}>
               <dt class="text-xs text-muted">{label as string}</dt>
-              <dd class="num text-left">₹{formatNav((p as { nav: number }).nav)} <span class="text-xs text-muted">{dateText((p as { day: number }).day)}</span></dd>
+              <dd class="num whitespace-normal text-left">₹{formatNav((p as { nav: number }).nav)} <span class="block text-xs text-muted sm:inline">{dateText((p as { day: number }).day)}</span></dd>
             </div>
           ))}
         </dl>

@@ -23,7 +23,8 @@ licence allow.
 | Guides (26, English and Hindi) | Mutual funds and tax (16), government schemes (PPF, Sukanya Samriddhi, Post Office schemes, schemes compared, PPF vs mutual funds), planning (rent vs buy, EV vs petrol, buying gold and silver, how an EMI works, FD returns after tax and inflation). Pages: `/learn/…` and `/hi/learn/…` |
 | Languages | `hreflang` links between each English page and its Hindi twin, a language switch in the header, Hindi navigation, Hindi page text |
 | SEO | Titles, descriptions, canonical links, hreflang (en-IN, hi-IN), JSON-LD, sitemap |
-| Quality | 414 unit tests, 129 end-to-end tests, lint, type check, site link check (about 11,700 links) |
+| Phone support | Every page type, in both languages, was audited at 320, 360, 390 and 412 px wide: no sideways scrolling, inputs at 16px (so iPhones do not zoom when you tap one), header and card links at least 36px tall, FAQ rows and chart buttons easy to tap. A test (`e2e/mobile.spec.ts`) keeps it that way |
+| Quality | 414 unit tests, 134 end-to-end tests, lint, type check, site link check (about 11,700 links) |
 | Delivery | CI on every push; nightly data build and deploy workflow (deploys only once Cloudflare is configured) |
 | Analytics | Microsoft Clarity, switched on by setting `PUBLIC_CLARITY_ID` |
 

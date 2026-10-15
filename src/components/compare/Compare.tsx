@@ -116,7 +116,7 @@ export function Compare() {
       <div class="relative max-w-xl">
         <input
           type="search" value={query} disabled={!prepared || codes.length >= MAX_FUNDS}
-          placeholder={codes.length >= MAX_FUNDS ? `Maximum ${MAX_FUNDS} funds selected` : 'Search a fund to add (at least 2 letters)…'}
+          placeholder={codes.length >= MAX_FUNDS ? `Maximum ${MAX_FUNDS} funds selected` : 'Search a fund to add…'}
           aria-label="Search a fund to add" onInput={(e) => setQuery((e.currentTarget as HTMLInputElement).value)}
           class="h-10 w-full rounded-md border border-line bg-bg px-3 text-sm"
         />
@@ -141,10 +141,10 @@ export function Compare() {
       {selected.length > 0 && d && (
         <ul class="flex flex-wrap gap-2" aria-label="Selected funds">
           {selected.map((s) => (
-            <li key={s.code} class="flex items-center gap-2 rounded-md border border-line px-3 py-1.5 text-sm">
+            <li key={s.code} class="flex max-w-full min-w-0 items-center gap-2 rounded-md border border-line py-1 pl-3 pr-1 text-sm">
               <svg class="shrink-0" width="14" height="6" aria-hidden="true"><line x1="0" y1="3" x2="14" y2="3" stroke={`var(--s${slotOf(s.code) + 1})`} stroke-width="2" stroke-linecap="round" /></svg>
-              <span class="max-w-72 truncate">{d.name[s.row]}</span>
-              <button type="button" class="text-muted hover:text-fg" aria-label={`Remove ${d.name[s.row]}`} onClick={() => setSelection(codes.filter((c) => c !== s.code))}>×</button>
+              <span class="line-clamp-2 min-w-0 break-words sm:max-w-72 sm:truncate">{d.name[s.row]}</span>
+              <button type="button" class="h-9 w-9 shrink-0 text-lg text-muted hover:text-fg" aria-label={`Remove ${d.name[s.row]}`} onClick={() => setSelection(codes.filter((c) => c !== s.code))}>×</button>
             </li>
           ))}
         </ul>
@@ -168,7 +168,7 @@ export function Compare() {
                 <button
                   key={r.label} type="button" disabled={!rangeAvailable(r.months)} aria-pressed={allLoaded && windowMonths === r.months}
                   onClick={() => setMonths(r.months)}
-                  class={`h-8 min-w-10 rounded-md border px-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-30 ${allLoaded && windowMonths === r.months ? 'border-accent bg-accent text-accent-fg' : 'border-line hover:bg-subtle'}`}
+                  class={`h-10 min-w-11 rounded-md border px-2.5 text-sm sm:h-8 sm:min-w-10 disabled:cursor-not-allowed disabled:opacity-30 ${allLoaded && windowMonths === r.months ? 'border-accent bg-accent text-accent-fg' : 'border-line hover:bg-subtle'}`}
                 >{r.label}</button>
               ))}
             </div>

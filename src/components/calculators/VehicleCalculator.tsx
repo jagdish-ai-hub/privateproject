@@ -113,19 +113,19 @@ export function VehicleCalculator({ kind, lang = 'en' }: { kind: VehicleKind; la
 
   if (kind === 'car') {
     return (
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputsLabel}>
           {fuelChoice([['petrol', t.petrol], ['diesel', t.diesel], ['cng', t.cng], ['ev', t.ev]], t.fuel)}
           <NumberField label={t.km} value={km} onChange={setKm} min={1} max={20_000} sliderMax={5000} step={50} unit={t.kmUnit} />
           {fuel === 'ev' ? <EvFields t={t} v={ev} set={setEvP} /> : convFields}
         </form>
         <div class="space-y-4" aria-live="polite">
-          <div class="grid gap-3 sm:grid-cols-3" data-testid="results">
+          <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3" data-testid="results">
             <Tile label={t.perKm} value={rs(single.perKm, 2)} strong testid="veh-perkm" />
             <Tile label={t.perMonth} value={rs(single.perMonth)} testid="veh-permonth" />
             <Tile label={t.perYear} value={rs(single.perYear)} testid="veh-peryear" />
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
             <Tile label={t.energy} value={rs(single.energyPerKm, 2)} testid="veh-energy" />
             <Tile label={t.maint} value={rs(single.maintenancePerKm, 2)} />
           </div>
@@ -145,7 +145,7 @@ export function VehicleCalculator({ kind, lang = 'en' }: { kind: VehicleKind; la
   const pay = cmp.paybackMonths === null ? t.never : cmp.paybackMonths === 0 ? t.now : `${Math.ceil(cmp.paybackMonths)} ${t.months} (${Math.round(cmp.paybackKm ?? 0).toLocaleString('en-IN')} ${t.km2})`;
 
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputsLabel}>
         <NumberField label={t.km} value={km} onChange={setKm} min={1} max={20_000} sliderMax={5000} step={50} unit={t.kmUnit} />
         <NumberField label={t.years} value={years} onChange={setYears} min={1} max={20} step={1} unit={t.yrs} />
@@ -167,7 +167,7 @@ export function VehicleCalculator({ kind, lang = 'en' }: { kind: VehicleKind; la
       </form>
       <div class="space-y-4" aria-live="polite">
         <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="veh-verdict">{verdict}</p>
-        <div class="grid gap-3 sm:grid-cols-2" data-testid="results">
+        <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2" data-testid="results">
           <Tile label={t.perKmA} value={rs(cmp.a.perKm, 2)} testid="veh-perkm-a" />
           <Tile label={t.perKmB} value={rs(cmp.b.perKm, 2)} testid="veh-perkm-b" />
           <Tile label={t.monthA} value={rs(cmp.a.perMonth)} />

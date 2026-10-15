@@ -33,16 +33,16 @@ export function NumberField({ label, value, onChange, min, max, step, unit, rupe
   return (
     <div>
       <div class="flex items-center justify-between gap-3">
-        <label for={id} class="text-sm">{label}</label>
-        <div class="flex items-center gap-1.5">
+        <label for={id} class="min-w-0 text-sm">{label}</label>
+        <div class="flex shrink-0 items-center gap-1.5">
           {rupee && <span class="text-sm text-muted" aria-hidden="true">₹</span>}
           <input
             id={id} type="text" inputMode="decimal" value={text} aria-describedby={`${id}-hint`}
             onInput={(e) => commit((e.currentTarget as HTMLInputElement).value.replace(/,/g, ''))}
             onBlur={() => { const n = Math.min(max, Math.max(min, Number(text) || min)); setText(String(n)); onChange(n); }}
-            class="num h-9 w-32 rounded-md border border-line bg-bg px-2 text-sm"
+            class="num h-10 w-28 rounded-md border border-line bg-bg px-2 text-sm sm:h-9 sm:w-32"
           />
-          {unit && <span class="w-10 text-sm text-muted">{unit}</span>}
+          {unit && <span class="w-10 shrink-0 text-sm text-muted">{unit}</span>}
         </div>
       </div>
       <input

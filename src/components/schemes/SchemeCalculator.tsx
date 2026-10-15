@@ -44,7 +44,7 @@ const money = (v: number): string => formatRupees(v, v < 10_000 && Math.abs(v - 
 const Tile = ({ label, value, strong }: { label: string; value: string; strong?: boolean }) => (
   <div class="rounded-md border border-line p-4">
     <p class="text-xs text-muted">{label}</p>
-    <p class={`num mt-1 text-left ${strong ? 'text-2xl font-semibold' : 'text-lg'}`} data-testid={strong ? 'scheme-result' : undefined}>{value}</p>
+    <p class={`num mt-1 whitespace-normal break-words text-left ${strong ? 'text-2xl font-semibold' : 'text-lg'}`} data-testid={strong ? 'scheme-result' : undefined}>{value}</p>
   </div>
 );
 
@@ -148,10 +148,10 @@ export function SchemeCalculator({ kind, rates, kvpMonths, lang = 'en' }: Props)
   }
 
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]" data-testid="scheme-calculator">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]" data-testid="scheme-calculator">
       <div class="space-y-5 rounded-md border border-line p-4">{inputs}</div>
       <div class="space-y-4">
-        <div class="grid gap-3 sm:grid-cols-3">{tiles}</div>
+        <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">{tiles}</div>
         {build && (
           <>
             <MiniChart rows={build.rows.map((row, i) => ({ year: row.year, invested: build!.rows.slice(0, i + 1).reduce((s, x) => s + x.deposit, 0), value: row.balance }))} labels={{ year: t.yearCol, value: t.chartValue, invested: t.chartInvested }} />

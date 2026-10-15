@@ -103,12 +103,12 @@ const nav = hi
   <body>
     <header class="border-b border-line">
       <div class="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2">
-        <a href="/" class="flex items-center gap-2 font-semibold tracking-tight" aria-label="Mutual Fund Compare, home"><Logo size={24} /><span>Mutual Fund Compare</span></a>
-        <nav class="order-3 flex w-full gap-4 overflow-x-auto text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
-          {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'whitespace-nowrap py-1 hover:text-fg'}>{n.label}</a>)}
+        <a href="/" class="flex items-center gap-2 py-2 font-semibold tracking-tight" aria-label="Mutual Fund Compare, home"><Logo size={24} /><span>Mutual Fund Compare</span></a>
+        <nav class="order-3 flex w-full flex-wrap gap-x-3 text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
+          {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-2.5 font-medium text-accent-fg hover:opacity-90 sm:py-1' : 'whitespace-nowrap px-1 py-2.5 hover:text-fg sm:py-1'}>{n.label}</a>)}
         </nav>
         <div class="ml-auto flex items-center gap-3">
-          {other && <a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="rounded-md border border-line px-2.5 py-1 text-sm hover:bg-subtle" data-testid="lang-switch">{other.lang === 'hi' ? 'हिंदी' : 'English'}</a>}
+          {other && <a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="rounded-md border border-line px-3 py-2 text-sm hover:bg-subtle sm:px-2.5 sm:py-1" data-testid="lang-switch">{other.lang === 'hi' ? 'हिंदी' : 'English'}</a>}
           <ThemeToggle />
         </div>
       </div>
@@ -128,7 +128,7 @@ const nav = hi
             <p>Educational information only; not investment advice. Data: NAV from AMFI via <a class="underline" href="https://www.mfapi.in">MFapi.in</a>; expense ratio and AUM from AMFI; Government scheme rates from Ministry of Finance notices.</p>
           </>
         )}
-        <p><a class="underline" href="/methodology/">Methodology</a> · <a class="underline" href="/about/">About</a> · <a class="underline" href="/privacy/">Privacy</a> · <a class="underline" href="/disclaimer/">Disclaimer</a></p>
+        <p><a class="inline-block py-2 underline" href="/methodology/">Methodology</a> · <a class="inline-block py-2 underline" href="/about/">About</a> · <a class="inline-block py-2 underline" href="/privacy/">Privacy</a> · <a class="inline-block py-2 underline" href="/disclaimer/">Disclaimer</a></p>
       </div>
     </footer>
   </body>

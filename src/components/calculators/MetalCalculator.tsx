@@ -85,7 +85,7 @@ export function MetalCalculator({ kind, lang = 'en' }: { kind: MetalKind; lang?:
   if (kind === 'jewellery') {
     const verdict = j.premium === null || j.breakEvenRise === null ? '' : t.verdictJ(pc(j.premium), pc(j.breakEvenRise));
     return (
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputs}>
           {metalChoice}
           <div>
@@ -108,7 +108,7 @@ export function MetalCalculator({ kind, lang = 'en' }: { kind: MetalKind; lang?:
         </form>
         <div class="space-y-4" aria-live="polite">
           {verdict && <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="metal-verdict">{verdict}</p>}
-          <div class="grid gap-3 sm:grid-cols-2" data-testid="results">
+          <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2" data-testid="results">
             <Tile label={t.total} value={rs(j.total)} strong testid="metal-total" />
             <Tile label={t.metalValue} value={rs(j.metalValue)} testid="metal-value" />
             <Tile label={t.making} value={rs(j.makingCharges)} testid="metal-making" />
@@ -124,7 +124,7 @@ export function MetalCalculator({ kind, lang = 'en' }: { kind: MetalKind; lang?:
   const net = r.netCagr;
   const verdict = net === null ? t.verdictRGone : net >= 0 ? t.verdictRGain(pc(net)) : t.verdictRLoss(pc(Math.abs(net)));
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputs}>
         {metalChoice}
         <NumberField label={t.amount} value={amount} onChange={setAmount} min={1000} max={1_000_000_000} sliderMax={5_000_000} step={1000} rupee />
@@ -142,7 +142,7 @@ export function MetalCalculator({ kind, lang = 'en' }: { kind: MetalKind; lang?:
       </form>
       <div class="space-y-4" aria-live="polite">
         <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="metal-verdict">{verdict}</p>
-        <div class="grid gap-3 sm:grid-cols-2" data-testid="results">
+        <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2" data-testid="results">
           <Tile label={t.netCagr} value={pc(r.netCagr)} strong testid="metal-netcagr" />
           <Tile label={t.priceCagr} value={pc(r.priceCagr)} testid="metal-pricecagr" />
           <Tile label={t.finalValue} value={rs(r.finalValue)} testid="metal-final" />

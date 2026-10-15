@@ -12,7 +12,7 @@ import { TOOLS } from '../../lib/tools.ts';
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Calculators' }]} />
   <h1 class="text-2xl font-semibold tracking-tight">Calculators</h1>
   <p class="mt-2 max-w-3xl text-sm text-muted">Plan investments with simple, transparent calculators. Every page shows the formula it uses.</p>
-  <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <ul class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {TOOLS.map((t) => (
       <li><a href={`/tools/${t.slug}/`} class="block h-full rounded-md border border-line p-4 hover:bg-subtle">
         <span class="font-medium">{t.name}</span>

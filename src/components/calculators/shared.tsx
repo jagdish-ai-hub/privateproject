@@ -4,7 +4,7 @@ export function Tile({ label, value, strong, testid }: { label: string; value: s
   return (
     <div class="rounded-md border border-line p-4">
       <p class="text-xs text-muted">{label}</p>
-      <p class={`num mt-1 text-left ${strong ? 'text-2xl font-semibold' : 'text-lg'}`} data-testid={testid}>{value}</p>
+      <p class={`num mt-1 whitespace-normal break-words text-left ${strong ? 'text-2xl font-semibold' : 'text-lg'}`} data-testid={testid}>{value}</p>
     </div>
   );
 }

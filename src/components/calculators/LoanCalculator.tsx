@@ -62,7 +62,7 @@ export function LoanCalculator({ kind, lang = 'en' }: { kind: LoanKind; lang?: L
   const chart = r ? (() => { let paid = 0; return r.years.map((y) => { paid += y.interestPaid; return { year: y.year, value: y.balance, invested: paid }; }); })() : [];
 
   return (
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <form class="space-y-5 rounded-md border border-line p-5" onSubmit={(e) => e.preventDefault()} aria-label={t.inputs}>
         <NumberField label={t.amount} value={amount} onChange={setAmount} min={10_000} max={1_000_000_000} sliderMax={d.sliderMax} step={10_000} rupee />
         <Choice label={t.rateType} value={rateType} options={[['reducing', t.reducing], ['flat', t.flat]]} onChange={setRateType} testid="rate-type" />
@@ -81,7 +81,7 @@ export function LoanCalculator({ kind, lang = 'en' }: { kind: LoanKind; lang?: L
       <div class="space-y-4" aria-live="polite">
         {r === null ? <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium">{t.cannot}</p> : (<>
           <p class="rounded-md border border-line bg-subtle p-4 text-base font-medium leading-snug" data-testid="loan-verdict">{t.verdict(rs(emiShown), rs(r.totalInterest), pc(r.interestShare))}</p>
-          <div class="grid gap-3 sm:grid-cols-2" data-testid="results">
+          <div class="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2" data-testid="results">
             <Tile label={t.emi} value={rs(emiShown)} strong testid="loan-emi" />
             <Tile label={t.interest} value={rs(r.totalInterest)} testid="loan-interest" />
             <Tile label={t.total} value={rs(r.totalPaid)} testid="loan-total" />

@@ -71,7 +71,7 @@ export function ResultsTable({ prepared, rows, columns, sort, onSort, compact }:
               const tags = [d0.dict.category[d0.category[i]], PLAN_LABEL[d0.dict.plan[d0.plan[i]]], OPTION_LABEL[d0.dict.option[d0.option[i]]]].filter(Boolean).join(' · ');
               return (
                 <li key={d0.code[i]} class="p-3" data-testid="result-card">
-                  <a href={`/fund/${fundSlug(d0.name[i], d0.code[i])}/`} class="font-medium hover:underline">{d0.name[i]}</a>
+                  <a href={`/fund/${fundSlug(d0.name[i], d0.code[i])}/`} class="-mt-1 block py-2.5 font-medium hover:underline">{d0.name[i]}</a>
                   <div class="text-xs text-muted">{tags}</div>
                   {numericCols.length > 0 && (
                     <dl class="mt-2 grid grid-cols-3 gap-x-3 gap-y-2">

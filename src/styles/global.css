@@ -85,7 +85,7 @@ body { margin: 0; min-height: 100vh; }
   .hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse 80% 90% at 70% 0%, #000 0%, transparent 75%); mask-image: radial-gradient(ellipse 80% 90% at 70% 0%, #000 0%, transparent 75%); opacity: 0.8; }
   .hero > * { position: relative; }
   /* (i) explainer button and its popover (native popover API: top layer, Esc / outside tap closes). */
-  .info-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 1rem; height: 1rem; margin-left: 0.3rem; vertical-align: middle; border: 1px solid var(--border-strong); border-radius: 9999px; color: var(--fg-muted); font: italic 600 0.65rem/1 var(--font-sans); cursor: pointer; }
+  .info-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 1.125rem; height: 1.125rem; margin-left: 0.3rem; vertical-align: middle; border: 1px solid var(--border-strong); border-radius: 9999px; color: var(--fg-muted); font: italic 600 0.75rem/1 var(--font-sans); cursor: pointer; }
   .info-btn::after { content: ''; position: absolute; inset: -0.55rem; }
   .info-btn:hover { color: var(--fg); border-color: var(--fg); }
   .info-pop { margin: auto; max-width: min(24rem, calc(100vw - 2rem)); padding: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg); color: var(--fg); font-size: 0.875rem; line-height: 1.5; text-align: left; font-weight: 400; box-shadow: 0 8px 30px rgb(0 0 0 / 0.18); }
@@ -115,3 +115,8 @@ body { margin: 0; min-height: 100vh; }
 
 /* Tight letter-spacing suits Latin headings but cramps Devanagari conjuncts; reset it on Hindi pages. Unlayered, so it wins over the utility. */
 :lang(hi) .tracking-tight { letter-spacing: normal; }
+
+/* Phones: inputs under 16px make iOS Safari zoom the page when focused, so keep them at 16px. Unlayered, so it wins over the utility classes. */
+@media (max-width: 639px) {
+  input:not([type='range']):not([type='checkbox']):not([type='radio']), select, textarea { font-size: 16px; }
+}

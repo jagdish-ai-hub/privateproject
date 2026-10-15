@@ -93,7 +93,7 @@ const partRows = f.terParts
     <p class="mt-4 flex flex-wrap items-baseline gap-x-3">
       <span class="num text-3xl font-semibold tracking-tight">₹{formatNav(f.nav)}</span>
       <span class="text-sm text-muted">NAV as on {formatDay(f.navDate)}<InfoTip term="nav" /></span>
-      <a href={`/compare/?f=${f.code}`} class="text-sm underline hover:no-underline">Compare with other funds</a>
+      <a href={`/compare/?f=${f.code}`} class="inline-flex min-h-10 items-center rounded-md border border-line px-3 text-sm hover:bg-subtle">Compare with other funds</a>
     </p>
   </header>
 
@@ -131,7 +131,7 @@ const partRows = f.terParts
     </div>
   )}
 
-  <div class="mt-8 grid gap-6 lg:grid-cols-2">
+  <div class="mt-8 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
     <section aria-labelledby="ret-h">
       <h2 id="ret-h" class="mb-2 text-lg font-semibold tracking-tight">Returns</h2>
       <div class="overflow-auto rounded-md border border-line">
@@ -218,7 +218,7 @@ const partRows = f.terParts
 
   <section class="mt-8" aria-labelledby="cost-h" data-testid="costs">
     <h2 id="cost-h" class="mb-2 text-lg font-semibold tracking-tight">Costs and size</h2>
-    <div class="grid gap-6 lg:grid-cols-2">
+    <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
       <div class="overflow-auto rounded-md border border-line">
         <table class="w-full text-sm">
           <caption class="sr-only">Expense ratio and AUM of {f.name}</caption>
@@ -263,7 +263,7 @@ const partRows = f.terParts
     <h2 id="about-h" class="mb-2 text-lg font-semibold tracking-tight">Fund details</h2>
     <dl class="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1.5 rounded-md border border-line p-4 text-sm">
       <dt class="text-muted">Fund house</dt><dd>{f.amc}</dd>
-      <dt class="text-muted">Category</dt><dd><a class="hover:underline" href={`/category/${catSlug}/`}>{f.category}</a> ({f.assetClass})</dd>
+      <dt class="text-muted">Category</dt><dd><a class="inline-block py-1.5 hover:underline" href={`/category/${catSlug}/`}>{f.category}</a> ({f.assetClass})</dd>
       <dt class="text-muted">Scheme type</dt><dd>{f.schemeType}</dd>
       <dt class="text-muted">Plan / option</dt><dd>{[planText, optionText].filter(Boolean).join(' · ') || '—'}</dd>
       <dt class="text-muted">First NAV<InfoTip term="age" /></dt><dd class="num text-left">{formatDay(f.inception)}</dd>

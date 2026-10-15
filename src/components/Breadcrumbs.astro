@@ -8,7 +8,7 @@ const { crumbs } = Astro.props;
     {crumbs.map((c, i) => (
       <li class="flex items-center gap-1.5">
         {i > 0 && <span aria-hidden="true">/</span>}
-        {c.href ? <a href={c.href} class="hover:text-fg hover:underline">{c.name}</a> : <span aria-current="page" class="text-fg">{c.name}</span>}
+        {c.href ? <a href={c.href} class="-my-2 py-2 hover:text-fg hover:underline">{c.name}</a> : <span aria-current="page" class="text-fg">{c.name}</span>}
       </li>
     ))}
   </ol>
