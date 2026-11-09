@@ -1,0 +1,11 @@
+---
+/** "Written and reviewed by … · Last reviewed …" line, linking to the author page. */
+import { AUTHOR } from '../data/author.ts';
+interface Props { lang?: 'en' | 'hi'; date: string }
+const { lang = 'en', date } = Astro.props;
+const hi = lang === 'hi';
+const shown = new Date(`${date}T00:00:00Z`).toLocaleDateString(hi ? 'hi-IN' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<p class="mt-2 text-xs text-muted" data-testid="byline">
+  {hi ? 'लेखन और समीक्षा:' : 'Written and reviewed by'} <a class="underline" href={hi ? AUTHOR.pathHi : AUTHOR.path}>{hi ? 'आशीष' : AUTHOR.name}</a>, {AUTHOR.org}{' · '}{hi ? 'अंतिम समीक्षा' : 'Last reviewed'} <time datetime={date}>{shown}</time>{' · '}{hi ? 'सामान्य जानकारी, निवेश सलाह नहीं' : 'General information, not investment advice'}
+</p>

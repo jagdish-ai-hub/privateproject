@@ -1,0 +1,19 @@
+---
+/**
+ * On-demand fund page for variants without a static page (Regular plans, IDCW and other options).
+ * The fund is chosen with ?code=…; the page is not indexed and is left out of the sitemap.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { FundOnDemand } from '../../components/FundOnDemand.tsx';
+---
+<BaseLayout
+  title="Fund details: NAV, Returns and Risk"
+  description="NAV, returns, SIP returns, risk, expense ratio and chart for one mutual fund scheme, from official AMFI data."
+  path="/fund/"
+  noindex
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Fund details' }]} />
+  <h1 id="fund-h" class="max-w-4xl text-2xl font-semibold tracking-tight sm:text-3xl">Fund details</h1>
+  <div class="mt-4"><FundOnDemand client:load /></div>
+</BaseLayout>

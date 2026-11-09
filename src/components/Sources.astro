@@ -1,0 +1,14 @@
+---
+/** "Sources" section: the official organisations behind a page's rules and figures. */
+import type { Source } from '../lib/sources.ts';
+interface Props { sources: Source[]; lang?: 'en' | 'hi' }
+const { sources, lang = 'en' } = Astro.props;
+const hi = lang === 'hi';
+---
+<section class="mt-10 max-w-3xl" aria-labelledby="src-h" data-testid="sources">
+  <h2 id="src-h" class="text-lg font-semibold tracking-tight">{hi ? 'स्रोत' : 'Sources'}</h2>
+  <p class="mt-2 text-sm text-muted">{hi ? 'नियम, दरें और परिभाषाएँ इन आधिकारिक स्रोतों से ली गई हैं। फ़ैसला लेने से पहले मौजूदा स्थिति वहीं जाँचें।' : 'Rules, rates and definitions on this page come from these official sources. Check the current position there before you decide.'}</p>
+  <ul class="mt-3 space-y-2 text-sm">
+    {sources.map((s) => <li><a class="inline-block py-0.5 underline" href={s.url} rel="noopener" target="_blank">{hi ? s.nameHi : s.name}</a> <span class="text-muted">· {hi ? s.whatHi : s.what}</span></li>)}
+  </ul>
+</section>

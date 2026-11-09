@@ -4,7 +4,7 @@ import { defaultWindow, rebase, type CompareInput } from '../../lib/compare.ts';
 import { cellFor } from '../../lib/screener/cells.ts';
 import { COLUMNS } from '../../lib/screener/columns.ts';
 import { filterIndices } from '../../lib/screener/query.ts';
-import { fundSlug } from '../../lib/slug.ts';
+import { fundHrefAt } from '../../lib/fundLinks.ts';
 import type { Filters } from '../../lib/screener/types.ts';
 import { CompareChart } from './CompareChart.tsx';
 import { COLUMN_TERM, type TermKey } from '../../lib/glossary.ts';
@@ -190,7 +190,7 @@ export function Compare() {
             <thead>
               <tr class="border-b border-line text-xs text-muted">
                 <th scope="col" class="sticky left-0 bg-bg px-3 py-2 text-left font-medium">Metric</th>
-                {selected.map((s) => <th key={s.code} scope="col" class="min-w-44 px-3 py-2 text-right font-medium"><a class="hover:underline" href={`/fund/${fundSlug(prepared.data.name[s.row], s.code)}/`}>{prepared.data.name[s.row]}</a></th>)}
+                {selected.map((s) => <th key={s.code} scope="col" class="min-w-44 px-3 py-2 text-right font-medium"><a class="hover:underline" href={fundHrefAt(prepared.data, s.row)}>{prepared.data.name[s.row]}</a></th>)}
               </tr>
             </thead>
             <tbody>

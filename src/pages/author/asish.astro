@@ -1,0 +1,22 @@
+---
+/** Author page (en). */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AuthorPage from '../../components/AuthorPage.astro';
+import { AUTHOR } from '../../data/author.ts';
+import { breadcrumbLd, personLd } from '../../lib/seo.ts';
+const site = new URL('/', Astro.site).toString();
+---
+<BaseLayout
+  title="About Asish, Author and Reviewer"
+  description="Asish of JGRF Software writes and reviews the calculators, Government scheme pages and guides on Mutual Fund Compare, checking every rate and rule against official sources."
+  path={AUTHOR.path}
+  alternates={[{ lang: 'en', path: AUTHOR.path }, { lang: 'hi', path: AUTHOR.pathHi }]}
+  jsonLd={[
+    breadcrumbLd([{ name: 'Home', url: site }, { name: 'Author', url: new URL(AUTHOR.path, site).toString() }]),
+    { '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: { ...personLd(site), description: AUTHOR.bio[0] } },
+  ]}
+>
+  <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Author' }]} />
+  <AuthorPage lang="en" />
+</BaseLayout>

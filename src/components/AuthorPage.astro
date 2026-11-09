@@ -1,0 +1,21 @@
+---
+/** About the author: who writes and reviews the site, and how pages are checked. Shared by the English and Hindi routes. */
+import { AUTHOR, REVIEWED_ON } from '../data/author.ts';
+interface Props { lang: 'en' | 'hi' }
+const { lang } = Astro.props;
+const hi = lang === 'hi';
+const L = hi
+  ? { h1: 'आशीष के बारे में', role: `${AUTHOR.org} · Mutual Fund Compare के निर्माता`, howH: 'पेज कैसे जाँचे जाते हैं', how: ['हर कैलकुलेटर का फ़ॉर्मूला उसके पेज पर दिखाया गया है, और स्वचालित टेस्ट उसे प्रकाशित उदाहरणों से मिलाते हैं।', 'सरकारी योजनाओं की ब्याज दरें वित्त मंत्रालय की तिमाही अधिसूचना से ली जाती हैं, और तिमाही ख़त्म होने पर पेज अपने आप चेतावनी दिखाता है।', 'म्यूचुअल फंड के आँकड़े AMFI के आधिकारिक NAV से रोज़ रात दोबारा निकाले जाते हैं।', 'हर पेज पर उसकी अंतिम समीक्षा की तारीख़ और उसके स्रोत दिखाए गए हैं।'], reviewed: 'कैलकुलेटर और योजनाओं के पेजों की अंतिम समीक्षा', contact: 'कोई ग़लती दिखे तो', contactLink: 'संपर्क पेज से बताएँ' }
+  : { h1: 'About Asish', role: `${AUTHOR.org} · Builder of Mutual Fund Compare`, howH: 'How pages are checked', how: ['Every calculator shows its formula on the page, and automated tests check it against published worked examples.', 'Government scheme rates come from the Finance Ministry’s quarterly notice, and the pages warn automatically when the quarter has ended.', 'Mutual fund figures are recalculated every night from AMFI’s official NAVs.', 'Every page shows when it was last reviewed and the sources it relies on.'], reviewed: 'Calculators and scheme pages last reviewed', contact: 'Spotted a mistake?', contactLink: 'Tell us on the contact page' };
+const bio = hi ? AUTHOR.bioHi : AUTHOR.bio;
+const shown = new Date(`${REVIEWED_ON}T00:00:00Z`).toLocaleDateString(hi ? 'hi-IN' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<article class="max-w-3xl" data-testid="author-page">
+  <h1 class="text-2xl font-semibold tracking-tight">{L.h1}</h1>
+  <p class="mt-1 text-sm text-muted">{L.role}</p>
+  <div class="prose-mf mt-5">{bio.map((p) => <p>{p}</p>)}</div>
+  <h2 class="mt-8 text-lg font-semibold tracking-tight">{L.howH}</h2>
+  <ul class="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">{L.how.map((x) => <li>{x}</li>)}</ul>
+  <p class="mt-6 text-sm">{L.reviewed}: <time datetime={REVIEWED_ON}>{shown}</time>.</p>
+  <p class="mt-2 text-sm">{L.contact} <a class="underline" href="/contact/">{L.contactLink}</a>.</p>
+</article>

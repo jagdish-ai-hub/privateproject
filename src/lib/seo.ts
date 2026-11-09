@@ -3,6 +3,8 @@
  * into `<script type="application/ld+json">` tags.
  */
 
+import { AUTHOR } from '../data/author.ts';
+
 /** One FAQ entry. */
 export interface Faq {
   question: string;
@@ -118,8 +120,46 @@ export function articleLd(a: ArticleLdInput): Record<string, unknown> {
     mainEntityOfPage: a.url,
     datePublished: a.datePublished,
     dateModified: a.dateModified,
-    author: { '@type': 'Organization', name: SITE_NAME, url: a.siteUrl },
+    author: personLd(a.siteUrl),
     publisher: { '@type': 'Organization', name: SITE_NAME, url: a.siteUrl },
+  };
+}
+
+/**
+ * The author as a `Person` (used as author and reviewer).
+ *
+ * @param siteUrl - Absolute site root, for the author page URL.
+ * @returns A JSON-LD object.
+ */
+export function personLd(siteUrl: string): Record<string, unknown> {
+  return {
+    '@type': 'Person',
+    name: AUTHOR.name,
+    url: new URL(AUTHOR.path, siteUrl).toString(),
+    worksFor: { '@type': 'Organization', name: AUTHOR.org },
+    knowsAbout: [...AUTHOR.knowsAbout],
+  };
+}
+
+/**
+ * `WebPage` markup with the review date, author and reviewer, for calculator and scheme pages.
+ *
+ * @param p - Page facts; `dateModified` as ISO `YYYY-MM-DD`.
+ * @returns A JSON-LD object.
+ */
+export function webPageLd(p: { url: string; name: string; description: string; dateModified: string; siteUrl: string; lang: 'en' | 'hi' }): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: p.name,
+    description: p.description,
+    url: p.url,
+    inLanguage: p.lang === 'hi' ? 'hi-IN' : 'en-IN',
+    dateModified: p.dateModified,
+    lastReviewed: p.dateModified,
+    author: personLd(p.siteUrl),
+    reviewedBy: personLd(p.siteUrl),
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: p.siteUrl },
   };
 }
 

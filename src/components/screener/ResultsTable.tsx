@@ -1,7 +1,7 @@
 import { cellFor } from '../../lib/screener/cells.ts';
 import { COLUMN_TERM, type TermKey } from '../../lib/glossary.ts';
 import { InfoTip } from '../InfoTip.tsx';
-import { fundSlug } from '../../lib/slug.ts';
+import { fundHrefAt } from '../../lib/fundLinks.ts';
 import type { Column } from '../../lib/screener/columns.ts';
 import type { Prepared } from '../../lib/screener/query.ts';
 import type { SortKey, ViewState } from '../../lib/screener/types.ts';
@@ -71,7 +71,7 @@ export function ResultsTable({ prepared, rows, columns, sort, onSort, compact }:
               const tags = [d0.dict.category[d0.category[i]], PLAN_LABEL[d0.dict.plan[d0.plan[i]]], OPTION_LABEL[d0.dict.option[d0.option[i]]]].filter(Boolean).join(' · ');
               return (
                 <li key={d0.code[i]} class="p-3" data-testid="result-card">
-                  <a href={`/fund/${fundSlug(d0.name[i], d0.code[i])}/`} class="-mt-1 block py-2.5 font-medium hover:underline">{d0.name[i]}</a>
+                  <a href={fundHrefAt(d0, i)} class="-mt-1 block py-2.5 font-medium hover:underline">{d0.name[i]}</a>
                   <div class="text-xs text-muted">{tags}</div>
                   {numericCols.length > 0 && (
                     <dl class="mt-2 grid grid-cols-3 gap-x-3 gap-y-2">
@@ -119,7 +119,7 @@ export function ResultsTable({ prepared, rows, columns, sort, onSort, compact }:
                 return (
                   <tr key={d.code[i]} class="group border-b border-line hover:bg-subtle">
                     <td class={`sticky left-0 z-[5] bg-bg px-3 ${pad} group-hover:bg-subtle`}>
-                      <a href={`/fund/${fundSlug(d.name[i], d.code[i])}/`} class="font-medium hover:underline">{d.name[i]}</a>
+                      <a href={fundHrefAt(d, i)} class="font-medium hover:underline">{d.name[i]}</a>
                       {!compact && tags && <div class="text-xs text-muted">{tags}</div>}
                     </td>
                     {columns.map((c) => {

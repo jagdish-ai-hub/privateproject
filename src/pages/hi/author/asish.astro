@@ -1,0 +1,23 @@
+---
+/** Author page (hi). */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import AuthorPage from '../../../components/AuthorPage.astro';
+import { AUTHOR } from '../../../data/author.ts';
+import { breadcrumbLd, personLd } from '../../../lib/seo.ts';
+const site = new URL('/', Astro.site).toString();
+---
+<BaseLayout
+  title="आशीष के बारे में: लेखक और समीक्षक"
+  description="JGRF Software के आशीष, Mutual Fund Compare के कैलकुलेटर, सरकारी योजनाओं के पेज और गाइड लिखते और जाँचते हैं, हर दर और नियम आधिकारिक स्रोतों से मिलाकर।"
+  path={AUTHOR.pathHi}
+  lang="hi"
+  alternates={[{ lang: 'en', path: AUTHOR.path }, { lang: 'hi', path: AUTHOR.pathHi }]}
+  jsonLd={[
+    breadcrumbLd([{ name: 'होम', url: site }, { name: 'लेखक', url: new URL(AUTHOR.pathHi, site).toString() }]),
+    { '@context': 'https://schema.org', '@type': 'ProfilePage', inLanguage: 'hi-IN', mainEntity: { ...personLd(site), description: AUTHOR.bioHi[0] } },
+  ]}
+>
+  <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'लेखक' }]} />
+  <AuthorPage lang="hi" />
+</BaseLayout>

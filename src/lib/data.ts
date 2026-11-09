@@ -5,6 +5,7 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { fundSlug } from './slug.ts';
+import { fundHrefAt } from './fundLinks.ts';
 import { METRIC_KEYS, type MetricKey, type ScreenerData } from './screener/types.ts';
 
 /** One plan's expense ratio and its parts, in percent of assets per year. */
@@ -34,6 +35,8 @@ export interface Fund {
   displayName: string;
   code: number;
   slug: string;
+  /** Link to this fund: its own page, or the on-demand page for variants without one. */
+  href: string;
   name: string;
   amc: string;
   category: string;
@@ -130,6 +133,7 @@ export function fundAt(data: ScreenerData, i: number): Fund {
     displayName: duplicateNames(data).has(data.name[i]) ? `${data.name[i]} (${data.code[i]})` : data.name[i],
     code: data.code[i],
     slug: fundSlug(data.name[i], data.code[i]),
+    href: fundHrefAt(data, i),
     name: data.name[i],
     amc: data.dict.amc[data.amc[i]],
     category: data.dict.category[data.category[i]],

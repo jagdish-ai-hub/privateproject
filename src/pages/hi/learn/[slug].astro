@@ -2,6 +2,7 @@
 /** One guide (hi): rendered Markdown, FAQ block, related guides, Article + FAQPage + Breadcrumb JSON-LD. */
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Byline from '../../../components/Byline.astro';
 import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 import Faq from '../../../components/Faq.astro';
 import AdSlot from '../../../components/AdSlot.astro';
@@ -17,7 +18,6 @@ const all = await getCollection('learnHi');
 const related = entry.data.related.map((id) => all.find((g) => g.id === id)).filter((g) => g !== undefined);
 const path = `/hi/learn/${entry.id}/`;
 const url = new URL(path, Astro.site).toString();
-const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('hi-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 <BaseLayout
   title={entry.data.title}
@@ -38,7 +38,7 @@ const fmt = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('hi
   <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'सीखें', href: '/hi/learn/' }, { name: entry.data.title }]} />
   <article>
     <h1 class="max-w-3xl text-2xl font-semibold tracking-tight">{entry.data.title}</h1>
-    <p class="mt-2 text-xs text-muted">अंतिम समीक्षा: <time datetime={entry.data.dateModified}>{fmt(entry.data.dateModified)}</time> · सामान्य जानकारी, निवेश सलाह नहीं</p>
+    <Byline lang="hi" date={entry.data.dateModified} />
     <div class="prose-mf mt-5"><Content /></div>
   </article>
   <AdSlot slot="learn-article-end" />

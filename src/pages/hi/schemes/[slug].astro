@@ -1,10 +1,11 @@
 ---
 /** One Government savings scheme calculator page (hi). */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { REVIEWED_ON } from '../../../data/author.ts';
 import Breadcrumbs from '../../../components/Breadcrumbs.astro';
 import SchemePageBody from '../../../components/schemes/SchemePageBody.astro';
 import { SCHEMES_HI as PAGES, SCHEME_SUMMARY_HI as SUMMARY } from '../../../lib/schemeContent.hi.ts';
-import { breadcrumbLd, calculatorLd, faqLd } from '../../../lib/seo.ts';
+import { breadcrumbLd, calculatorLd, faqLd, webPageLd } from '../../../lib/seo.ts';
 
 export function getStaticPaths() {
   return PAGES.map((p) => ({ params: { slug: p.slug }, props: { slug: p.slug } }));
@@ -23,6 +24,7 @@ const url = new URL(path, Astro.site).toString();
       { name: page.name, url },
     ]),
     calculatorLd(page.name, url, page.description),
+    webPageLd({ url, name: page.title, description: page.description, dateModified: REVIEWED_ON, siteUrl: new URL('/', Astro.site).toString(), lang: 'hi' }),
     faqLd(page.faqs),
   ]}>
   <Breadcrumbs crumbs={[{ name: 'होम', href: '/' }, { name: 'सरकारी योजनाएँ', href: '/hi/schemes/' }, { name: page.name }]} />

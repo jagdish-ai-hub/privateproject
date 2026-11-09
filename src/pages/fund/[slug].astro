@@ -1,6 +1,6 @@
 ---
 /**
- * One static page per active scheme: NAV, chart, returns (with peer rank), SIP returns, risk,
+ * One static page per active Direct Growth scheme (other variants use /fund/?code=…): NAV, chart, returns (with peer rank), SIP returns, risk,
  * notices about adjusted data, similar funds, FAQ and JSON-LD. Generated from screener.json.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -17,6 +17,7 @@ import { formatAum, formatDay, formatNav, formatNum, formatPct, formatPlainPct, 
 import { formatIsoDate, leviesNote, terGap } from '../../lib/costs.ts';
 import { breadcrumbLd, faqLd, fundLd } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
+import { hasFundPage } from '../../lib/fundLinks.ts';
 import { clip } from '../../lib/stats.ts';
 
 export function getStaticPaths() {
@@ -25,7 +26,11 @@ export function getStaticPaths() {
   // FUND_CODES=122639,115284 builds only those schemes.
   const max = Number(process.env.MAX_FUND_PAGES ?? Infinity);
   const only = process.env.FUND_CODES ? new Set(process.env.FUND_CODES.split(',').map(Number)) : null;
-  const indices = Array.from({ length: data.count }, (_, i) => i).filter((i) => !only || only.has(data.code[i])).slice(0, max);
+  // Only Direct Growth (and single-plan Growth) schemes get a page of their own; see hasFundPage.
+  const indices = Array.from({ length: data.count }, (_, i) => i)
+    .filter((i) => hasFundPage(data.dict.plan[data.plan[i]], data.dict.option[data.option[i]]))
+    .filter((i) => !only || only.has(data.code[i]))
+    .slice(0, max);
   return indices.map((i) => ({ params: { slug: fundAt(data, i).slug }, props: { index: i } }));
 }
 

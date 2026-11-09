@@ -1,11 +1,19 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fundSlug } from '../src/lib/slug.ts';
+import { hasFundPage } from '../src/lib/fundLinks.ts';
 import type { ScreenerData } from '../src/lib/screener/types.ts';
 
-/** The first fund among the pages built for e2e (MAX_FUND_PAGES=30) with 1Y, 3Y and 5Y returns. */
+/** Rows that have a static page in an e2e build (MAX_FUND_PAGES=30): the first 30 Direct Growth schemes. */
+function builtRows(data: ScreenerData): number[] {
+  const rows: number[] = [];
+  for (let i = 0; i < data.count && rows.length < 30; i++) if (hasFundPage(data.dict.plan[data.plan[i]], data.dict.option[data.option[i]])) rows.push(i);
+  return rows;
+}
+
+/** The first fund among the pages built for e2e with 1Y, 3Y and 5Y returns. */
 async function pickFund(page: Page): Promise<{ path: string; name: string }> {
   const data = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
-  for (let i = 0; i < Math.min(30, data.count); i++) {
+  for (const i of builtRows(data)) {
     if (data.metrics.r1y[i] !== null && data.metrics.r3y[i] !== null && data.metrics.r5y[i] !== null) {
       return { path: `/fund/${fundSlug(data.name[i], data.code[i])}/`, name: data.name[i] };
     }
@@ -100,7 +108,7 @@ test('fund page: a skeleton of the same height is shown while chart data loads (
 
 test('fund page: costs block shows this plan\'s TER and AUM from the data, and a dash when there is none', async ({ page }) => {
   const data = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
-  const built = Array.from({ length: Math.min(30, data.count) }, (_, i) => i);
+  const built = builtRows(data);
   const withTer = built.find((i) => data.ter[i] !== null);
   const without = built.find((i) => data.ter[i] === null);
   if (withTer === undefined && without === undefined) throw new Error('no fund among the first 30 pages');
@@ -118,7 +126,8 @@ test('fund page: costs block shows this plan\'s TER and AUM from the data, and a
 
 test('fund page: an (i) opens a plain-language explanation, Escape closes it, and peers insight quotes real numbers', async ({ page }) => {
   const data = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
-  const i = Array.from({ length: Math.min(30, data.count) }, (_, k) => k).find((k) => data.ter[k] !== null && data.metrics.r1y[k] !== null) ?? 0;
+  const built = builtRows(data);
+  const i = built.find((k) => data.ter[k] !== null && data.metrics.r1y[k] !== null) ?? built[0];
   await page.goto(`/fund/${fundSlug(data.name[i], data.code[i])}/`);
   const costs = page.getByTestId('costs');
   await costs.getByRole('button', { name: /What is TER/ }).click();

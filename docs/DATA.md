@@ -115,7 +115,10 @@ in `src/lib/screener/types.ts`.
 
 ## File count
 
-The static host's limit matters: Cloudflare Pages' free plan allows 20,000 files. A full build is
-about 17,000 (one page and one chart file per scheme). The pipeline warns when it gets close; if
-active schemes grow past about 9,500, host `public/data/nav/` elsewhere (for example R2) or build
-fewer fund pages.
+The static host's limit matters: Cloudflare Pages' free plan allows 20,000 files per site. Only the
+**Direct Growth** variant of each scheme (and the Growth option of single-plan schemes such as ETFs)
+gets a static page; every other variant opens `/fund/?code=…`, one page that loads the fund from
+`screener.json` in the browser and is marked `noindex` (see `src/lib/fundLinks.ts`). The chart file
+`public/data/nav/{code}.json` is still written for every scheme, because the compare page and the
+on-demand page use it. A full build is therefore about one chart file per scheme plus one page per
+Direct Growth scheme, roughly 10,000 to 11,000 files.

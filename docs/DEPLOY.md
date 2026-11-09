@@ -2,16 +2,32 @@
 
 ## Hosting (Cloudflare Pages, free)
 
-1. Create a Pages project (direct upload, no build settings needed: the nightly workflow builds).
-2. In the GitHub repo set **secrets** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and
-   **variables** `CLOUDFLARE_PROJECT` (project name), `SITE_URL` (for example `https://example.com`,
-   used for canonical URLs, the sitemap and robots.txt), `PUBLIC_CONTACT_EMAIL`.
-3. Run the **Nightly data and deploy** workflow once manually (`workflow_dispatch`). The first run
-   backfills all histories (about 10 minutes); later runs are fast ([CACHING.md](CACHING.md)).
-4. Add a custom domain in Cloudflare Pages.
-5. Submit `https://your-domain/sitemap-index.xml` in Google Search Console.
+The site is built here (or in GitHub Actions), then the finished `dist/` folder is uploaded to
+Cloudflare Pages with **Direct Upload**. Cloudflare never builds it: Cloudflare stops builds after
+20 minutes, and downloading every fund's history from scratch takes about that long.
 
-Any static host works. Build with `npm run data:build && npm run build` and upload `dist/`.
+**Do not** create the project with "Connect to Git". A Direct Upload project cannot later be switched
+to Git, and a Git-connected project tries to build the site itself and times out.
+
+The dashboard's drag-and-drop upload takes at most 1,000 files, and the site has about 10,000, so the
+upload is done with Cloudflare's command-line tool, `wrangler`. That needs one **API token**
+(Cloudflare → My Profile → API Tokens → Create Token, permission *Cloudflare Pages: Edit*) and your
+**account ID** (dashboard sidebar). Three ways to use it, from least to most automatic:
+
+1. **From your own computer** (Node.js 22): `npm ci`, `npm run data:build`, `npm run build`, then
+   `CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… npx wrangler pages deploy dist --project-name=<name>`.
+   The first run creates the project. Data is as fresh as your last run.
+2. **From a Claude Code cloud session:** save the token as a network secret for `api.cloudflare.com` in
+   the environment's settings; the session can then build and run the same `wrangler` command.
+3. **Every night, automatically (recommended once live):** in the GitHub repository set the secrets
+   `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the variable `CLOUDFLARE_PROJECT`, plus `SITE_URL`.
+   The **Nightly data and deploy** workflow then rebuilds the data and uploads the site every night.
+   This stores the token in GitHub; Cloudflare itself is still not connected to the repository.
+
+After the first upload: add the custom domain in Cloudflare Pages and submit
+`https://your-domain/sitemap-index.xml` in Google Search Console and Bing Webmaster Tools.
+
+Any static host works: build with `npm run data:build && npm run build` and upload `dist/`.
 Mind the host's file limit ([DATA.md](DATA.md#file-count)).
 
 ## Data licensing: read this before you monetise

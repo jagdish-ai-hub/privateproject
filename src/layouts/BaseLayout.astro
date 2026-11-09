@@ -22,11 +22,13 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
   lang?: 'en' | 'hi';
   alternates?: { lang: 'en' | 'hi'; path: string }[];
+  /** Keep the page out of search results (it can still be visited and its links followed). */
+  noindex?: boolean;
 }
 // Only a plausible Clarity project id (letters and digits) turns the script on.
 const clarityRaw = import.meta.env.PUBLIC_CLARITY_ID;
 const clarityId = typeof clarityRaw === 'string' && /^[a-z0-9]{6,20}$/i.test(clarityRaw) ? clarityRaw : '';
-const { title, description, path = Astro.url.pathname, jsonLd = [], lang = 'en', alternates = [] } = Astro.props;
+const { title, description, path = Astro.url.pathname, jsonLd = [], lang = 'en', alternates = [], noindex = false } = Astro.props;
 const hi = lang === 'hi';
 const other = alternates.find((a) => a.lang !== lang);
 const canonical = new URL(path, Astro.site).toString();
@@ -56,6 +58,7 @@ const nav = hi
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang === 'hi' ? 'hi-IN' : 'en-IN'} href={new URL(a.path, Astro.site).toString()} />)}
     {alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={new URL((alternates.find((a) => a.lang === 'en') ?? alternates[0]).path, Astro.site).toString()} />}
     <meta property="og:title" content={fullTitle} />
@@ -149,7 +152,7 @@ const nav = hi
             <p>Educational information only; not investment advice. Data: NAV from AMFI via <a class="underline" href="https://www.mfapi.in">MFapi.in</a>; expense ratio and AUM from AMFI; Government scheme rates from Ministry of Finance notices.</p>
           </>
         )}
-        <p><a class="inline-block py-2 underline" href="/methodology/">Methodology</a> · <a class="inline-block py-2 underline" href="/about/">About</a> · <a class="inline-block py-2 underline" href="/privacy/">Privacy</a> · <a class="inline-block py-2 underline" href="/disclaimer/">Disclaimer</a></p>
+        <p><a class="inline-block py-2 underline" href="/methodology/">Methodology</a> · <a class="inline-block py-2 underline" href="/about/">About</a> · <a class="inline-block py-2 underline" href="/privacy/">Privacy</a> · <a class="inline-block py-2 underline" href="/disclaimer/">Disclaimer</a> · <a class="inline-block py-2 underline" href={hi ? '/hi/author/asish/' : '/author/asish/'}>{hi ? 'लेखक' : 'Author'}</a></p>
       </div>
     </footer>
   </body>

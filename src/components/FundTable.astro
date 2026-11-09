@@ -24,7 +24,7 @@ const cols = [['r1y', '1Y'], ['r3y', '3Y'], ['r5y', '5Y'], ['sip3y', 'SIP 3Y']] 
     <tbody>
       {funds.map((f) => (
         <tr class="border-b border-line last:border-0 hover:bg-subtle">
-          <td class="px-3 py-2.5"><a href={`/fund/${f.slug}/`} class="font-medium hover:underline">{f.name}</a></td>
+          <td class="px-3 py-2.5"><a href={f.href} class="font-medium hover:underline">{f.name}</a></td>
           {showCategory && <td class="whitespace-nowrap px-3 py-2.5 text-muted">{f.category}</td>}
           <td class="num px-3 py-2.5">{formatNav(f.nav)}</td>
           {cols.map(([k]) => <td class={`num px-3 py-2.5 ${signClass(f.metrics[k])}`}>{formatPct(f.metrics[k])}</td>)}

@@ -1,0 +1,16 @@
+# Mutual Fund Compare
+
+> Free, no-sign-up tools for Indian savers, in English and Hindi: a mutual fund screener and side-by-side comparison built from official AMFI NAV data, calculators (SIP, lumpsum, SWP, CAGR, home/car/personal loan EMI with prepayment, FD after tax and inflation, inflation, rent vs buy, car and EV running cost, gold and silver), Government small savings scheme calculators with the notified rates (PPF, Sukanya Samriddhi, SCSS, NSC, KVP, Post Office MIS, RD and Time Deposit), and plain-language guides. Every calculator shows its formula and a worked example. Written and reviewed by Asish (JGRF Software). General information, not investment advice.
+
+## Main sections
+- [Mutual fund screener](/#screener): filter and sort every active scheme by returns, SIP returns, risk, expense ratio and fund size
+- [Compare funds](/compare/): two to four funds side by side
+- [Calculators](/tools/) · [Hindi](/hi/tools/)
+- [Government savings schemes and current rates](/schemes/) · [Hindi](/hi/schemes/)
+- [Guides](/learn/) · [Hindi](/hi/learn/)
+- [How the numbers are calculated](/methodology/)
+- [About the author](/author/asish/)
+
+## Data
+- NAV: AMFI, via MFapi.in, rebuilt every night. Expense ratio and fund size: AMFI.
+- Government scheme rates: Ministry of Finance quarterly notice, with the period and notice number shown on each page.
