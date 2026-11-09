@@ -15,7 +15,7 @@ test('a guide has Article, FAQPage and Breadcrumb JSON-LD, a visible FAQ and a r
   const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
   const types = blocks.map((b) => (JSON.parse(b) as { '@type': string })['@type']);
   expect(types).toEqual(expect.arrayContaining(['Article', 'FAQPage', 'BreadcrumbList']));
-  await expect(page.locator('summary').first()).toBeVisible();
+  await expect(page.locator('main summary').first()).toBeVisible();
   await expect(page.getByText(/Last reviewed/)).toBeVisible();
   // the worked example uses numbers computed with the calculator code
   await expect(page.getByText('₹12.6 lakh')).toBeVisible();

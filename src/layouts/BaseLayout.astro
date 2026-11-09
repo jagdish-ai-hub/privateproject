@@ -101,17 +101,38 @@ const nav = hi
     {jsonLd.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
   </head>
   <body>
-    <header class="border-b border-line">
-      <div class="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2">
-        <a href="/" class="flex items-center gap-2 py-2 font-semibold tracking-tight" aria-label="Mutual Fund Compare, home"><Logo size={24} /><span>Mutual Fund Compare</span></a>
-        <nav class="order-3 flex w-full flex-wrap gap-x-3 text-sm text-muted sm:order-none sm:w-auto" aria-label="Main">
-          {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-2.5 font-medium text-accent-fg hover:opacity-90 sm:py-1' : 'whitespace-nowrap px-1 py-2.5 hover:text-fg sm:py-1'}>{n.label}</a>)}
+    <header class="relative border-b border-line">
+      <div class="mx-auto flex min-h-14 max-w-7xl items-center gap-x-2 px-4 py-2 sm:gap-x-6">
+        <a href="/" class="flex shrink-0 items-center gap-2 whitespace-nowrap py-2 text-[15px] font-semibold tracking-tight sm:text-base" aria-label="Mutual Fund Compare, home"><Logo size={24} /><span>Mutual Fund Compare</span></a>
+        <nav class="hidden flex-wrap gap-x-3 text-sm text-muted sm:flex" aria-label="Main">
+          {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'whitespace-nowrap px-1 py-1 hover:text-fg'}>{n.label}</a>)}
         </nav>
-        <div class="ml-auto flex items-center gap-3">
-          {other && <a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="rounded-md border border-line px-3 py-2 text-sm hover:bg-subtle sm:px-2.5 sm:py-1" data-testid="lang-switch">{other.lang === 'hi' ? 'हिंदी' : 'English'}</a>}
+        <div class="ml-auto flex items-center gap-1.5 sm:gap-3">
+          {other && <a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="hidden rounded-md border border-line px-2.5 py-1 text-sm hover:bg-subtle sm:inline-block" data-testid="lang-switch">{other.lang === 'hi' ? 'हिंदी' : 'English'}</a>}
           <ThemeToggle />
+          <details class="sm:hidden" data-testid="mobile-menu" data-mobile-menu>
+            <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-md border border-line hover:bg-subtle [&::-webkit-details-marker]:hidden" aria-label={hi ? 'मेनू' : 'Menu'}>
+              <svg class="menu-open" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+              <svg class="menu-close" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+            </summary>
+            <nav class="absolute inset-x-0 top-full z-40 border-b border-line bg-bg px-4 pb-3 shadow-lg" aria-label={hi ? 'मुख्य मेनू' : 'Main menu'}>
+              <ul class="divide-y divide-line">
+                {nav.map((n) => <li><a href={n.href} class={n.cta ? 'my-2 flex min-h-11 items-center justify-center rounded-md bg-accent px-3 font-medium text-accent-fg' : 'flex min-h-12 items-center text-[15px]'}>{n.label}</a></li>)}
+                {other && <li><a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="flex min-h-12 items-center text-[15px]" data-testid="lang-switch-mobile">{other.lang === 'hi' ? 'हिंदी में पढ़ें' : 'Read in English'}</a></li>}
+              </ul>
+            </nav>
+          </details>
         </div>
       </div>
+      <script>
+        // Close the phone menu after choosing a link (same-page anchors otherwise leave it open), on Escape and on a tap outside.
+        const menu = document.querySelector<HTMLDetailsElement>('[data-mobile-menu]');
+        if (menu) {
+          menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { menu.open = false; }));
+          document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary')?.focus(); } });
+          document.addEventListener('click', (e) => { if (menu.open && !menu.contains(e.target as Node)) menu.open = false; });
+        }
+      </script>
     </header>
     <slot name="hero" />
     <main class="mx-auto max-w-7xl px-4 py-6"><slot /></main>

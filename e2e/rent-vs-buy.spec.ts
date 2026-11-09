@@ -1,10 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+/** Wait until every calculator island has loaded in the browser; a click before that is lost. */
+const hydrated = (page: Page) => page.waitForFunction(() => !document.querySelector('astro-island[ssr]'));
 import { RENT_VS_BUY_DEFAULTS, breakEvenRent, rentVsBuy } from '../src/lib/rentVsBuy.ts';
 
 const rs = (n: number): string => '₹' + Math.round(n).toLocaleString('en-IN');
 
 test('defaults show the same numbers as the maths and the worked example', async ({ page }) => {
   await page.goto('/tools/rent-vs-buy-calculator/');
+  await hydrated(page);
   const r = rentVsBuy(RENT_VS_BUY_DEFAULTS);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Rent vs buy calculator');
   await expect(page.getByTestId('rvb-buyer')).toHaveText(rs(r.buyerNetWorth));
@@ -15,6 +19,7 @@ test('defaults show the same numbers as the maths and the worked example', async
 
 test('raising the rent flips the verdict to buying, and the verdict follows the numbers', async ({ page }) => {
   await page.goto('/tools/rent-vs-buy-calculator/');
+  await hydrated(page);
   await expect(page.getByTestId('rvb-verdict')).toContainText('renting and investing the difference leaves you');
   await page.getByLabel('Rent for a similar home (per month)', { exact: true }).fill('60000');
   await expect(page.getByTestId('rvb-verdict')).toContainText('buying leaves you');
@@ -26,6 +31,7 @@ test('raising the rent flips the verdict to buying, and the verdict follows the 
 test('the extra assumptions are tucked away but reachable, and the page fits a phone', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   await page.goto('/tools/rent-vs-buy-calculator/');
+  await hydrated(page);
   await page.getByTestId('more-assumptions').locator('summary').click();
   await expect(page.getByLabel('Cost of selling', { exact: true })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

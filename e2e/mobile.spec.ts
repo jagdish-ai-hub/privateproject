@@ -13,7 +13,7 @@ const names = (d: string): string[] => readdirSync(join(dir, d)).filter((f) => f
 const tools = ['sip-calculator', 'step-up-sip-calculator', 'lumpsum-calculator', 'goal-sip-calculator', 'swp-calculator', 'cagr-calculator', 'rent-vs-buy-calculator', 'car-running-cost-calculator', 'ev-vs-petrol-running-cost-calculator', 'gold-jewellery-price-calculator', 'gold-silver-return-calculator', 'home-loan-emi-calculator', 'car-loan-emi-calculator', 'personal-loan-emi-calculator', 'fd-calculator', 'inflation-calculator'];
 const schemes = ['ppf-calculator', 'sukanya-samriddhi-calculator', 'scss-calculator', 'nsc-calculator', 'kvp-calculator', 'post-office-mis-calculator', 'post-office-rd-calculator', 'post-office-fd-calculator'];
 const routes = [
-  '/', '/compare/', '/compare/?f=100033,100034', '/tools/', '/hi/tools/', '/schemes/', '/hi/schemes/', '/learn/', '/hi/learn/', '/methodology/', '/about/', '/privacy/', '/disclaimer/', '/contact/',
+  '/', '/compare/', '/tools/', '/hi/tools/', '/schemes/', '/hi/schemes/', '/learn/', '/hi/learn/', '/methodology/', '/about/', '/privacy/', '/disclaimer/', '/contact/',
   ...tools.flatMap((t) => [`/tools/${t}/`, `/hi/tools/${t}/`]),
   ...schemes.flatMap((t) => [`/schemes/${t}/`, `/hi/schemes/${t}/`]),
   ...names('src/content/learn').flatMap((g) => [`/learn/${g}/`, `/hi/learn/${g}/`]),
@@ -31,11 +31,13 @@ for (const width of [320, 390]) {
         const m = await page.evaluate(() => ({
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           smallInputs: [...document.querySelectorAll<HTMLInputElement>('input')].filter((i) => !['range', 'checkbox', 'radio', 'hidden'].includes(i.type) && getComputedStyle(i).display !== 'none' && parseFloat(getComputedStyle(i).fontSize) < 16).length,
-          smallNav: [...document.querySelectorAll<HTMLElement>('header a')].filter((a) => a.getBoundingClientRect().height < 36).length,
+          smallNav: [...document.querySelectorAll<HTMLElement>('header a, header summary, header button')].filter((a) => { const r = a.getBoundingClientRect(); return r.height > 0 && r.height < 36; }).length,
+          headerHeight: Math.round(document.querySelector('header')!.getBoundingClientRect().height),
         }));
         if (m.overflow > 0) failures.push(`${r}: scrolls sideways by ${m.overflow}px`);
         if (m.smallInputs) failures.push(`${r}: ${m.smallInputs} input(s) under 16px`);
-        if (m.smallNav) failures.push(`${r}: ${m.smallNav} header link(s) under 36px tall`);
+        if (m.smallNav) failures.push(`${r}: ${m.smallNav} header control(s) under 36px tall`);
+        if (m.headerHeight > 72) failures.push(`${r}: header is ${m.headerHeight}px tall on a phone`);
       }
       expect(failures, failures.join('\n')).toEqual([]);
     });
@@ -44,6 +46,30 @@ for (const width of [320, 390]) {
 
 test.describe('phone, interactive states', () => {
   test.use({ viewport: { width: 320, height: 800 }, hasTouch: true, isMobile: true });
+
+  test('the phone header is one row; the menu opens a list of every link and closes again', async ({ page }) => {
+    for (const [path, other] of [['/tools/', 'हिंदी में पढ़ें'], ['/hi/tools/', 'Read in English']] as const) {
+      await page.goto(path);
+      await expect(page.getByRole('navigation', { name: 'Main', exact: true })).toBeHidden();
+      const menu = page.getByTestId('mobile-menu');
+      await menu.locator('summary').click();
+      const links = menu.getByRole('link');
+      expect(await links.count()).toBe(6);
+      for (const l of await links.all()) {
+        await expect(l).toBeVisible();
+        expect((await l.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+        expect((await l.boundingBox())!.x + (await l.boundingBox())!.width).toBeLessThanOrEqual(321);
+      }
+      await expect(menu.getByTestId('lang-switch-mobile')).toHaveText(other);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+      await page.keyboard.press('Escape');
+      await expect(links.first()).toBeHidden();
+    }
+    await page.goto('/learn/');
+    await page.getByTestId('mobile-menu').locator('summary').click();
+    await page.getByTestId('mobile-menu').getByRole('link', { name: 'Calculators' }).click();
+    await expect(page).toHaveURL(/\/tools\/$/);
+  });
 
   test('the screener opens, its filters stay on screen and the page does not scroll sideways', async ({ page }) => {
     await page.goto('/');
@@ -62,7 +88,8 @@ test.describe('phone, interactive states', () => {
   });
 
   test('the compare page keeps long fund names readable and inside the screen', async ({ page }) => {
-    await page.goto('/compare/?f=100033,100034');
+    const d = (await (await page.request.get('/data/screener.json')).json()) as { code: number[] };
+    await page.goto(`/compare/?f=${d.code[0]},${d.code[1]}`);
     await page.getByRole('list', { name: 'Selected funds' }).waitFor({ timeout: 15_000 });
     const chips = await page.getByRole('list', { name: 'Selected funds' }).getByRole('listitem').all();
     for (const c of chips) expect((await c.boundingBox())!.x + (await c.boundingBox())!.width).toBeLessThanOrEqual(321);

@@ -1,4 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+/** Wait until every calculator island has loaded in the browser; a click before that is lost. */
+const hydrated = (page: Page) => page.waitForFunction(() => !document.querySelector('astro-island[ssr]'));
 import { EV_DEFAULT, PETROL_DEFAULT, compareCars, runningCost } from '../src/lib/vehicle.ts';
 import { jewelleryPrice, metalReturn } from '../src/lib/metals.ts';
 
@@ -6,6 +9,7 @@ const rs = (n: number, dp = 0): string => '₹' + n.toLocaleString('en-IN', { mi
 
 test('car running cost: default petrol matches the maths, and switching to electric changes the numbers', async ({ page }) => {
   await page.goto('/tools/car-running-cost-calculator/');
+  await hydrated(page);
   const p = runningCost(PETROL_DEFAULT, 1000);
   await expect(page.getByTestId('veh-perkm')).toHaveText(rs(p.perKm, 2));
   await expect(page.getByTestId('veh-permonth')).toHaveText(rs(p.perMonth));
@@ -20,6 +24,7 @@ test('car running cost: default petrol matches the maths, and switching to elect
 
 test('EV vs petrol: results equal the maths; a big subsidy flips the total in favour of the electric car', async ({ page }) => {
   await page.goto('/tools/ev-vs-petrol-running-cost-calculator/');
+  await hydrated(page);
   const c = compareCars(PETROL_DEFAULT, EV_DEFAULT, 1000, 5, 1_000_000, 1_400_000, 0, 25_000, 35_000);
   await expect(page.getByTestId('veh-saving')).toHaveText(rs(c.monthlySaving));
   await expect(page.getByTestId('veh-total-a')).toHaveText(rs(c.totalA));
@@ -32,6 +37,7 @@ test('EV vs petrol: results equal the maths; a big subsidy flips the total in fa
 
 test('jewellery: bill, sell-back and the line for making and GST agree with the maths', async ({ page }) => {
   await page.goto('/tools/gold-jewellery-price-calculator/');
+  await hydrated(page);
   const j = jewelleryPrice({ ratePerGram: 10_000, weightGrams: 10, purity: 22 / 24, makingType: 'percent', making: 0.1, gst: 0.03, buybackDeduction: 0 });
   await expect(page.getByTestId('metal-total')).toHaveText(rs(j.total));
   await expect(page.getByTestId('metal-value')).toHaveText(rs(j.metalValue));
@@ -45,6 +51,7 @@ test('jewellery: bill, sell-back and the line for making and GST agree with the 
 
 test('metal return: net return after costs is below the price growth, and break-even is above the buying price', async ({ page }) => {
   await page.goto('/tools/gold-silver-return-calculator/');
+  await hydrated(page);
   const r = metalReturn({ amount: 100_000, buyPrice: 6_000, sellPrice: 7_500, years: 5, buyCost: 0.03, sellCost: 0, holdingCostPerYear: 0 });
   await expect(page.getByTestId('metal-final')).toHaveText(rs(r.finalValue));
   await expect(page.getByTestId('metal-netcagr')).toHaveText(`${(r.netCagr! * 100).toFixed(2)}%`);

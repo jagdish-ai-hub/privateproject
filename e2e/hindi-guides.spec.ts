@@ -21,7 +21,7 @@ for (const slug of slugs) {
     await expect(page.locator('html')).toHaveAttribute('lang', 'hi-IN');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await expect(page.getByText(/अंतिम समीक्षा/).first()).toBeVisible();
-    await expect(page.locator('summary').first()).toBeVisible();
+    await expect(page.locator('main summary').first()).toBeVisible();
     await expect(page.locator('link[rel="alternate"][hreflang="en-IN"]')).toHaveAttribute('href', new RegExp(`/learn/${slug}/$`));
     const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
     const parsed = blocks.map((b) => JSON.parse(b) as { '@type': string; inLanguage?: string });

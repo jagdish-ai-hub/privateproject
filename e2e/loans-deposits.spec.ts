@@ -1,10 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+/** Wait until every calculator island has loaded in the browser; a click before that is lost. */
+const hydrated = (page: Page) => page.waitForFunction(() => !document.querySelector('astro-island[ssr]'));
 import { deposit, emi, flatEmi, inflation, loan, rateFromEmi } from '../src/lib/loans.ts';
 
 const rs = (n: number): string => '₹' + Math.round(n).toLocaleString('en-IN');
 
 test('home loan: default EMI, interest and total match the maths', async ({ page }) => {
   await page.goto('/tools/home-loan-emi-calculator/');
+  await hydrated(page);
   const r = loan({ amount: 5_000_000, rate: 0.0875, years: 20, feePct: 0.005 });
   await expect(page.getByTestId('loan-emi')).toHaveText(rs(r.emi));
   await expect(page.getByTestId('loan-interest')).toHaveText(rs(r.totalInterest));
@@ -14,6 +18,7 @@ test('home loan: default EMI, interest and total match the maths', async ({ page
 
 test('home loan: an extra monthly payment shows the interest and time saved', async ({ page }) => {
   await page.goto('/tools/home-loan-emi-calculator/');
+  await hydrated(page);
   await page.getByTestId('more-assumptions').locator('summary').click();
   await page.getByLabel('Extra payment every month', { exact: true }).fill('5000');
   const p = loan({ amount: 5_000_000, rate: 0.0875, years: 20, extraMonthly: 5_000, feePct: 0.005 });
@@ -24,6 +29,7 @@ test('home loan: an extra monthly payment shows the interest and time saved', as
 
 test('car loan: flat rate shows the equivalent reducing-balance rate and the flat-rate EMI', async ({ page }) => {
   await page.goto('/tools/car-loan-emi-calculator/');
+  await hydrated(page);
   await page.getByTestId('rate-type').getByRole('button', { name: 'Flat rate' }).click();
   await page.getByLabel('Interest rate (per year)', { exact: true }).fill('8');
   const e = flatEmi(800_000, 0.08, 5);
@@ -35,6 +41,7 @@ test('car loan: flat rate shows the equivalent reducing-balance rate and the fla
 
 test('personal loan: the processing fee is in the total', async ({ page }) => {
   await page.goto('/tools/personal-loan-emi-calculator/');
+  await hydrated(page);
   const r = loan({ amount: 300_000, rate: 0.14, years: 3, feePct: 0.02 });
   await expect(page.getByTestId('loan-emi')).toHaveText(rs(r.emi));
   await expect(page.getByTestId('loan-total')).toHaveText(rs(r.totalPaid));
@@ -42,6 +49,7 @@ test('personal loan: the processing fee is in the total', async ({ page }) => {
 
 test('FD: maturity, tax, after-tax and real return match the maths, and compounding changes the result', async ({ page }) => {
   await page.goto('/tools/fd-calculator/');
+  await hydrated(page);
   const d = deposit({ amount: 100_000, rate: 0.07, years: 5, perYear: 4, taxRate: 0.3, inflation: 0.05 });
   await expect(page.getByTestId('fd-maturity')).toHaveText(rs(d.maturity));
   await expect(page.getByTestId('fd-tax')).toHaveText(rs(d.tax));
@@ -57,6 +65,7 @@ test('FD: maturity, tax, after-tax and real return match the maths, and compound
 
 test('inflation: future cost and buying power match the maths', async ({ page }) => {
   await page.goto('/tools/inflation-calculator/');
+  await hydrated(page);
   const r = inflation(100_000, 0.06, 10);
   await expect(page.getByTestId('infl-future')).toHaveText(rs(r.futureCost));
   await expect(page.getByTestId('infl-power')).toHaveText(rs(r.buyingPower));
