@@ -6,7 +6,8 @@
  *   node scripts/build-data.ts [--limit=N] [--concurrency=5] [--rps=10] [--offline] [--amc=Name]
  *                              [--ter=auto|refresh|cached|skip] [--aum=skip] [--min-ter-coverage=0.8]
  *
- * - `--limit=N`   only process the first N active schemes (development)
+ * - `--limit=N`   only process N active schemes, spread evenly across the whole list so every fund type is in
+ *                  the sample (development and CI; the list starts with debt funds, so the first N would have no equity)
  * - `--rps=N`      max MFapi requests per second across all workers (default 10; 0 = unlimited)
  * - `--offline`   reuse `data/cache/NAVAll.txt` instead of downloading it
  * - `--amc=Name`  only schemes whose fund house contains Name (development)
@@ -104,7 +105,10 @@ async function main(): Promise<void> {
   for (const s of active) perDay.set(s.navDay, (perDay.get(s.navDay) ?? 0) + 1);
   const asOf = [...perDay].sort((a, b) => b[1] - a[1])[0][0];
   if (args.has('amc')) active = active.filter((s) => s.amc.includes(args.get('amc') as string));
-  if (args.has('limit')) active = active.slice(0, Number(args.get('limit')));
+  if (args.has('limit')) {
+    const n = Number(args.get('limit'));
+    if (n > 0 && n < active.length) active = Array.from({ length: n }, (_, k) => active[Math.floor((k * active.length) / n)]);
+  }
   console.log(`parsed ${all.length} rows; as-of ${formatIso(asOf)}; active ${active.length}; future-dated (excluded) ${future.length}`);
 
   const concurrency = Number(args.get('concurrency') ?? 5);
