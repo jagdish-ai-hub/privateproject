@@ -40,36 +40,48 @@ test.describe('author, review date and sources', () => {
     test(`${path}: byline with the review date, official sources, and WebPage markup with the author`, async ({ page }) => {
       await page.goto(path);
       const byline = page.getByTestId('byline');
-      await expect(byline).toContainText(lang === 'hi' ? 'आशीष' : 'Asish');
+      await expect(byline).toContainText(lang === 'hi' ? 'ओम' : 'Omm');
+      await expect(byline).not.toContainText('JGRF');
       await expect(byline.locator('time')).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}$/);
-      await expect(byline.getByRole('link')).toHaveAttribute('href', lang === 'hi' ? '/hi/author/asish/' : '/author/asish/');
+      await expect(byline.getByRole('link')).toHaveAttribute('href', lang === 'hi' ? '/hi/author/omm/' : '/author/omm/');
       const links = page.getByTestId('sources').getByRole('link');
       expect(await links.count()).toBeGreaterThanOrEqual(1);
       for (const l of await links.all()) expect(await l.getAttribute('href')).toMatch(/^https:\/\/[^/]*(gov\.in|org\.in|amfiindia\.com)\//);
       const webPage = (await ld(page)).find((o) => o['@type'] === 'WebPage') as { dateModified: string; author: { name: string }; reviewedBy: { name: string } };
       expect(webPage.dateModified).toBe(await byline.locator('time').getAttribute('datetime'));
-      expect(webPage.author.name).toBe('Asish');
-      expect(webPage.reviewedBy.name).toBe('Asish');
+      expect(webPage.author.name).toBe('Omm');
+      expect(webPage.reviewedBy.name).toBe('Omm');
     });
   }
 
   test('guides credit the author as a Person and keep their own review date', async ({ page }) => {
     await page.goto('/learn/what-is-sip/');
     const article = (await ld(page)).find((o) => o['@type'] === 'Article') as { author: { '@type': string; name: string }; dateModified: string };
-    expect(article.author).toMatchObject({ '@type': 'Person', name: 'Asish' });
+    expect(article.author).toMatchObject({ '@type': 'Person', name: 'Omm' });
     await expect(page.getByTestId('byline').locator('time')).toHaveAttribute('datetime', article.dateModified);
   });
 
   test('the author page exists in both languages and is linked from the footer', async ({ page }) => {
-    await page.goto('/author/asish/');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('About Asish');
+    await page.goto('/author/omm/');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('About Omm');
     await expect(page.getByTestId('author-page')).toContainText('JGRF Software');
     await expect(page.getByTestId('author-page')).toContainText('not a SEBI-registered investment adviser');
     expect((await ld(page)).some((o) => o['@type'] === 'ProfilePage')).toBe(true);
     await page.getByTestId('lang-switch').click();
-    await expect(page).toHaveURL(/\/hi\/author\/asish\/$/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('आशीष के बारे में');
+    await expect(page).toHaveURL(/\/hi\/author\/omm\/$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('ओम के बारे में');
     await page.goto('/tools/');
-    await expect(page.locator('footer a[href="/author/asish/"]')).toBeVisible();
+    await expect(page.locator('footer a[href="/author/omm/"]')).toBeVisible();
   });
+});
+
+test('the footer says the data is public information from fund houses and AMFI, without naming individual services', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.locator('footer');
+  await expect(footer).toContainText('publicly available information as published by fund houses and AMFI');
+  await expect(footer).toContainText('Ministry of Finance');
+  await expect(footer).not.toContainText('MFapi');
+  await expect(footer.locator('a[href*="mfapi"]')).toHaveCount(0);
+  await page.goto('/hi/tools/sip-calculator/');
+  await expect(page.locator('footer')).toContainText('फंड हाउस और AMFI द्वारा प्रकाशित सार्वजनिक जानकारी');
 });

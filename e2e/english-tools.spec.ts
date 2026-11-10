@@ -32,7 +32,7 @@ for (const t of ONLY) {
     await expect(page.getByTestId('lang-switch-mobile')).toHaveCount(0);
     expect((await page.request.get(`/hi/tools/${t.slug}/`)).status()).toBe(404);
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-    await expect(page.getByTestId('byline')).toContainText('Asish');
+    await expect(page.getByTestId('byline')).toContainText('Omm');
     await expect(page.getByTestId('sources')).toBeVisible();
     await expect(page.getByTestId('tool-guide')).toBeVisible();
     await expect(page.getByTestId('related-tools').locator('a').first()).toBeVisible();

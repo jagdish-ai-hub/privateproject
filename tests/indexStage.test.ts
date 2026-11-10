@@ -38,11 +38,11 @@ describe('groupOf', () => {
     expect(groupOf('/tools/sip-calculator/')).toBe('en');
     expect(groupOf('/schemes/')).toBe('en');
     expect(groupOf('/learn/what-is-sip/')).toBe('en');
-    expect(groupOf('/author/asish/')).toBe('en');
+    expect(groupOf('/author/omm/')).toBe('en');
     expect(groupOf('/compare/')).toBe('en');
     expect(groupOf('/hi/')).toBe('hi');
     expect(groupOf('/hi/tools/sip-calculator/')).toBe('hi');
-    expect(groupOf('/hi/author/asish/')).toBe('hi');
+    expect(groupOf('/hi/author/omm/')).toBe('hi');
     expect(groupOf('/category/flexi-cap/')).toBe('lists');
     expect(groupOf('/amc/hdfc-mutual-fund/')).toBe('lists');
     expect(groupOf('/fund/parag-parikh-flexi-cap-fund-direct-plan-growth-122639/')).toBe('funds');
