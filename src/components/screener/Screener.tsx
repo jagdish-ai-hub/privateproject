@@ -4,7 +4,7 @@ import { COLUMNS } from '../../lib/screener/columns.ts';
 import { toCsv } from '../../lib/screener/csv.ts';
 import { applyView, filterIndices, sortIndices } from '../../lib/screener/query.ts';
 import type { Filters, SortKey, ViewState } from '../../lib/screener/types.ts';
-import { DEFAULT_VIEW, parseView, serializeView } from '../../lib/screener/url.ts';
+import { DEFAULT_VIEW, parseView, serializeView, withSearchWidening } from '../../lib/screener/url.ts';
 import { FilterBar } from './FilterBar.tsx';
 import { Pagination } from './Pagination.tsx';
 import { ResultsTable } from './ResultsTable.tsx';
@@ -58,7 +58,7 @@ export function Screener() {
   };
 
   const onFilters = (patch: Partial<Filters>, mode: 'push' | 'replace' = 'push'): void =>
-    update((v) => ({ ...v, filters: { ...v.filters, ...patch }, page: 1 }), mode);
+    update((v) => ({ ...v, filters: { ...v.filters, ...withSearchWidening(v.filters, patch) }, page: 1 }), mode);
   const onSort = (key: SortKey): void =>
     update((v) => ({ ...v, page: 1, sort: v.sort.key === key ? { key, dir: v.sort.dir === 'desc' ? 'asc' : 'desc' } : { key, dir: key === 'name' || key === 'amc' || key === 'category' || key === 'ter' ? 'asc' : 'desc' } }));
 

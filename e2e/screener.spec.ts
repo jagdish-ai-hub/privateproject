@@ -157,8 +157,8 @@ test.describe('phone layout', () => {
   test('active filters are counted on the Filters button', async ({ page }) => {
     await page.goto('/?cat=Any%20Category');
     await expect(showing(page)).toBeVisible();
-    // Plan + Option defaults and Category = 3 active groups
-    await expect(page.getByRole('button', { name: /^Filters/ })).toContainText('3');
+    // Plan, Option and Fund type (equity) defaults, plus Category = 4 active groups
+    await expect(page.getByRole('button', { name: /^Filters/ })).toContainText('4');
   });
 });
 
@@ -203,4 +203,32 @@ test.describe('phone results', () => {
     const top = applyView(prepare(d), parseView('?sort=ter:desc')).rows[0];
     await expect(page.getByTestId('result-card').first()).toContainText(d.name[top]);
   });
+});
+
+test('the home page opens on the largest Direct Growth equity funds, and says so', async ({ page }) => {
+  const data = await loadData(page);
+  await page.goto('/');
+  await expect(showing(page)).toBeVisible();
+  const equity = data.dict.assetClass.indexOf('Equity');
+  const best = [...Array(data.count).keys()]
+    .filter((i) => data.assetClass[i] === equity && data.dict.plan[data.plan[i]] === 'direct' && data.dict.option[data.option[i]] === 'growth' && data.aum[i] != null)
+    .sort((a, b) => (data.aum[b] as number) - (data.aum[a] as number) || data.name[a].localeCompare(data.name[b]) || data.code[a] - data.code[b])[0];
+  await expect(firstRowName(page)).toContainText(data.name[best].split(' - ')[0].slice(0, 20));
+  await expect(page.locator('#screener')).toContainText('largest fund size first');
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test('searching finds a fund of any type, and the link can be shared', async ({ page }) => {
+  const data = await loadData(page);
+  const liquid = data.name.findIndex((n, i) => data.dict.assetClass[data.assetClass[i]] !== 'Equity' && data.dict.plan[data.plan[i]] === 'direct' && data.dict.option[data.option[i]] === 'growth' && /liquid/i.test(n));
+  expect(liquid).toBeGreaterThanOrEqual(0);
+  await page.goto('/');
+  await expect(showing(page)).toBeVisible();
+  await page.getByLabel('Search funds').fill('liquid');
+  await expect(page).toHaveURL(/q=liquid/);
+  expect(page.url()).not.toContain('type=');
+  await expect(firstRowName(page)).toContainText(/liquid/i);
+  await page.goto('/?q=liquid');
+  await expect(showing(page)).toBeVisible();
+  await expect(firstRowName(page)).toContainText(/liquid/i);
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_VIEW, parseView, serializeView } from '../src/lib/screener/url.ts';
+import { DEFAULT_VIEW, parseView, serializeView, withSearchWidening } from '../src/lib/screener/url.ts';
 import type { ViewState } from '../src/lib/screener/types.ts';
 import { DASH, formatAum, formatNav, formatNum, formatPct, formatPlainPct, formatRupees, formatTer, signClass } from '../src/lib/format.ts';
 
@@ -97,5 +97,43 @@ describe('URL state with TER and AUM', () => {
   });
   it('sorting by aum is a valid sort key', () => {
     expect(parseView('?sort=aum:desc').sort).toEqual({ key: 'aum', dir: 'desc' });
+  });
+});
+
+describe('default view and search', () => {
+  it('opens on Direct Growth equity funds, largest fund size first', () => {
+    expect(DEFAULT_VIEW.filters.plan).toEqual(['direct']);
+    expect(DEFAULT_VIEW.filters.option).toEqual(['growth']);
+    expect(DEFAULT_VIEW.filters.assetClass).toEqual(['Equity']);
+    expect(DEFAULT_VIEW.sort).toEqual({ key: 'aum', dir: 'desc' });
+  });
+  it('a search link covers every fund type unless it names one', () => {
+    expect(parseView('?q=liquid').filters.assetClass).toEqual([]);
+    expect(parseView('?q=liquid&type=Equity').filters.assetClass).toEqual(['Equity']);
+    expect(parseView('?q=liquid&type=Debt~Hybrid').filters.assetClass).toEqual(['Debt', 'Hybrid']);
+    expect(parseView('?q=').filters.assetClass).toEqual(['Equity']);
+    expect(parseView('?q=%20%20').filters.assetClass).toEqual(['Equity']);
+  });
+  it('searching with no fund type chosen writes no type, and a chosen type is always written', () => {
+    const any = { ...DEFAULT_VIEW, filters: { ...DEFAULT_VIEW.filters, q: 'liquid', assetClass: [] } };
+    expect(serializeView(any)).toBe('q=liquid');
+    expect(parseView(serializeView(any))).toEqual(any);
+    const eq = { ...DEFAULT_VIEW, filters: { ...DEFAULT_VIEW.filters, q: 'liquid', assetClass: ['Equity'] } };
+    expect(serializeView(eq)).toContain('type=Equity');
+    expect(parseView(serializeView(eq))).toEqual(eq);
+  });
+  it('without a search, no fund type means "any type" and is written as an empty value', () => {
+    const any = { ...DEFAULT_VIEW, filters: { ...DEFAULT_VIEW.filters, assetClass: [] } };
+    expect(serializeView(any)).toBe('type=');
+    expect(parseView('type=').filters.assetClass).toEqual([]);
+  });
+  it('typing the first search character clears the default fund type, but never one the visitor chose', () => {
+    const f = DEFAULT_VIEW.filters;
+    expect(withSearchWidening(f, { q: 'l' })).toEqual({ q: 'l', assetClass: [] });
+    expect(withSearchWidening({ ...f, q: 'l', assetClass: [] }, { q: 'li' })).toEqual({ q: 'li' });
+    expect(withSearchWidening({ ...f, assetClass: ['Debt'] }, { q: 'l' })).toEqual({ q: 'l' });
+    expect(withSearchWidening(f, { q: '  ' })).toEqual({ q: '  ' });
+    expect(withSearchWidening(f, { plan: [] })).toEqual({ plan: [] });
+    expect(withSearchWidening(f, { q: 'l', assetClass: ['Hybrid'] })).toEqual({ q: 'l', assetClass: ['Hybrid'] });
   });
 });

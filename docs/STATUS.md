@@ -14,7 +14,7 @@ licence allow.
 
 | Area | What exists |
 |---|---|
-| Mutual fund screener | About 8,600 schemes; filter and sort on returns, SIP returns, risk, expense ratio (TER) and fund size (AUM); phone card layout; shareable URLs; CSV export |
+| Mutual fund screener | About 8,700 schemes. Opens on Direct Growth equity funds, largest fund size first (a fact, not a performance ranking; the home page says so). A search covers every fund type unless one is chosen. Filter and sort on returns, SIP returns, risk, expense ratio (TER) and fund size (AUM); phone card layout; shareable URLs; CSV export |
 | Fund pages | One page per Direct Growth scheme (about 1,850, indexed by Google): returns, risk, NAV chart with drop-from-peak, costs and size (Direct vs Regular TER), peer comparison, FAQ. Every other variant (Regular, IDCW and so on, about 6,850) opens on one shared page, `/fund/?code=…`, which loads the figures in the browser, links to the Direct Growth page and is kept out of Google (`noindex`, not in the sitemap). This keeps the site under Cloudflare's 20,000-file limit and keeps Google's attention on one page per scheme |
 | Category and fund-house pages | Lists with median expense ratio |
 | Side-by-side compare | Up to several funds, chart, plain-language insights |

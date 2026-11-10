@@ -5,12 +5,13 @@ import type { Filters, RangeKey, SortKey, ViewState } from './types.ts';
 export const PAGE_SIZES = [25, 50, 100] as const;
 
 /**
- * The view a first-time visitor sees: Direct plans, Growth option, sorted by 3Y return.
+ * The view a first-time visitor sees: Direct plans, Growth option, equity funds, largest fund size first.
+ * Fund size is a fact, not a verdict: it brings the best-known funds to the top without ranking by past returns.
  * Defaults are left out of the URL, so a clean `/` is the default view.
  */
 export const DEFAULT_VIEW: ViewState = {
-  filters: { q: '', amc: [], assetClass: [], category: [], plan: ['direct'], option: ['growth'], ranges: {} },
-  sort: { key: 'r3y', dir: 'desc' },
+  filters: { q: '', amc: [], assetClass: ['Equity'], category: [], plan: ['direct'], option: ['growth'], ranges: {} },
+  sort: { key: 'aum', dir: 'desc' },
   page: 1,
   size: 50,
 };
@@ -35,7 +36,13 @@ export function serializeView(view: ViewState): string {
   const sp = new URLSearchParams();
   const { filters: f } = view;
   if (f.q.trim()) sp.set('q', f.q.trim());
+  // While searching, an empty fund-type list means "every type" (see parseView), so only a chosen type is written.
+  const searching = f.q.trim() !== '';
   for (const field of LIST_FIELDS) {
+    if (field === 'assetClass' && searching) {
+      if (f.assetClass.length) sp.set(PARAM.assetClass, f.assetClass.join('~'));
+      continue;
+    }
     if (!sameList(f[field], DEFAULT_VIEW.filters[field])) sp.set(PARAM[field], f[field].join('~'));
   }
   for (const [key, r] of Object.entries(f.ranges) as [RangeKey, { min?: number; max?: number }][]) {
@@ -67,6 +74,9 @@ export function parseView(search: string): ViewState {
     const raw = sp.get(PARAM[field]);
     if (raw !== null) filters[field] = raw === '' ? [] : raw.split('~');
   }
+  // A search link looks across every fund type unless it names one: the default view shows equity funds only,
+  // and "/?q=liquid" must not come back empty.
+  if (filters.q.trim() !== '' && sp.get(PARAM.assetClass) === null) filters.assetClass = [];
   for (const { key } of RANGE_FILTERS) {
     const min = num(sp.get(`min_${key}`));
     const max = num(sp.get(`max_${key}`));
@@ -94,4 +104,19 @@ function num(v: string | null): number | undefined {
 /** Is this string a sortable column key? */
 function isSortKey(k: string): k is SortKey {
   return k === 'name' || k === 'amc' || k === 'category' || k === 'nav' || k === 'age' || k === 'ter' || k === 'aum' || isMetricKey(k);
+}
+
+/**
+ * Changes to apply when the filters change. When the search box goes from empty to filled while the fund type is
+ * still the default (equity), the fund type is cleared, so a search finds a liquid or hybrid fund as well as an
+ * equity one. A fund type the visitor chose themselves is left alone.
+ *
+ * @param current - The filters before the change.
+ * @param patch - The change requested.
+ * @returns The change to apply.
+ */
+export function withSearchWidening(current: Filters, patch: Partial<Filters>): Partial<Filters> {
+  const startsSearching = patch.q !== undefined && patch.q.trim() !== '' && current.q.trim() === '';
+  if (startsSearching && patch.assetClass === undefined && sameList(current.assetClass, DEFAULT_VIEW.filters.assetClass)) return { ...patch, assetClass: [] };
+  return patch;
 }
