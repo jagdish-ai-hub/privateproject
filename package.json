@@ -12,9 +12,10 @@
     "typecheck": "astro sync && tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "build:e2e": "MAX_FUND_PAGES=30 astro build",
+    "build:e2e": "INDEX_STAGE=all MAX_FUND_PAGES=30 astro build",
     "test:e2e": "npm run build:e2e && playwright test",
     "check:site": "node scripts/check-site.mjs",
+    "check:stages": "node scripts/check-stages.mjs",
     "data:build": "node scripts/build-data.ts"
   },
   "dependencies": {

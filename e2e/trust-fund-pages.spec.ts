@@ -25,8 +25,10 @@ test.describe('fund pages', () => {
 
   test('the sitemap has no on-demand page and gives last-changed dates', async ({ page }) => {
     const index = await (await page.request.get('/sitemap-index.xml')).text();
-    const first = /<loc>[^<]*?(\/sitemap-\d+\.xml)<\/loc>/.exec(index)![1];
-    const xml = await (await page.request.get(first)).text();
+    // one file per page group (English, Hindi, lists, funds); the e2e build opens every group
+    const files = [...index.matchAll(/<loc>[^<]*?(\/sitemap-(?:en|hi|lists|funds)-\d+\.xml)<\/loc>/g)].map((m) => m[1]);
+    expect(files.length).toBeGreaterThanOrEqual(2);
+    const xml = (await Promise.all(files.map(async (f) => (await page.request.get(f)).text()))).join('\n');
     expect(xml).not.toMatch(/<loc>[^<]*\/fund\/<\/loc>/);
     expect(xml).toMatch(/<loc>[^<]*\/tools\/sip-calculator\/<\/loc><lastmod>\d{4}-\d{2}-\d{2}/);
     expect(xml).toMatch(/<loc>[^<]*\/hi\/learn\/what-is-sip\/<\/loc><lastmod>\d{4}-\d{2}-\d{2}/);

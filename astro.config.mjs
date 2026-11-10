@@ -6,10 +6,16 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { REVIEWED_ON } from './src/data/author.ts';
+import { GROUPS, groupOf, parseStage, parseTopFunds } from './src/lib/indexStage.ts';
+import { pageIndexable } from './src/lib/indexing.ts';
 
 // SITE_URL is set in CI / hosting; the placeholder keeps canonical URLs valid locally.
 // `||`, not `??`: GitHub Actions passes an unset variable as an empty string, which is not nullish and is not a valid URL.
 const site = process.env.SITE_URL || 'https://mf-screener.example.com';
+
+// Staged indexing (see src/lib/indexStage.ts): fail the build at once on a mistyped setting.
+parseStage(process.env.INDEX_STAGE);
+parseTopFunds(process.env.INDEX_FUNDS);
 
 // Sitemap <lastmod>: a guide's own review date; the review date for calculators, scheme and author pages;
 // the newest NAV date for pages built from fund data (home, fund, category and fund-house pages).
@@ -37,12 +43,16 @@ function lastmodFor(path) {
 export default defineConfig({
   trailingSlash: 'always',
   site,
+  // OUT_DIR lets the stage check (scripts/check-stages.mjs) build several variants side by side.
+  outDir: process.env.OUT_DIR || './dist',
   integrations: [
     preact({ compat: false }),
     mdx(),
     sitemap({
-      // The on-demand fund page (/fund/?code=…) is not indexed.
-      filter: (page) => !/\/fund\/$/.test(page),
+      // Only pages open to Google at this INDEX_STAGE (never the on-demand /fund/ page), in one sitemap file per group
+      // (sitemap-en-0.xml, sitemap-hi-0.xml, ...) so Search Console shows how each group is indexed.
+      filter: (page) => pageIndexable(new URL(page).pathname),
+      chunks: Object.fromEntries(GROUPS.map((g) => [g, (/** @type {import('@astrojs/sitemap').SitemapItem} */ item) => (groupOf(new URL(item.url).pathname) === g ? item : undefined)])),
       serialize(item) {
         const lastmod = lastmodFor(new URL(item.url).pathname);
         return lastmod ? { ...item, lastmod } : item;

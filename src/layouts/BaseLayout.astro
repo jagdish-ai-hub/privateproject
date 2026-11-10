@@ -14,6 +14,7 @@
 import '../styles/global.css';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import Logo from '../components/Logo.astro';
+import { hreflangOk, pageIndexable } from '../lib/indexing.ts';
 
 interface Props {
   title: string;
@@ -22,7 +23,7 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
   lang?: 'en' | 'hi';
   alternates?: { lang: 'en' | 'hi'; path: string }[];
-  /** Keep the page out of search results (it can still be visited and its links followed). */
+  /** Keep the page out of search results (it can still be visited and its links followed). Pages not yet open under INDEX_STAGE are also kept out; see src/lib/indexStage.ts. */
   noindex?: boolean;
 }
 // Only a plausible Clarity project id (letters and digits) turns the script on.
@@ -32,6 +33,9 @@ const { title, description, path = Astro.url.pathname, jsonLd = [], lang = 'en',
 const hi = lang === 'hi';
 const other = alternates.find((a) => a.lang !== lang);
 const canonical = new URL(path, Astro.site).toString();
+// Staged indexing: a page that is not open yet is tagged noindex, and hreflang links only join pages that are all open.
+const listed = !noindex && pageIndexable(path);
+const hreflang = listed && alternates.length > 0 && hreflangOk([path, ...alternates.map((a) => a.path)]);
 const fullTitle = title.includes('Mutual Fund Compare') ? title : `${title} | Mutual Fund Compare`;
 // The first item is the main call to action: it goes straight to the screener on the home page.
 const nav = hi
@@ -58,9 +62,9 @@ const nav = hi
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
-    {alternates.map((a) => <link rel="alternate" hreflang={a.lang === 'hi' ? 'hi-IN' : 'en-IN'} href={new URL(a.path, Astro.site).toString()} />)}
-    {alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={new URL((alternates.find((a) => a.lang === 'en') ?? alternates[0]).path, Astro.site).toString()} />}
+    {!listed && <meta name="robots" content="noindex, follow" />}
+    {hreflang && alternates.map((a) => <link rel="alternate" hreflang={a.lang === 'hi' ? 'hi-IN' : 'en-IN'} href={new URL(a.path, Astro.site).toString()} />)}
+    {hreflang && <link rel="alternate" hreflang="x-default" href={new URL((alternates.find((a) => a.lang === 'en') ?? alternates[0]).path, Astro.site).toString()} />}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

@@ -7,3 +7,4 @@ test-results/
 data/cache/
 public/data/
 data/generated/
+.stage-check/

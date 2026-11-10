@@ -30,6 +30,52 @@ After the first upload: add the custom domain in Cloudflare Pages and submit
 Any static host works: build with `npm run data:build && npm run build` and upload `dist/`.
 Mind the host's file limit ([DATA.md](DATA.md#file-count)).
 
+## Which pages Google may list (staged indexing)
+
+Every page is always built and works for visitors. One setting, `INDEX_STAGE`, decides which pages
+Google may list. A page that is held back gets a "do not index" tag (`noindex, follow`), is left out of
+the sitemaps, and is left out of the English/Hindi `hreflang` links. The menus, the screener and the
+language switch still link to it. Rules and code: `src/lib/indexStage.ts`.
+
+| `INDEX_STAGE` | Open to Google | Pages |
+|---|---|---|
+| `en` (default, also when empty) | the hand-written English pages: home, compare, calculators, schemes, guides, about, author, legal | 67 |
+| `core` | + the Hindi pages | 121 |
+| `lists` | + the 50 category and 55 fund-house list pages | 226 |
+| `funds` | + the largest funds by fund size; how many is `INDEX_FUNDS` (default 250) | 226 + N |
+| `all` | + every fund page | about 2,080 |
+
+The shared `/fund/?code=…` page is never listed. A mistyped value (for example `everything`) stops the
+build with a message, so it cannot silently open something else.
+
+**Set it:** GitHub → Settings → Secrets and variables → Actions → Variables → `INDEX_STAGE` (and
+`INDEX_FUNDS`). Then run **Nightly data and deploy** (or wait for the nightly run). The sitemap is
+`/sitemap-index.xml`, with one file per group (`sitemap-en-0.xml`, `sitemap-hi-0.xml`,
+`sitemap-lists-0.xml`, `sitemap-funds-*.xml`), so Search Console shows how each group is indexed.
+
+**Moving up a stage.** Each time: change the variable, redeploy, then in Search Console submit the
+sitemap file of the group that just opened and, for a few main pages of that group, use URL Inspection
+→ Request indexing. Google re-checks pages that were held back less often, so expect days to a few
+weeks, not a penalty.
+
+Move up only when the previous group has settled. Signals to look for (rules of thumb, not Google rules):
+
+- Search Console → Indexing → Pages, filtered to that group's sitemap: most pages (about 80%) show as indexed.
+- Few pages stuck as "Crawled - currently not indexed". If many are, do not open more templated pages:
+  improve the pages that are already open first.
+- Settings → Crawl stats shows steady daily crawling and mostly 200 responses.
+- Performance shows impressions for calculator and scheme searches, not only for the home page.
+
+Suggested order: `en` → `core` (after a Hindi speaker has read the Hindi pages) → `lists` →
+`funds` with `INDEX_FUNDS=250`, then 700, 1200 → `all`.
+
+**While you test the site on its `pages.dev` address** do not post the link publicly and do not add it to
+Search Console, then switch the `pages.dev` address off once the custom domain works (Pages project →
+Custom domains). `en` is open to Google in principle on any address that Google finds.
+
+**Check it:** `npm run check:stages` builds the site once per stage and checks the tags, sitemaps and
+`hreflang` links (about a minute). CI runs it on every push.
+
 ## Data licensing: read this before you monetise
 
 The site is free and ad-free as built. **Putting ads on it is commercial use**, and the data comes

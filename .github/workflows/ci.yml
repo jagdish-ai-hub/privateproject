@@ -40,10 +40,14 @@ jobs:
         with:
           path: data/cache
           key: ci-data-${{ github.run_id }}
+      # INDEX_STAGE=all so the end-to-end tests below can see every page group as indexable; the stage rules
+      # themselves are checked by check:stages (one build per stage).
       - name: Build the site (30 fund pages) and check links / SEO basics
         run: |
-          MAX_FUND_PAGES=30 npm run build
+          INDEX_STAGE=all MAX_FUND_PAGES=30 npm run build
           node scripts/check-site.mjs --sample
+      - name: Check that each INDEX_STAGE opens exactly its pages (noindex, sitemaps, hreflang)
+        run: npm run check:stages
       - name: Install browser
         run: npx playwright install --with-deps chromium
       - name: End-to-end tests
