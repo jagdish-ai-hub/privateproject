@@ -9,9 +9,10 @@ import { REVIEWED_ON } from './src/data/author.ts';
 import { GROUPS, groupOf, parseStage, parseTopFunds } from './src/lib/indexStage.ts';
 import { pageIndexable } from './src/lib/indexing.ts';
 
-// SITE_URL is set in CI / hosting; the placeholder keeps canonical URLs valid locally.
-// `||`, not `??`: GitHub Actions passes an unset variable as an empty string, which is not nullish and is not a valid URL.
-const site = process.env.SITE_URL || 'https://mf-screener.example.com';
+// The live domain is written here, not in GitHub settings: change this line if the domain ever changes.
+// SITE_URL, if set, overrides it (tests build with a dummy address). `||`, not `??`: an unset GitHub variable
+// arrives as an empty string, which is not nullish and is not a valid URL.
+const site = process.env.SITE_URL || 'https://mutualfundcompare.in';
 
 // Staged indexing (see src/lib/indexStage.ts): fail the build at once on a mistyped setting.
 parseStage(process.env.INDEX_STAGE);

@@ -61,14 +61,13 @@ licence allow.
 
 ## Waiting on the owner
 
-0. Test the site on its `workers.dev` address first (do not share the link), have the Hindi pages read, then set `INDEX_STAGE` to `en` (or `core`) when the domain is ready.
+0. Attach `mutualfundcompare.in` to the Worker (put its DNS on Cloudflare first). The domain is written in `astro.config.mjs` and the stage (`core`: English and Hindi pages open to Google) in `.github/workflows/nightly.yml`, so the nightly deploy publishes both as soon as it runs.
 
 1. Pick and buy the final domain; until then a subdomain can be used (see `docs/DEPLOY.md`).
 2. The Cloudflare token and the GitHub variables for the Workers deploy (never "Connect to Git"), and one of the deploy routes in `docs/DEPLOY.md`: run wrangler on your own computer, give a Claude session a Cloudflare token, or add the token as a GitHub secret for nightly deploys.
 3. Set `PUBLIC_CLARITY_ID` after creating a Clarity project.
 4. Email AMFI about commercial use of their data. Keep ads off until they answer.
-5. Have a Hindi speaker read the Hindi pages;
-   have the "known limits" facts above checked once.
+5. Have the "known limits" facts above checked once. (The Hindi pages have been read by a Hindi speaker.)
 6. Decide where gold and silver prices should come from, if a price page is wanted.
 7. Apply for AdSense once the site is live and has traffic.
 

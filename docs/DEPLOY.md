@@ -25,13 +25,14 @@ page). Three ways to deploy, from least to most automatic:
    the environment's settings; the session can then build and run the same `wrangler` command.
 3. **Every night, automatically (recommended once live):** in the GitHub repository set the secrets
    `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the variables `CLOUDFLARE_PROJECT` (the Worker name,
-   for example `mf-compare`), `SITE_URL` and `PUBLIC_CONTACT_EMAIL`. The **Nightly data and deploy** workflow
+   for example `mf-compare`) and `PUBLIC_CONTACT_EMAIL`. The **Nightly data and deploy** workflow
    then rebuilds the data and uploads the site every night. This stores the token in GitHub; Cloudflare itself
-   is still not connected to the repository. Leave `INDEX_STAGE` unset while testing.
+   is still not connected to the repository. The domain (`https://mutualfundcompare.in`) is written in
+   `astro.config.mjs` and the indexing stage (`core`) in `.github/workflows/nightly.yml`, so neither needs a GitHub setting.
 
-The test address is `https://<name>.<your-subdomain>.workers.dev` (your subdomain is shown on the
-Workers & Pages page). After the first run, set `SITE_URL` to that address and run the workflow again so
-canonical links and the sitemap use it.
+The Worker is also reachable at `https://<name>.<your-subdomain>.workers.dev` (your subdomain is shown on the
+Workers & Pages page). The pages' canonical links and the sitemap always name `mutualfundcompare.in`, so
+until that domain is attached to the Worker (below), search engines cannot reach what they point to.
 
 **Custom domain.** In Workers & Pages → your Worker → Settings → Domains & Routes → Add → Custom domain.
 Unlike Pages, Workers only accepts a domain whose **DNS (nameservers) is managed by Cloudflare**. If you
@@ -59,8 +60,9 @@ language switch still link to it. Rules and code: `src/lib/indexStage.ts`.
 The shared `/fund/?code=…` page is never listed. A mistyped value (for example `everything`) stops the
 build with a message, so it cannot silently open something else.
 
-**Set it:** GitHub → Settings → Secrets and variables → Actions → Variables → `INDEX_STAGE` (and
-`INDEX_FUNDS`). Then run **Nightly data and deploy** (or wait for the nightly run). The sitemap is
+**Set it:** edit the `INDEX_STAGE:` line in `.github/workflows/nightly.yml` (currently `core`; it can be done
+in the GitHub web editor), and for the funds stage the repository variable `INDEX_FUNDS`. Then run
+**Nightly data and deploy** (or wait for the nightly run). A build with no setting at all is `en`. The sitemap is
 `/sitemap-index.xml`, with one file per group (`sitemap-en-0.xml`, `sitemap-hi-0.xml`,
 `sitemap-lists-0.xml`, `sitemap-funds-*.xml`), so Search Console shows how each group is indexed.
 
@@ -77,12 +79,12 @@ Move up only when the previous group has settled. Signals to look for (rules of 
 - Settings → Crawl stats shows steady daily crawling and mostly 200 responses.
 - Performance shows impressions for calculator and scheme searches, not only for the home page.
 
-Suggested order: `en` → `core` (after a Hindi speaker has read the Hindi pages) → `lists` →
+Order: `en` → `core` (live now; the Hindi pages were read by a Hindi speaker) → `lists` →
 `funds` with `INDEX_FUNDS=250`, then 700, 1200 → `all`.
 
-**While you test the site on its `workers.dev` address** do not post the link publicly and do not add it to
-Search Console, then switch the `workers.dev` address off once the custom domain works (Worker →
-Settings → Domains & Routes). `en` is open to Google in principle on any address that Google finds.
+**The `workers.dev` address:** switch it off once the custom domain works (Worker → Settings → Domains &
+Routes), and do not add it to Search Console. Pages open at the current stage are open to Google on any
+address that Google finds, but their canonical links point at `mutualfundcompare.in`.
 
 **Check it:** `npm run check:stages` builds the site once per stage and checks the tags, sitemaps and
 `hreflang` links (about a minute). CI runs it on every push.
@@ -114,7 +116,7 @@ know where data comes from; everything downstream reads `screener.json` and the 
 Use this when you change from a temporary address (for example a subdomain) to the final domain.
 
 1. Buy the new domain, put its DNS on Cloudflare, and add it to the same Worker as a second custom domain.
-2. Set the repository variable `SITE_URL` to the new address and run the nightly workflow once. Every
+2. Change the `site` line in `astro.config.mjs` to the new address, push, and run the nightly workflow once. Every
    canonical link, `hreflang` link and the sitemap then use it.
 3. Redirect the old address to the new one with a permanent (301) redirect that keeps the path, for
    example `old.example.com/fund/abc/` to `new.example.com/fund/abc/`. In Cloudflare this is one
@@ -128,7 +130,7 @@ Expect a short dip in search traffic while Google follows the redirects. Do not 
 
 ## Before applying for Google AdSense
 
-- A real domain, `SITE_URL` set, and `PUBLIC_CONTACT_EMAIL` set (the contact page needs a way to
+- A real domain (set in `astro.config.mjs`) and `PUBLIC_CONTACT_EMAIL` set (the contact page needs a way to
   reach you).
 - The guides, methodology, about, privacy and disclaimer pages exist already. Read the privacy page and
   update it to match what you actually run.
