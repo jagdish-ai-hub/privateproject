@@ -23,6 +23,8 @@ upload is done with Cloudflare's command-line tool, `wrangler`. That needs one *
    `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the variable `CLOUDFLARE_PROJECT`, plus `SITE_URL`.
    The **Nightly data and deploy** workflow then rebuilds the data and uploads the site every night.
    This stores the token in GitHub; Cloudflare itself is still not connected to the repository.
+   You do not need to create the Pages project first: the workflow tries to create it on the first run
+   (and uses the existing one if you already made it in the dashboard). Leave `INDEX_STAGE` unset while testing.
 
 After the first upload: add the custom domain in Cloudflare Pages and submit
 `https://your-domain/sitemap-index.xml` in Google Search Console and Bing Webmaster Tools.

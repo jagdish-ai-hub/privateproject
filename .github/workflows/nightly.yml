@@ -66,6 +66,17 @@ jobs:
       - name: Check links and SEO basics
         run: node scripts/check-site.mjs
 
+      # Creates the Direct Upload project on the first run. If it already exists (for example you made it in the
+      # dashboard) this step fails harmlessly and the deploy below uses the existing project.
+      - name: Create the Pages project if it does not exist yet
+        if: env.CF_READY == 'true'
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create ${{ vars.CLOUDFLARE_PROJECT }} --production-branch=main
+
       - name: Deploy to Cloudflare Pages
         if: env.CF_READY == 'true'
         uses: cloudflare/wrangler-action@v3
