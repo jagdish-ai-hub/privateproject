@@ -6,7 +6,7 @@ import { NumberField } from './NumberField.tsx';
 import { Choice, Tile } from './shared.tsx';
 
 type Lang = 'en' | 'hi';
-export type LoanKind = 'homeloan' | 'carloan' | 'personalloan';
+export type LoanKind = 'homeloan' | 'carloan' | 'personalloan' | 'emi';
 
 const T = {
   en: {
@@ -33,6 +33,7 @@ const DEFAULTS: Record<LoanKind, { amount: number; rate: number; years: number; 
   homeloan: { amount: 5_000_000, rate: 8.75, years: 20, fee: 0.5, maxYears: 30, sliderMax: 30_000_000 },
   carloan: { amount: 800_000, rate: 9, years: 5, fee: 1, maxYears: 10, sliderMax: 5_000_000 },
   personalloan: { amount: 300_000, rate: 14, years: 3, fee: 2, maxYears: 10, sliderMax: 3_000_000 },
+  emi: { amount: 1_000_000, rate: 10, years: 5, fee: 0, maxYears: 30, sliderMax: 10_000_000 },
 };
 
 const rs = (n: number): string => formatRupees(Math.round(n));

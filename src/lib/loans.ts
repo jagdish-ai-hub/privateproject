@@ -217,3 +217,54 @@ export function inflation(amount: number, rate: number, years: number): { future
   const f = (1 + rate) ** years;
   return { futureCost: amount * f, buyingPower: amount / f, lostShare: 1 - 1 / f };
 }
+
+/**
+ * The loan amount a given EMI can repay: the EMI formula run backwards.
+ *
+ * @param payment - Monthly EMI.
+ * @param rate - Reducing-balance yearly rate as a fraction.
+ * @param years - Tenure in years.
+ */
+export function principalFromEmi(payment: number, rate: number, years: number): number {
+  const n = Math.round(years * 12);
+  if (payment <= 0 || n <= 0) return 0;
+  const i = rate / 12;
+  if (i === 0) return payment * n;
+  return (payment * (1 - (1 + i) ** -n)) / i;
+}
+
+export interface EligibilityInput {
+  /** Take-home income per month. */
+  income: number;
+  /** EMIs already being paid every month. */
+  existingEmi: number;
+  /** Share of income a lender lets all EMIs add up to, as a fraction (0.5 = 50%). */
+  emiShare: number;
+  /** Reducing-balance yearly rate as a fraction. */
+  rate: number;
+  years: number;
+}
+
+export interface EligibilityResult {
+  /** All EMIs together may not exceed this. */
+  emiLimit: number;
+  /** What is left of the limit for the new loan. */
+  maxEmi: number;
+  /** Loan that EMI can repay at the rate and tenure. */
+  maxLoan: number;
+  /** Total interest if the full amount is borrowed. */
+  totalInterest: number;
+}
+
+/**
+ * Rough loan eligibility from income. Lenders each use their own rules (income type, age, credit
+ * score, property value), so this is an estimate of the usual income-based limit, not an offer.
+ *
+ * @param p - Income, existing EMIs, the share of income allowed for EMIs, rate and tenure.
+ */
+export function loanEligibility(p: EligibilityInput): EligibilityResult {
+  const emiLimit = Math.max(0, p.income * p.emiShare);
+  const maxEmi = Math.max(0, emiLimit - p.existingEmi);
+  const maxLoan = principalFromEmi(maxEmi, p.rate, p.years);
+  return { emiLimit, maxEmi, maxLoan, totalInterest: Math.max(0, maxEmi * Math.round(p.years * 12) - maxLoan) };
+}

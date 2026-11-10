@@ -144,3 +144,53 @@ export function metalReturn(p: MetalReturnInput): MetalReturn {
     breakEvenPrice: denominator > 0 ? (p.amount + holdingCost) / denominator : null,
   };
 }
+
+export interface GoldSipInput {
+  /** Rupees invested every month. */
+  monthly: number;
+  /** Price per gram today, of the gold being bought. */
+  pricePerGram: number;
+  /** Assumed yearly rise in the gold price, as a fraction. */
+  growth: number;
+  years: number;
+  /** Cost on every purchase as a fraction of the gold bought (GST, spread): 0.03 = 3%. */
+  buyCost: number;
+}
+
+export interface GoldSipYear { year: number; invested: number; grams: number; value: number }
+
+export interface GoldSipResult {
+  invested: number;
+  /** Grams collected by the end. */
+  grams: number;
+  /** Price per gram at the end, at the assumed growth. */
+  finalPrice: number;
+  value: number;
+  gain: number;
+  /** Rupees paid per gram on average, costs included. */
+  averageCost: number;
+  years: GoldSipYear[];
+}
+
+/**
+ * A monthly investment in gold at an assumed price growth. Each month's money buys gold at that
+ * month's price; the price rises smoothly at the yearly rate. The first instalment is at today's
+ * price, and the value is taken one month after the last instalment.
+ *
+ * @param p - Monthly amount, today's price, assumed growth, years and the cost on each purchase.
+ */
+export function goldSip(p: GoldSipInput): GoldSipResult {
+  const n = Math.round(p.years * 12);
+  const priceAt = (month: number): number => p.pricePerGram * (1 + p.growth) ** (month / 12);
+  let grams = 0;
+  const years: GoldSipYear[] = [];
+  for (let m = 0; m < n; m++) {
+    const price = priceAt(m);
+    if (price > 0) grams += p.monthly / (1 + p.buyCost) / price;
+    if ((m + 1) % 12 === 0 || m === n - 1) years.push({ year: Math.ceil((m + 1) / 12), invested: p.monthly * (m + 1), grams, value: grams * priceAt(m + 1) });
+  }
+  const invested = p.monthly * n;
+  const finalPrice = priceAt(n);
+  const value = grams * finalPrice;
+  return { invested, grams, finalPrice, value, gain: value - invested, averageCost: grams > 0 ? invested / grams : 0, years };
+}

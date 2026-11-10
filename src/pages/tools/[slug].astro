@@ -10,6 +10,7 @@ import Faq from '../../components/Faq.astro';
 import ToolCalculator from '../../components/calculators/ToolCalculator.astro';
 import { breadcrumbLd, calculatorLd, faqLd, webPageLd } from '../../lib/seo.ts';
 import { TOOLS } from '../../lib/tools.ts';
+import { toolFaqs } from '../../lib/toolsExtraFaqs.ts';
 import { TOOL_GUIDES } from '../../lib/toolGuides.ts';
 
 export function getStaticPaths() {
@@ -21,12 +22,14 @@ const path = `/tools/${tool.slug}/`;
 const url = new URL(path, Astro.site).toString();
 const guide = TOOL_GUIDES[tool.kind];
 const others = TOOLS.filter((t) => t.slug !== tool.slug);
+const faqs = toolFaqs(tool);
+const related = (tool.related ?? []).map((s) => TOOLS.find((t) => t.slug === s)!);
 ---
 <BaseLayout
   title={tool.title}
   description={tool.description}
   path={path}
-  alternates={[{ lang: 'en', path }, { lang: 'hi', path: `/hi/tools/${tool.slug}/` }]}
+  alternates={tool.englishOnly ? [] : [{ lang: 'en', path }, { lang: 'hi', path: `/hi/tools/${tool.slug}/` }]}
   jsonLd={[
     breadcrumbLd([
       { name: 'Home', url: new URL('/', Astro.site).toString() },
@@ -35,13 +38,16 @@ const others = TOOLS.filter((t) => t.slug !== tool.slug);
     ]),
     calculatorLd(tool.name, url, tool.description),
     webPageLd({ url, name: tool.title, description: tool.description, dateModified: REVIEWED_ON, siteUrl: new URL('/', Astro.site).toString(), lang: 'en' }),
-    faqLd(tool.faqs),
+    faqLd(faqs),
   ]}
 >
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Calculators', href: '/tools/' }, { name: tool.name }]} />
   <h1 class="text-2xl font-semibold tracking-tight">{tool.h1}</h1>
   <Byline date={REVIEWED_ON} />
   <p class="mt-3 mb-6 max-w-3xl text-sm text-muted">{tool.intro}</p>
+  {related.length > 0 && (
+    <p class="-mt-3 mb-6 max-w-3xl text-sm" data-testid="related-tools">Related: {related.map((t, i) => <>{i > 0 && ' · '}<a class="underline" href={`/tools/${t.slug}/`}>{t.name}</a></>)}</p>
+  )}
 
   <ToolCalculator kind={tool.kind} lang="en" />
 
@@ -54,7 +60,7 @@ const others = TOOLS.filter((t) => t.slug !== tool.slug);
 
   <p class="mt-8 max-w-3xl text-sm" data-testid="tool-guide">Read the guide: <a class="underline" href={`/learn/${guide.slug}/`}>{guide.title}</a>.</p>
 
-  <Faq faqs={tool.faqs} />
+  <Faq faqs={faqs} />
 
   <Sources sources={TOOL_SOURCES[tool.kind]} />
 

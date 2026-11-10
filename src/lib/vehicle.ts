@@ -124,3 +124,77 @@ export function compareCars(a: Car, b: Car, kmPerMonth: number, years: number, p
 /** Starting values. Prices vary by city and change often: these are examples to replace. */
 export const PETROL_DEFAULT: ConventionalCar & { maintenancePerKm: number } = { fuel: 'petrol', fuelPrice: 100, kmPerUnit: 15, maintenancePerKm: 0.8 };
 export const EV_DEFAULT: ElectricCar & { maintenancePerKm: number } = { fuel: 'ev', batteryKwh: 30, rangeKm: 200, chargingLoss: 0.1, homeRate: 8, publicRate: 18, publicShare: 0.2, maintenancePerKm: 0.4 };
+
+export interface FuelCostInput {
+  /** Price of one litre (petrol, diesel) or one kg (CNG). */
+  fuelPrice: number;
+  /** Kilometres per litre (or per kg). */
+  kmPerUnit: number;
+  /** Fraction to take off the mileage for real driving (0.1 = 10% lower than the figure entered). */
+  mileageCut: number;
+  /** Length of one trip in km. */
+  tripKm: number;
+  /** Distance driven in a month, in km. */
+  kmPerMonth: number;
+  /** People sharing the cost of the trip. */
+  people: number;
+}
+
+export interface FuelCostResult {
+  /** Mileage used after the cut. */
+  mileageUsed: number;
+  perKm: number;
+  /** Litres (or kg) used on the trip. */
+  tripFuel: number;
+  tripCost: number;
+  tripCostPerPerson: number;
+  perMonth: number;
+  perYear: number;
+  /** Litres (or kg) used in a month. */
+  monthFuel: number;
+}
+
+/**
+ * Fuel cost of a trip and of a month's driving.
+ *
+ * @param p - Fuel price, mileage, an optional real-world cut, trip and monthly distance.
+ */
+export function fuelCost(p: FuelCostInput): FuelCostResult {
+  const mileageUsed = p.kmPerUnit * (1 - p.mileageCut);
+  const perKm = mileageUsed > 0 ? p.fuelPrice / mileageUsed : 0;
+  const tripFuel = mileageUsed > 0 ? p.tripKm / mileageUsed : 0;
+  const tripCost = perKm * p.tripKm;
+  return {
+    mileageUsed,
+    perKm,
+    tripFuel,
+    tripCost,
+    tripCostPerPerson: tripCost / Math.max(1, p.people),
+    perMonth: perKm * p.kmPerMonth,
+    perYear: perKm * p.kmPerMonth * 12,
+    monthFuel: mileageUsed > 0 ? p.kmPerMonth / mileageUsed : 0,
+  };
+}
+
+export interface MileageResult {
+  /** Kilometres per litre (or per kg). */
+  kmPerUnit: number;
+  /** Litres (or kg) per 100 km. */
+  per100Km: number;
+  /** Rupees per km at the fuel price entered. */
+  costPerKm: number;
+}
+
+/**
+ * Mileage from a tank-to-tank reading: distance driven ÷ fuel used.
+ *
+ * @param distanceKm - Kilometres driven between two fills.
+ * @param fuelUsed - Litres (or kg) needed to fill up again.
+ * @param fuelPrice - Price per litre (or kg), for the cost per km.
+ * @returns The mileage, or null when there is nothing to divide by.
+ */
+export function mileage(distanceKm: number, fuelUsed: number, fuelPrice: number): MileageResult | null {
+  if (distanceKm <= 0 || fuelUsed <= 0) return null;
+  const kmPerUnit = distanceKm / fuelUsed;
+  return { kmPerUnit, per100Km: (fuelUsed / distanceKm) * 100, costPerKm: fuelPrice / kmPerUnit };
+}

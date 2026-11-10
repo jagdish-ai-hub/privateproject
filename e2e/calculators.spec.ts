@@ -1,3 +1,4 @@
+import { TOOLS } from '../src/lib/tools.ts';
 import { expect, test } from '@playwright/test';
 
 const results = (page: import('@playwright/test').Page) => page.getByTestId('results');
@@ -68,9 +69,9 @@ test('CAGR: 1,00,000 -> 2,00,000 in 5 years is +14.87%', async ({ page }) => {
   await expect(results(page)).toContainText('2.00x');
 });
 
-test('each calculator page has its JSON-LD and FAQ, and the index lists all sixteen', async ({ page }) => {
+test('each calculator page has its JSON-LD and FAQ, and the index lists every calculator', async ({ page }) => {
   await page.goto('/tools/');
-  await expect(page.locator('ul.grid li a')).toHaveCount(16);
+  await expect(page.locator('ul.grid li a')).toHaveCount(TOOLS.length);
   await page.goto('/tools/step-up-sip-calculator/');
   const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
   const types = blocks.map((b) => (JSON.parse(b) as { '@type': string })['@type']);

@@ -11,10 +11,13 @@ import { expect, test } from '@playwright/test';
 const dir = fileURLToPath(new URL('..', import.meta.url));
 const names = (d: string): string[] => readdirSync(join(dir, d)).filter((f) => f.endsWith('.md')).map((f) => f.replace(/\.md$/, ''));
 const tools = ['sip-calculator', 'step-up-sip-calculator', 'lumpsum-calculator', 'goal-sip-calculator', 'swp-calculator', 'cagr-calculator', 'rent-vs-buy-calculator', 'car-running-cost-calculator', 'ev-vs-petrol-running-cost-calculator', 'gold-jewellery-price-calculator', 'gold-silver-return-calculator', 'home-loan-emi-calculator', 'car-loan-emi-calculator', 'personal-loan-emi-calculator', 'fd-calculator', 'inflation-calculator'];
+/** English-only calculators: no Hindi page. */
+const englishOnly = ['home-loan-eligibility-calculator', 'emi-calculator', 'xirr-calculator', 'fuel-cost-calculator', 'mileage-calculator', 'gold-sip-calculator'];
 const schemes = ['ppf-calculator', 'sukanya-samriddhi-calculator', 'scss-calculator', 'nsc-calculator', 'kvp-calculator', 'post-office-mis-calculator', 'post-office-rd-calculator', 'post-office-fd-calculator'];
 const routes = [
   '/', '/compare/', '/tools/', '/hi/tools/', '/schemes/', '/hi/schemes/', '/learn/', '/hi/learn/', '/methodology/', '/about/', '/privacy/', '/disclaimer/', '/contact/',
   ...tools.flatMap((t) => [`/tools/${t}/`, `/hi/tools/${t}/`]),
+  ...englishOnly.map((t) => `/tools/${t}/`),
   ...schemes.flatMap((t) => [`/schemes/${t}/`, `/hi/schemes/${t}/`]),
   ...names('src/content/learn').flatMap((g) => [`/learn/${g}/`, `/hi/learn/${g}/`]),
 ];

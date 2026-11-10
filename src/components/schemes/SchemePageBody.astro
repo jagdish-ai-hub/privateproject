@@ -14,8 +14,11 @@ import { SchemeCalculator } from './SchemeCalculator.tsx';
 import { SMALL_SAVINGS, ratesMayBeStale } from '../../data/small-savings.ts';
 import type { SchemePage } from '../../lib/schemeContent.ts';
 
-interface Props { page: SchemePage; lang: 'en' | 'hi'; others: { slug: string; name: string }[] }
-const { page, lang, others } = Astro.props;
+import type { Faq as FaqItem } from '../../lib/seo.ts';
+
+/** `faqs` overrides the page's own FAQ list (the English pages add English-only questions). */
+interface Props { page: SchemePage; lang: 'en' | 'hi'; others: { slug: string; name: string }[]; faqs?: FaqItem[] }
+const { page, lang, others, faqs = page.faqs } = Astro.props;
 const hi = lang === 'hi';
 const base = hi ? '/hi/schemes/' : '/schemes/';
 const L = hi
@@ -68,7 +71,7 @@ const guides = [...(GUIDES[page.kind] ?? [POST_OFFICE]), COMPARED].map((g) => ({
   <p class="mt-1 text-sm leading-relaxed text-muted">{page.tax}</p>
 </section>
 
-<Faq faqs={page.faqs} heading={L.faq} />
+<Faq faqs={faqs} heading={L.faq} />
 
 <Sources sources={SCHEME_SOURCES} lang={lang} />
 

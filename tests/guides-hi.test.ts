@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { TOOL_GUIDES } from '../src/lib/toolGuides.ts';
-import { TOOLS } from '../src/lib/tools.ts';
+import { BILINGUAL_TOOLS, TOOLS } from '../src/lib/tools.ts';
 import { TOOLS_HI } from '../src/lib/toolsContent.hi.ts';
 
 const EN = join(__dirname, '../src/content/learn');
@@ -46,10 +46,17 @@ describe('Hindi guides mirror the English ones', () => {
 
 describe('calculators and their guides', () => {
   it('every calculator has Hindi text and a guide that exists in both languages', () => {
-    for (const t of TOOLS) {
+    for (const t of BILINGUAL_TOOLS) {
       expect(TOOLS_HI[t.slug], t.slug).toBeDefined();
       expect(TOOLS_HI[t.slug].faqs.length).toBe(t.faqs.length);
-      expect(files, t.kind).toContain(`${TOOL_GUIDES[t.kind].slug}.md`);
     }
+    for (const t of TOOLS) expect(files, t.kind).toContain(`${TOOL_GUIDES[t.kind].slug}.md`);
+  });
+  it('English-only calculators have no Hindi text, and every related calculator exists', () => {
+    const only = TOOLS.filter((t) => t.englishOnly);
+    expect(only.length).toBe(6);
+    for (const t of only) expect(TOOLS_HI[t.slug], t.slug).toBeUndefined();
+    for (const t of TOOLS) for (const r of t.related ?? []) expect(TOOLS.some((x) => x.slug === r), `${t.slug} -> ${r}`).toBe(true);
+    expect(new Set(TOOLS.map((t) => t.slug)).size).toBe(TOOLS.length);
   });
 });

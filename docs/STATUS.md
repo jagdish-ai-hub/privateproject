@@ -1,13 +1,13 @@
 # Project status
 
-Last updated: 9 November 2026. Everything below is on `main` of
+Last updated: 10 November 2026. Everything below is on `main` of
 https://github.com/jagdish-ai-hub/privateproject (nothing is waiting to be pushed).
 
 ## What the site is
 
 A free, no-sign-up Indian site to compare mutual funds and to calculate savings, home-buying,
 car and gold decisions, in English and Hindi. A static site (Astro), rebuilt nightly from AMFI and
-MFapi data. About 2,076 pages and 10,800 files. Plan for earning: Google AdSense, later, once traffic and the data
+MFapi data. About 2,082 pages and 10,830 files. Plan for earning: Google AdSense, later, once traffic and the data
 licence allow.
 
 ## Built
@@ -18,14 +18,14 @@ licence allow.
 | Fund pages | One page per Direct Growth scheme (about 1,850, indexed by Google): returns, risk, NAV chart with drop-from-peak, costs and size (Direct vs Regular TER), peer comparison, FAQ. Every other variant (Regular, IDCW and so on, about 6,850) opens on one shared page, `/fund/?code=…`, which loads the figures in the browser, links to the Direct Growth page and is kept out of Google (`noindex`, not in the sitemap). This keeps the site under Cloudflare's 20,000-file limit and keeps Google's attention on one page per scheme |
 | Category and fund-house pages | Lists with median expense ratio |
 | Side-by-side compare | Up to several funds, chart, plain-language insights |
-| Calculators (16, English and Hindi) | SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR, rent vs buy, car running cost, EV vs petrol, gold and silver jewellery price, gold and silver return, home loan EMI (with prepayment), car loan EMI (with flat-rate conversion), personal loan EMI, FD with tax and inflation, inflation. Pages: `/tools/…` and `/hi/tools/…` |
+| Calculators (22: 16 in English and Hindi, 6 English only) | SIP, step-up SIP, lumpsum, goal SIP, SWP, CAGR, rent vs buy, car running cost, EV vs petrol, gold and silver jewellery price, gold and silver return, home loan EMI (with prepayment), car loan EMI (with flat-rate conversion), personal loan EMI, FD with tax and inflation, inflation. Pages: `/tools/…` and `/hi/tools/…`. **English only** (no Hindi page, no hreflang, no language switch): home loan eligibility, general EMI, XIRR, fuel cost, mileage, gold SIP (`englishOnly: true` in `src/lib/tools.ts`) |
 | Government schemes (8, English and Hindi) | Hub with dated rates plus PPF, Sukanya Samriddhi, SCSS, NSC, KVP, Post Office MIS, RD and Time Deposit calculators, each stating its convention and a worked example. Pages: `/schemes/…` and `/hi/schemes/…` |
 | Guides (26, English and Hindi) | Mutual funds and tax (16), government schemes (PPF, Sukanya Samriddhi, Post Office schemes, schemes compared, PPF vs mutual funds), planning (rent vs buy, EV vs petrol, buying gold and silver, how an EMI works, FD returns after tax and inflation). Pages: `/learn/…` and `/hi/learn/…` |
 | Languages | `hreflang` links between each English page and its Hindi twin, a language switch in the header, Hindi navigation, Hindi page text |
 | SEO | Titles, descriptions, canonical links, hreflang (en-IN, hi-IN), JSON-LD, sitemap with `lastmod` for every page, `robots.txt`, `llms.txt` for AI assistants |
 | Trust | Author page for Asish of JGRF Software (`/author/asish/`, `/hi/author/asish/`), linked from the footer. Every calculator, scheme page and guide shows "Written and reviewed by Asish · Last reviewed …" and lists its official sources (Finance Ministry, India Post, RBI, SEBI, AMFI, Income Tax Department and others, in `src/lib/sources.ts`). JSON-LD names the author as a Person with `dateModified`. Calculator and scheme review date: `REVIEWED_ON` in `src/data/author.ts`; guides keep their own dates |
 | Phone support | Every page type, in both languages, was audited at 320, 360, 390 and 412 px wide: no sideways scrolling, inputs at 16px (so iPhones do not zoom when you tap one), header and card links at least 36px tall, FAQ rows and chart buttons easy to tap. A test (`e2e/mobile.spec.ts`) keeps it that way |
-| Quality | 417 unit tests, about 150 end-to-end tests, lint, type check, site link check |
+| Quality | 438 unit tests, 158 end-to-end tests, lint, type check, site link check |
 | Delivery | CI on every push; nightly data build and deploy workflow (deploys only once Cloudflare is configured). Deploys use Cloudflare Direct Upload (`wrangler pages deploy dist`); the Cloudflare project is never connected to the GitHub repository, because Cloudflare's own build stops at 20 minutes and the data build takes about 21 |
 | Analytics | Microsoft Clarity, switched on by setting `PUBLIC_CLARITY_ID` |
 
@@ -36,6 +36,7 @@ licence allow.
 - **Hindi text was written by an AI assistant and has not been read by a native speaker.** The
   maths, numbers and links are checked by tests, but the wording, tone and finance terms need one
   careful read by a Hindi speaker who knows personal finance before the Hindi pages are promoted.
+- **Six calculators and the extra FAQs are English only.** The six newest calculators (eligibility, EMI, XIRR, fuel cost, mileage, gold SIP) have no Hindi page. The extra FAQs added on the English calculator and scheme pages (`src/lib/toolsExtraFaqs.ts`, `src/lib/schemeExtraFaqs.ts`) have no Hindi twin, so the Hindi pages have fewer questions. A test keeps the shared FAQs the same count in both languages.
 - **Hindi covers calculators, schemes and guides only.** The home page, screener, fund pages,
   compare, category and fund-house pages, and the Methodology, About, Privacy and Disclaimer pages
   are English only. The Hindi footer links to the English legal pages. The first item in the Hindi
@@ -46,14 +47,15 @@ licence allow.
 - **Facts written from general knowledge** (not from a primary source), to be checked once by a
   person: PPF and Sukanya Samriddhi withdrawal rules, the rental yield remark in the rent vs buy
   guide, GST on jewellery (3%), the 12.5% gains-tax default in rent vs buy, and the wording about
-  gold bonds and hallmarking. The scheme interest rates come from two copies of the Finance
+  gold bonds and hallmarking. Also from secondary sources or memory, in the newer FAQs: the FD TDS limit (₹50,000, ₹1 lakh for seniors) and the single self-declaration form (Form 121) under the Income-tax Act, 2025; the SCSS TDS limit (₹1 lakh); the home loan interest deduction (₹2 lakh, old regime only); RBI's loan-to-value limits for home loans (90%/80%/75%); the DICGC cover (₹5 lakh); and the tola (11.66 g). Early-closure, extension, loan and withdrawal rules for the post office schemes are from India Post's booklet "Post Office Savings Schemes" version 2.0 dated 7 October 2024 (NSC from the NSI scheme rules); confirm they are unchanged. The scheme interest rates come from two copies of the Finance
   Ministry notice because the official sites could not be reached.
 
 ## Not built yet
 
 - Hindi home page, screener, fund pages and the legal pages.
-- Proposed next calculators (not approved yet): income tax old vs new, salary in hand, EPF, NPS, capital gains, retirement, GST; category hub pages.
+- Next batch (proposed, English only): income tax old vs new, salary in hand, EPF, NPS, capital gains, retirement, GST; category hub pages. Each needs its rules checked against the Income Tax Department first.
 - A gold and silver price page and price history (needs a licensed data source).
+- Hindi versions of the six English-only calculators and of the extra FAQs.
 - A consent banner (not needed: the site targets India only).
 
 ## Waiting on the owner

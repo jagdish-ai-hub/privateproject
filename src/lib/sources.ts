@@ -36,6 +36,7 @@ export const TOOL_SOURCES: Record<Tool['kind'], Source[]> = {
   fd: [S.rbi, S.tax, S.dicgc], inflation: [S.mospi, S.rbi],
   car: [S.ppac], evpetrol: [S.ppac],
   jewellery: [S.bis, S.gst], metalreturn: [S.bis, S.gst, S.tax],
+  eligibility: [S.rbi], emi: [S.rbi], xirr: [S.amfi, S.sebi], fuelcost: [S.ppac], mileage: [S.ppac], goldsip: [S.bis, S.gst, S.sebi],
 };
 
 /** Sources for the Government savings scheme pages. */

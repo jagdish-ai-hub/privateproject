@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { TOOLS } from '../src/lib/tools.ts';
+import { BILINGUAL_TOOLS as TOOLS } from '../src/lib/tools.ts';
 
 test('the Hindi calculators index lists every calculator and links to its Hindi page', async ({ page }) => {
   await page.goto('/hi/tools/');

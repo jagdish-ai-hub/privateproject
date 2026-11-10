@@ -1,15 +1,16 @@
 import { cagrBetween, lumpsumProjection, requiredSip, sipProjection, swpProjection } from './calculators.ts';
 import { formatPct, formatRupees } from './format.ts';
 import { RENT_VS_BUY_DEFAULTS, rentVsBuy } from './rentVsBuy.ts';
-import { deposit, flatEmi, inflation, loan, rateFromEmi } from './loans.ts';
-import { jewelleryPrice, metalReturn } from './metals.ts';
-import { EV_DEFAULT, PETROL_DEFAULT, compareCars, runningCost } from './vehicle.ts';
+import { deposit, emi, flatEmi, inflation, loan, loanEligibility, rateFromEmi } from './loans.ts';
+import { goldSip, jewelleryPrice, metalReturn } from './metals.ts';
+import { EV_DEFAULT, PETROL_DEFAULT, compareCars, fuelCost, mileage, runningCost } from './vehicle.ts';
+import { xirrOf } from './xirrTool.ts';
 import type { Faq } from './seo.ts';
 
 /** Content and metadata of one calculator page. */
 export interface Tool {
   slug: string;
-  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy' | 'car' | 'evpetrol' | 'jewellery' | 'metalreturn' | 'homeloan' | 'carloan' | 'personalloan' | 'fd' | 'inflation';
+  kind: 'sip' | 'stepup' | 'lumpsum' | 'goal' | 'swp' | 'cagr' | 'rentbuy' | 'car' | 'evpetrol' | 'jewellery' | 'metalreturn' | 'homeloan' | 'carloan' | 'personalloan' | 'fd' | 'inflation' | 'eligibility' | 'emi' | 'xirr' | 'fuelcost' | 'mileage' | 'goldsip';
   /** Short name, used in lists and breadcrumbs. */
   name: string;
   title: string;
@@ -23,6 +24,10 @@ export interface Tool {
   /** Builds a worked example from the same maths the calculator uses. */
   example: () => string;
   faqs: Faq[];
+  /** True for calculators that exist in English only: no Hindi page, no hreflang, no language switch. */
+  englishOnly?: boolean;
+  /** Slugs of closely related calculators, linked under the introduction. */
+  related?: string[];
 }
 
 const ASSUMPTION = 'The expected return is an assumption, not a promise. Equity mutual fund returns change from year to year and can be negative; use the screener to see what specific funds have actually delivered.';
@@ -402,7 +407,166 @@ export const TOOLS: Tool[] = [
       { question: 'How do I use this for a financial goal?', answer: 'Work out the goal’s cost in today’s money, use this calculator to find what it will cost in the year you need it, and then use the goal SIP calculator to find the monthly amount to save.' },
     ],
   },
+
+  {
+    slug: 'home-loan-eligibility-calculator', kind: 'eligibility', name: 'Home loan eligibility calculator', englishOnly: true,
+    related: ['home-loan-emi-calculator', 'emi-calculator', 'rent-vs-buy-calculator'],
+    title: 'Home Loan Eligibility Calculator: How Much Loan Can I Get?',
+    h1: 'Home loan eligibility calculator',
+    description: 'Free home loan eligibility calculator. Enter your monthly income, existing EMIs, interest rate and tenure to estimate how much home loan you can get and its EMI.',
+    intro: 'Estimate how much home loan you may get on your salary. Enter your monthly take-home income, the EMIs you already pay, the interest rate and the tenure to see the loan amount, its EMI and the home budget it gives you with your down payment.',
+    formula: 'EMI you can take = income × share allowed for EMIs − existing EMIs;   loan = EMI × (1 − (1 + i)⁻ⁿ) ÷ i    where i = yearly rate ÷ 12, n = number of months',
+    how: [
+      'Lenders want all your EMIs together to stay within a share of your monthly income, so that enough is left to live on. The calculator takes that share of your income, subtracts the EMIs you already pay, and treats what is left as the largest EMI for the new loan.',
+      'It then runs the EMI formula backwards to find the loan that this EMI repays at your interest rate and tenure. A longer tenure or a lower rate gives a larger loan for the same EMI, at the price of more total interest.',
+      'The share of income (50% to start with) is a common rule of thumb, not a fixed rule. Lenders set their own limits and also look at your age, credit score, the kind of income you have and the value of the property. Treat the result as an estimate to plan with, not as an offer.',
+    ],
+    example: () => {
+      const r = loanEligibility({ income: 100_000, existingEmi: 0, emiShare: 0.5, rate: 0.0875, years: 20 });
+      return `With a take-home income of ${formatRupees(100_000)} a month, no existing EMIs and half of income allowed for EMIs, the largest EMI is ${formatRupees(r.maxEmi)}. At 8.75% for 20 years that repays a loan of about ${formatRupees(Math.round(r.maxLoan))}.`;
+    },
+    faqs: [
+      {
+        question: 'How much home loan can I get on my salary?',
+        answer: (() => {
+          const f = (income: number): string => formatRupees(Math.round(loanEligibility({ income, existingEmi: 0, emiShare: 0.5, rate: 0.0875, years: 20 }).maxLoan));
+          return `It depends on your income, existing EMIs, the interest rate and the tenure. As a rough guide, at 8.75% for 20 years with half of income allowed for EMIs and no other loans, a take-home income of ${formatRupees(50_000)} a month supports about ${f(50_000)}, ${formatRupees(100_000)} about ${f(100_000)}, and ${formatRupees(200_000)} about ${f(200_000)}. Your lender’s figure can be lower or higher.`;
+        })(),
+      },
+      { question: 'How do banks decide home loan eligibility?', answer: 'Mainly from your income and the EMIs you already pay, which set the EMI you can afford. They also look at your age and the years left to retirement (which limit the tenure), your credit score and repayment record, how stable your income is, and the value of the property. Each lender weighs these differently.' },
+      { question: 'What is FOIR?', answer: 'FOIR is the Fixed Obligation to Income Ratio: the share of your monthly income that goes to EMIs and other fixed payments. Lenders use it to cap your total EMIs. The share they allow differs by lender and by income level, which is why you can change it in this calculator.' },
+      { question: 'How can I increase my home loan eligibility?', answer: 'Close or reduce existing loans and credit card dues, choose a longer tenure, add a co-applicant with their own income, or make a larger down payment so that you need to borrow less. A better credit score can also get you a lower rate, which raises the amount for the same EMI.' },
+      { question: 'Will the bank lend the full price of the home?', answer: 'No. Lenders finance only part of the property value, so you need a down payment. Under RBI’s limits a home loan can be up to 90% of the property value for loans of ₹30 lakh or less, 80% for loans above ₹30 lakh and up to ₹75 lakh, and 75% above ₹75 lakh. Stamp duty and registration are usually paid by you on top. Check the current limit with your lender.' },
+      { question: 'Does a longer tenure get me a bigger loan?', answer: 'Yes, because the same EMI repays a larger amount over more months. The total interest rises sharply with tenure, so use the home loan EMI calculator to see what the bigger loan costs.' },
+    ],
+  },
+  {
+    slug: 'emi-calculator', kind: 'emi', name: 'EMI calculator', englishOnly: true,
+    related: ['home-loan-emi-calculator', 'car-loan-emi-calculator', 'personal-loan-emi-calculator', 'home-loan-eligibility-calculator'],
+    title: 'EMI Calculator: Loan EMI, Total Interest and Yearly Schedule',
+    h1: 'EMI calculator',
+    description: 'Free EMI calculator for any loan. Enter the amount, interest rate and tenure to see the monthly EMI, total interest, a year-by-year schedule and what prepayment saves.',
+    intro: 'Work out the EMI of any loan. Enter the amount, the yearly interest rate and the tenure to see the monthly instalment, the total interest and how the balance falls each year. It also converts a flat rate to the reducing-balance rate and shows what prepaying saves.',
+    formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = number of months',
+    how: [
+      'An EMI (equated monthly instalment) is the same payment every month. Each month, interest is charged on the balance you still owe; the rest of the EMI reduces the balance. Early on most of the EMI is interest, and later most of it repays the loan.',
+      'If the lender quotes a flat rate, interest is charged on the full original amount for the whole term, so the true cost is much higher than the number suggests. Choose "Flat rate" and the calculator shows the reducing-balance rate that gives the same EMI, which is the one to compare between loans.',
+      'Under "Prepayment and fees" you can add a processing fee, an extra amount paid every month, or a one-time prepayment, and see the interest and time saved. The EMI is kept the same and the loan ends sooner.',
+    ],
+    example: () => { const r = loan({ amount: 1_000_000, rate: 0.10, years: 5 }); return `A loan of ${formatRupees(1_000_000)} at 10% a year for 5 years has an EMI of ${formatRupees(Math.round(r.emi))}. Over the 60 months you pay ${formatRupees(Math.round(r.totalInterest))} in interest, ${formatRupees(Math.round(r.emi * 60))} in all.`; },
+    faqs: [
+      { question: 'What is an EMI?', answer: 'An equated monthly instalment: a fixed amount paid to the lender every month until the loan is repaid. Each EMI covers that month’s interest and repays a part of the loan.' },
+      { question: 'How is EMI calculated?', answer: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1), where P is the loan amount, i is the yearly interest rate divided by 12 and n is the number of months. This is the reducing-balance method used by banks in India.' },
+      {
+        question: 'What is the EMI per ₹1 lakh?',
+        answer: (() => {
+          const e = (rate: number, years: number): string => formatRupees(Math.round(emi(100_000, rate, years)));
+          return `It depends on the rate and the tenure. For every ${formatRupees(100_000)} borrowed, the EMI is ${e(0.09, 5)} at 9% for 5 years, ${e(0.12, 3)} at 12% for 3 years, and ${e(0.085, 20)} at 8.5% for 20 years. Multiply by the number of lakhs you borrow.`;
+        })(),
+      },
+      { question: 'Does a longer tenure reduce the EMI?', answer: 'Yes, but it raises the total interest, because you owe money for longer. Compare the "Total interest" figure for two tenures before choosing the lower EMI.' },
+      { question: 'What is the difference between a flat rate and a reducing-balance rate?', answer: 'A flat rate charges interest on the full original amount for the whole term, even though you repay part of it every month. A reducing-balance rate charges interest only on what you still owe. The same loan therefore shows a much lower number as a flat rate than as a reducing-balance rate, so always compare loans on the reducing-balance rate.' },
+      { question: 'Which calculator should I use for a home, car or personal loan?', answer: 'The maths is the same for every loan. The home loan, car loan and personal loan calculators on this site start with typical figures for each and explain the points that matter for that loan, such as prepayment on a home loan or flat rates on a car loan.' },
+    ],
+  },
+  {
+    slug: 'xirr-calculator', kind: 'xirr', name: 'XIRR calculator', englishOnly: true,
+    related: ['cagr-calculator', 'sip-calculator'],
+    title: 'XIRR Calculator: Returns for SIPs and Irregular Investments',
+    h1: 'XIRR calculator',
+    description: 'Free XIRR calculator. Enter each investment and withdrawal with its date and the current value to get the yearly return (XIRR) of a SIP or any irregular investment.',
+    intro: 'Find the yearly return on money invested at different times, such as a SIP, top-ups or part withdrawals. Enter each amount with its date and what the investment is worth today; the calculator gives the XIRR, the same figure a spreadsheet’s XIRR function returns.',
+    formula: 'XIRR is the yearly rate r at which   Σ amountₖ ÷ (1 + r)^(daysₖ ÷ 365) = 0    (investments negative, withdrawals and the current value positive; days counted from the first date)',
+    how: [
+      'CAGR works for one investment with one start and one end. When money goes in or comes out on several dates, each amount has been invested for a different length of time, so a single start-to-end rate is wrong. XIRR finds the one yearly rate that explains all the cash flows together.',
+      'Enter every investment as "Invested" and every redemption or payout you received as "Withdrawn", each with its date. Then enter what the investment is worth now and the date of that value. If you have sold everything, list the sale as a withdrawal and enter 0 as the current value.',
+      'The answer is found by trial: the calculator looks for the rate at which the value of everything you put in, grown to today, equals what you took out plus what you still hold. Days are counted over a 365-day year, as spreadsheets do.',
+    ],
+    example: () => {
+      const r = xirrOf([{ date: '2023-01-10', amount: 100_000, kind: 'in' }, { date: '2024-01-10', amount: 100_000, kind: 'in' }, { date: '2025-01-10', amount: 100_000, kind: 'in' }], 400_000, '2026-01-10');
+      return `You invest ${formatRupees(100_000)} on 10 January in 2023, 2024 and 2025, and the investment is worth ${formatRupees(400_000)} on 10 January 2026. The gain is ${formatRupees(r.gain)} on ${formatRupees(r.invested)}, and the XIRR is ${formatPct(r.rate)} a year.`;
+    },
+    faqs: [
+      { question: 'What is XIRR?', answer: 'XIRR (extended internal rate of return) is the yearly return on an investment where money was added or taken out on different dates. It is the single yearly rate that makes all those dated cash flows add up to the current value.' },
+      { question: 'What is the difference between XIRR and CAGR?', answer: 'CAGR measures the growth of one amount between two dates. XIRR handles many amounts on many dates. For a single investment with no additions or withdrawals the two give the same answer; for a SIP, only XIRR is correct.' },
+      { question: 'How do I calculate the XIRR of a SIP?', answer: 'Add a row for each instalment with its date and amount, marked "Invested", then enter the current value of your units and today’s date. Your fund statement lists the instalment dates. The fund pages on this site also show the SIP return (XIRR) of each fund over 3 and 5 years.' },
+      { question: 'Is this the same as the XIRR function in Excel or Google Sheets?', answer: 'Yes. It uses the same definition: the rate at which the net present value of the dated cash flows is zero, with days counted over 365. In a spreadsheet, investments are entered as negative numbers and the final value as a positive number; here you choose "Invested" or "Withdrawn" instead.' },
+      { question: 'Why is the XIRR so high or so low for a short period?', answer: 'XIRR is a yearly rate. A gain of 3% in one month is shown as the rate you would earn if that pace continued for a whole year, which is far above 3%. For periods under a year, look at the gain in rupees as well.' },
+      { question: 'What is a good XIRR?', answer: 'There is no single number. Compare it with what the same money would have earned elsewhere over the same dates, such as other funds in the same category or a fixed deposit, and remember that a high XIRR over a short or lucky period says little about the future.' },
+    ],
+  },
+  {
+    slug: 'fuel-cost-calculator', kind: 'fuelcost', name: 'Fuel cost calculator', englishOnly: true,
+    related: ['mileage-calculator', 'car-running-cost-calculator', 'ev-vs-petrol-running-cost-calculator'],
+    title: 'Fuel Cost Calculator: Trip and Monthly Petrol, Diesel, CNG Cost',
+    h1: 'Fuel cost calculator',
+    description: 'Free fuel cost calculator for petrol, diesel and CNG. Enter the fuel price, your mileage and the distance to see the cost of a trip, the cost per km and the monthly fuel bill.',
+    intro: 'See what a trip or a month of driving costs in fuel. Enter the price at your pump, the mileage your vehicle actually gives and the distance; the calculator shows the fuel needed, the cost of the trip, the cost per kilometre and the monthly and yearly bill. It works for cars, bikes and scooters.',
+    formula: 'Cost per km = fuel price ÷ mileage;   fuel for a trip = distance ÷ mileage;   trip cost = distance × cost per km',
+    how: [
+      'Divide the price of a litre (or a kg of CNG) by the kilometres your vehicle runs on it, and you have the fuel cost of one kilometre. Multiply by any distance to get the cost of a trip, a month or a year.',
+      'Use the mileage you really get, not the figure in the brochure. If you only know the brochure figure, open "Real-world mileage and sharing" and lower it by a percentage; the calculator then uses the lower mileage. To measure your own mileage, use the mileage calculator.',
+      'Fuel prices differ by city and change often, so the price is typed in by you and is never looked up. The figures shown at first are examples.',
+    ],
+    example: () => { const r = fuelCost({ fuelPrice: 100, kmPerUnit: 18, mileageCut: 0, tripKm: 300, kmPerMonth: 1_000, people: 1 }); return `With petrol at ${formatRupees(100)} a litre and a mileage of 18 km/l, each kilometre costs ${formatRupees(r.perKm, 2)}. A 300 km trip uses ${r.tripFuel.toFixed(1)} litres and costs ${formatRupees(Math.round(r.tripCost))}; 1,000 km a month costs ${formatRupees(Math.round(r.perMonth))}.`; },
+    faqs: [
+      { question: 'How do I calculate the fuel cost of a trip?', answer: 'Divide the distance by your mileage to get the litres needed, then multiply by the price per litre. For example, 300 km at 15 km/l needs 20 litres; at ₹100 a litre that is ₹2,000.' },
+      { question: 'How do I calculate petrol cost per km?', answer: 'Divide the petrol price per litre by your mileage in km per litre. At ₹100 a litre and 20 km/l the cost is ₹5 per km; at 12 km/l it is ₹8.33 per km.' },
+      { question: 'How much petrol is needed for 100 km?', answer: 'Divide 100 by your mileage. A vehicle that gives 20 km/l needs 5 litres for 100 km, one that gives 15 km/l needs 6.67 litres, and a bike that gives 50 km/l needs 2 litres.' },
+      { question: 'Why should I lower the brochure mileage?', answer: 'The certified figure in a brochure is measured in a standard test. On the road, traffic, air conditioning, load and driving style usually give a lower mileage. Measuring your own mileage over a few tanks is more reliable than any adjustment.' },
+      { question: 'Is CNG cheaper to run than petrol?', answer: 'Often, because a kg of CNG usually takes a car further than a litre of petrol and has cost less. It depends on the prices in your city and your car, so enter both and compare the cost per km. A CNG kit or a CNG model also costs more to buy.' },
+      { question: 'Does this include tolls, parking or servicing?', answer: 'No, only fuel. For fuel plus maintenance use the car running cost calculator, and add tolls and parking to the trip cost yourself.' },
+    ],
+  },
+  {
+    slug: 'mileage-calculator', kind: 'mileage', name: 'Mileage calculator', englishOnly: true,
+    related: ['fuel-cost-calculator', 'car-running-cost-calculator'],
+    title: 'Mileage Calculator: km per Litre for Your Car or Bike',
+    h1: 'Mileage calculator',
+    description: 'Free mileage calculator for cars and bikes. Enter the distance driven and the fuel filled to get km per litre (or km per kg for CNG), litres per 100 km and fuel cost per km.',
+    intro: 'Find the mileage your car, bike or scooter really gives. Enter the kilometres driven between two full tanks and the fuel it took to fill up again; the calculator shows km per litre (km per kg for CNG), the fuel used per 100 km and the fuel cost of each kilometre.',
+    formula: 'Mileage = distance driven ÷ fuel used;   fuel per 100 km = fuel used ÷ distance × 100;   cost per km = fuel price ÷ mileage',
+    how: [
+      'The tank-to-tank method is the reliable way to measure mileage. Fill the tank completely and note the odometer reading (or reset the trip meter). Drive as you normally do. At the next fill, fill the tank completely again and note the litres it took and the kilometres driven since the first fill.',
+      'Divide the kilometres by the litres. The fuel you just filled is the fuel you used over that distance, because the tank is full again. Repeat over two or three tanks and take the average, since one tank can be thrown off by where the pump cut off.',
+      'With the fuel price you paid, the calculator also shows the fuel cost per kilometre, which you can use in the fuel cost calculator to price a trip.',
+    ],
+    example: () => { const m = mileage(450, 30, 100)!; return `You drive 450 km between two full tanks and the second fill takes 30 litres. The mileage is ${m.kmPerUnit.toFixed(1)} km/l, which is ${m.per100Km.toFixed(2)} litres per 100 km. At ${formatRupees(100)} a litre, each kilometre costs ${formatRupees(m.costPerKm, 2)} in fuel.`; },
+    faqs: [
+      { question: 'How do I calculate the mileage of my car or bike?', answer: 'Fill the tank fully and note the odometer. Drive normally, fill the tank fully again, and divide the kilometres driven by the litres of the second fill. For example, 450 km on 30 litres is 15 km/l.' },
+      { question: 'Why is my mileage lower than the company’s figure?', answer: 'The certified figure comes from a standard test, without traffic jams, heavy loads or constant air conditioning. City traffic, short trips, low tyre pressure, hard acceleration and a late service all lower the real figure.' },
+      { question: 'How can I improve my mileage?', answer: 'Keep the tyres at the recommended pressure, accelerate and brake smoothly, avoid long idling, service the vehicle on time, and do not carry unnecessary weight. The effect of each is small, but together they add up.' },
+      { question: 'How do I convert km/l to litres per 100 km?', answer: 'Divide 100 by the km/l figure. 20 km/l is 5 litres per 100 km; 12.5 km/l is 8 litres per 100 km. To go back, divide 100 by the litres per 100 km.' },
+      { question: 'Does this work for CNG and for bikes?', answer: 'Yes. For CNG choose CNG and enter the kilograms filled; the result is in km per kg. For a bike or scooter the method is the same, with smaller numbers.' },
+    ],
+  },
+  {
+    slug: 'gold-sip-calculator', kind: 'goldsip', name: 'Gold SIP calculator', englishOnly: true,
+    related: ['gold-silver-return-calculator', 'gold-jewellery-price-calculator', 'sip-calculator'],
+    title: 'Gold SIP Calculator: Monthly Gold Investment Returns',
+    h1: 'Gold SIP calculator',
+    description: 'Free gold SIP calculator. Enter a monthly amount, today’s gold price, an assumed yearly rise and the years to see the grams collected, the amount invested and the value.',
+    intro: 'See what a fixed monthly investment in gold could build up to. Enter the monthly amount, today’s price per gram, the yearly rise in the gold price you want to assume and the number of years; the calculator shows the grams you collect, the money you put in and what the gold is worth at the end.',
+    formula: 'Grams bought in a month = monthly amount ÷ (1 + cost) ÷ price that month;   price after t years = price today × (1 + rise)ᵗ;   value = total grams × price at the end',
+    how: [
+      'Each month the same amount buys gold at that month’s price, so it buys fewer grams as the price rises. The calculator assumes the price rises smoothly at the yearly rate you enter, adds up the grams bought month by month, and values them at the price at the end.',
+      'The cost on every purchase covers what does not turn into gold: GST on physical or digital gold, and the gap between buying and selling prices. If you invest through a gold mutual fund or ETF, set the cost to 0 and lower the assumed rise by the fund’s yearly expense ratio instead.',
+      'The yearly rise is an assumption, not a forecast. Gold has had long stretches when its price fell or stayed flat, so try a low figure as well as a high one. The price you enter is always your own; the site has no gold price feed.',
+    ],
+    example: () => { const r = goldSip({ monthly: 5_000, pricePerGram: 10_000, growth: 0.08, years: 10, buyCost: 0.03 }); return `${formatRupees(5_000)} a month for 10 years, starting at ${formatRupees(10_000)} a gram, with the price assumed to rise 8% a year and 3% lost to costs on each purchase, puts in ${formatRupees(r.invested)}, collects about ${r.grams.toFixed(2)} grams and is worth about ${formatRupees(Math.round(r.value))} at the end.`; },
+    faqs: [
+      { question: 'What is a gold SIP?', answer: 'It is a fixed amount invested in gold every month. It can be done through a gold mutual fund or gold ETF, through digital gold, or through a jeweller’s monthly scheme. Buying a little each month spreads your purchases across high and low prices.' },
+      { question: 'How is the value of a gold SIP calculated?', answer: 'Each month’s amount is divided by that month’s gold price to get the grams bought. The grams are added up and multiplied by the price at the end. The price path comes from the yearly rise you enter, so the result is only as good as that assumption.' },
+      { question: 'What yearly rise in the gold price should I assume?', answer: 'There is no safe number. Gold’s return has varied a great deal from one period to another, with some long flat or falling stretches. Use a cautious figure, compare a few, and do not treat any of them as a promise.' },
+      { question: 'What is the cost on every purchase?', answer: 'For physical and digital gold it is mainly GST, which has been 3%, plus the spread between the buying and selling price. Jewellery adds making charges, which are usually not recovered on selling. Gold mutual funds and ETFs do not charge GST on units but take a yearly expense ratio.' },
+      { question: 'Does this include tax on the gain?', answer: 'No. Tax depends on the form in which you hold gold and for how long, and the rules have changed in recent years. Check the current rules before selling.' },
+      { question: 'Can I use this for silver?', answer: 'Yes. Enter the silver price per gram and the rise you want to assume; the maths is the same.' },
+    ],
+  },
 ];
+
+/** Calculators that also have a Hindi page. */
+export const BILINGUAL_TOOLS: Tool[] = TOOLS.filter((t) => !t.englishOnly);
 
 /**
  * Look up a calculator by its URL slug.

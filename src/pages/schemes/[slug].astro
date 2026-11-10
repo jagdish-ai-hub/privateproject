@@ -5,6 +5,7 @@ import { REVIEWED_ON } from '../../data/author.ts';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import SchemePageBody from '../../components/schemes/SchemePageBody.astro';
 import { SCHEMES_EN as PAGES, SCHEME_SUMMARY_EN as SUMMARY } from '../../lib/schemeContent.ts';
+import { schemeFaqs } from '../../lib/schemeExtraFaqs.ts';
 import { breadcrumbLd, calculatorLd, faqLd, webPageLd } from '../../lib/seo.ts';
 
 export function getStaticPaths() {
@@ -14,6 +15,7 @@ const { slug } = Astro.props;
 const page = PAGES.find((p) => p.slug === slug)!;
 const path = `/schemes/${page.slug}/`;
 const url = new URL(path, Astro.site).toString();
+const faqs = schemeFaqs(page.kind, page.faqs);
 ---
 <BaseLayout title={page.title} description={page.description} path={path} lang="en"
   alternates={[{ lang: 'en', path: `/schemes/${page.slug}/` }, { lang: 'hi', path: `/hi/schemes/${page.slug}/` }]}
@@ -25,8 +27,8 @@ const url = new URL(path, Astro.site).toString();
     ]),
     calculatorLd(page.name, url, page.description),
     webPageLd({ url, name: page.title, description: page.description, dateModified: REVIEWED_ON, siteUrl: new URL('/', Astro.site).toString(), lang: 'en' }),
-    faqLd(page.faqs),
+    faqLd(faqs),
   ]}>
   <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Govt schemes', href: '/schemes/' }, { name: page.name }]} />
-  <SchemePageBody page={page} lang="en" others={PAGES.filter((p) => p.slug !== page.slug).map((p) => ({ slug: p.slug, name: p.name }))} />
+  <SchemePageBody page={page} faqs={faqs} lang="en" others={PAGES.filter((p) => p.slug !== page.slug).map((p) => ({ slug: p.slug, name: p.name }))} />
 </BaseLayout>

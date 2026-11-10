@@ -111,7 +111,7 @@ export const SCHEMES_EN: SchemePage[] = [
     formula: 'Quarterly payout = deposit × rate ÷ 4;  total interest = quarterly payout × 4 × years',
     rules: [
       ['Deposit', '₹1,000 to ₹30,00,000, in multiples of ₹1,000'],
-      ['Term', '5 years, extendable once by 3 years'],
+      ['Term', '5 years, extendable in blocks of 3 years'],
       ['Interest', `${pct(R.scss)} a year, paid quarterly`],
       ['Who can open', 'Individuals aged 60 or more (some retirees from 55)'],
     ],

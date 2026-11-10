@@ -21,7 +21,7 @@ Post offices offer a set of savings schemes backed by the Government of India. T
 ## Schemes that pay you regularly
 
 - **Monthly Income Scheme (MIS)**: you deposit a lump sum, up to ₹9 lakh in a single account or ₹15 lakh in a joint account, and receive interest every month for 5 years. The deposit comes back at maturity. The interest is simple, so it does not compound. [MIS calculator](/schemes/post-office-mis-calculator/).
-- **Senior Citizens' Savings Scheme (SCSS)**: for people aged 60 and above (and some retirees from 55). You deposit up to ₹30 lakh and receive interest every quarter for 5 years, which can be extended once. [SCSS calculator](/schemes/scss-calculator/).
+- **Senior Citizens' Savings Scheme (SCSS)**: for people aged 60 and above (and some retirees from 55). You deposit up to ₹30 lakh and receive interest every quarter for 5 years, which can be extended in blocks of 3 years. [SCSS calculator](/schemes/scss-calculator/).
 
 ## Schemes that grow and pay at the end
 

@@ -18,4 +18,10 @@ export const TOOL_GUIDES: Record<Tool['kind'], { slug: string; title: string; ti
   fd: { slug: 'fixed-deposit-returns-after-tax-and-inflation', title: 'Fixed deposit returns after tax and inflation: what you really earn', titleHi: 'फ़िक्स्ड डिपॉज़िट का रिटर्न टैक्स और महँगाई के बाद: असल कमाई' },
   inflation: { slug: 'fixed-deposit-returns-after-tax-and-inflation', title: 'Fixed deposit returns after tax and inflation: what you really earn', titleHi: 'फ़िक्स्ड डिपॉज़िट का रिटर्न टैक्स और महँगाई के बाद: असल कमाई' },
   metalreturn: { slug: 'gold-and-silver-jewellery-coins-or-funds', title: 'Buying gold and silver: jewellery, coins, funds and what each costs', titleHi: 'सोना-चाँदी ख़रीदना: गहने, सिक्के, फंड और हर एक का खर्च' },
+  eligibility: { slug: 'how-emi-works-home-car-personal-loans', title: 'How an EMI works: home, car and personal loans, flat vs reducing rate', titleHi: 'EMI कैसे काम करती है: होम, कार और पर्सनल लोन, फ़्लैट बनाम घटता बैलेंस' },
+  emi: { slug: 'how-emi-works-home-car-personal-loans', title: 'How an EMI works: home, car and personal loans, flat vs reducing rate', titleHi: 'EMI कैसे काम करती है: होम, कार और पर्सनल लोन, फ़्लैट बनाम घटता बैलेंस' },
+  xirr: { slug: 'cagr-xirr-absolute-return', title: 'CAGR vs XIRR vs absolute return: which one to use?', titleHi: 'CAGR बनाम XIRR बनाम कुल रिटर्न: कौन-सा इस्तेमाल करें?' },
+  fuelcost: { slug: 'ev-vs-petrol-running-cost-india', title: 'EV vs petrol car in India: running cost, payback and what to check', titleHi: 'भारत में EV बनाम पेट्रोल कार: चलाने का खर्च, वसूली और क्या जाँचें' },
+  mileage: { slug: 'ev-vs-petrol-running-cost-india', title: 'EV vs petrol car in India: running cost, payback and what to check', titleHi: 'भारत में EV बनाम पेट्रोल कार: चलाने का खर्च, वसूली और क्या जाँचें' },
+  goldsip: { slug: 'gold-and-silver-jewellery-coins-or-funds', title: 'Buying gold and silver: jewellery, coins, funds and what each costs', titleHi: 'सोना-चाँदी ख़रीदना: गहने, सिक्के, फंड और हर एक का खर्च' },
 };

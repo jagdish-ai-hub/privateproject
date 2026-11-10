@@ -26,7 +26,7 @@ The government offers a handful of savings schemes. They are often listed togeth
 | [Sukanya Samriddhi](/schemes/sukanya-samriddhi-calculator/) | A girl child's future | Tax-free | 21 years | Credited yearly, grows with the balance |
 | [NSC](/schemes/nsc-calculator/) | A lump sum in 5 years | Taxable | 5 years | Compounds yearly, paid at maturity |
 | [KVP](/schemes/kvp-calculator/) | Money that doubles over a fixed period | Taxable | Fixed number of months | Compounds yearly, paid at maturity |
-| [SCSS](/schemes/scss-calculator/) | Regular income for seniors | Taxable | 5 years, extendable once | Paid quarterly |
+| [SCSS](/schemes/scss-calculator/) | Regular income for seniors | Taxable | 5 years, extendable in 3-year blocks | Paid quarterly |
 | [Post Office MIS](/schemes/post-office-mis-calculator/) | Regular monthly income | Taxable | 5 years | Paid monthly |
 | [Post Office RD](/schemes/post-office-rd-calculator/) | Saving a fixed amount each month | Taxable | 5 years | Compounds quarterly |
 | [Post Office Time Deposit](/schemes/post-office-fd-calculator/) | A fixed deposit for 1 to 5 years | Taxable | 1, 2, 3 or 5 years | Calculated quarterly, paid yearly |
