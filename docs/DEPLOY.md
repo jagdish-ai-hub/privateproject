@@ -1,33 +1,42 @@
 # Deploy and monetise
 
-## Hosting (Cloudflare Pages, free)
+## Hosting (Cloudflare Workers static assets, free)
 
-The site is built here (or in GitHub Actions), then the finished `dist/` folder is uploaded to
-Cloudflare Pages with **Direct Upload**. Cloudflare never builds it: Cloudflare stops builds after
-20 minutes, and downloading every fund's history from scratch takes about that long.
+Cloudflare now steers new projects to **Workers** (with *static assets*) instead of Pages, so the site is
+deployed as a Worker that serves the finished `dist/` folder. The setup is in `wrangler.jsonc`. There is
+no Worker code: only files. (Pages still works and has the same limits, but is no longer recommended for new projects.)
 
-**Do not** create the project with "Connect to Git". A Direct Upload project cannot later be switched
-to Git, and a Git-connected project tries to build the site itself and times out.
+The site is built here or in GitHub Actions, then `dist/` is uploaded with `wrangler deploy`. Cloudflare
+never builds it: Cloudflare stops builds after 20 minutes, and downloading every fund's history from
+scratch takes about that long. **Do not** connect the repository to Cloudflare (Workers Builds or Pages
+"Connect to Git"): it would try to build the site itself and time out.
 
-The dashboard's drag-and-drop upload takes at most 1,000 files, and the site has about 10,000, so the
-upload is done with Cloudflare's command-line tool, `wrangler`. That needs one **API token**
-(Cloudflare → My Profile → API Tokens → Create Token, permission *Cloudflare Pages: Edit*) and your
-**account ID** (dashboard sidebar). Three ways to use it, from least to most automatic:
+Limits: 20,000 files per Worker version on the free plan and 25 MiB per file. The site has about 10,800 files
+(`wrangler deploy --dry-run` reports about 12,900, which seems to include folders); either is well under the limit.
+
+You need one **API token** (Cloudflare → Manage account → Account API tokens → Create Token → Custom
+token, permission *Account → Workers Scripts → Edit*; set an expiry) and your **account ID** (Workers & Pages
+page). Three ways to deploy, from least to most automatic:
 
 1. **From your own computer** (Node.js 22): `npm ci`, `npm run data:build`, `npm run build`, then
-   `CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… npx wrangler pages deploy dist --project-name=<name>`.
-   The first run creates the project. Data is as fresh as your last run.
+   `CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… npx wrangler deploy --name <name>`.
+   The first run creates the Worker. Data is as fresh as your last run.
 2. **From a Claude Code cloud session:** save the token as a network secret for `api.cloudflare.com` in
    the environment's settings; the session can then build and run the same `wrangler` command.
 3. **Every night, automatically (recommended once live):** in the GitHub repository set the secrets
-   `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the variable `CLOUDFLARE_PROJECT`, plus `SITE_URL`.
-   The **Nightly data and deploy** workflow then rebuilds the data and uploads the site every night.
-   This stores the token in GitHub; Cloudflare itself is still not connected to the repository.
-   You do not need to create the Pages project first: the workflow tries to create it on the first run
-   (and uses the existing one if you already made it in the dashboard). Leave `INDEX_STAGE` unset while testing.
+   `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and the variables `CLOUDFLARE_PROJECT` (the Worker name,
+   for example `mf-compare`), `SITE_URL` and `PUBLIC_CONTACT_EMAIL`. The **Nightly data and deploy** workflow
+   then rebuilds the data and uploads the site every night. This stores the token in GitHub; Cloudflare itself
+   is still not connected to the repository. Leave `INDEX_STAGE` unset while testing.
 
-After the first upload: add the custom domain in Cloudflare Pages and submit
-`https://your-domain/sitemap-index.xml` in Google Search Console and Bing Webmaster Tools.
+The test address is `https://<name>.<your-subdomain>.workers.dev` (your subdomain is shown on the
+Workers & Pages page). After the first run, set `SITE_URL` to that address and run the workflow again so
+canonical links and the sitemap use it.
+
+**Custom domain.** In Workers & Pages → your Worker → Settings → Domains & Routes → Add → Custom domain.
+Unlike Pages, Workers only accepts a domain whose **DNS (nameservers) is managed by Cloudflare**. If you
+buy the domain elsewhere, add it to Cloudflare (free plan) and change its nameservers at the registrar first.
+Then submit `https://your-domain/sitemap-index.xml` in Google Search Console and Bing Webmaster Tools.
 
 Any static host works: build with `npm run data:build && npm run build` and upload `dist/`.
 Mind the host's file limit ([DATA.md](DATA.md#file-count)).
@@ -71,9 +80,9 @@ Move up only when the previous group has settled. Signals to look for (rules of 
 Suggested order: `en` → `core` (after a Hindi speaker has read the Hindi pages) → `lists` →
 `funds` with `INDEX_FUNDS=250`, then 700, 1200 → `all`.
 
-**While you test the site on its `pages.dev` address** do not post the link publicly and do not add it to
-Search Console, then switch the `pages.dev` address off once the custom domain works (Pages project →
-Custom domains). `en` is open to Google in principle on any address that Google finds.
+**While you test the site on its `workers.dev` address** do not post the link publicly and do not add it to
+Search Console, then switch the `workers.dev` address off once the custom domain works (Worker →
+Settings → Domains & Routes). `en` is open to Google in principle on any address that Google finds.
 
 **Check it:** `npm run check:stages` builds the site once per stage and checks the tags, sitemaps and
 `hreflang` links (about a minute). CI runs it on every push.
@@ -104,7 +113,7 @@ know where data comes from; everything downstream reads `screener.json` and the 
 
 Use this when you change from a temporary address (for example a subdomain) to the final domain.
 
-1. Buy the new domain and add it to the same Cloudflare Pages project as a second custom domain.
+1. Buy the new domain, put its DNS on Cloudflare, and add it to the same Worker as a second custom domain.
 2. Set the repository variable `SITE_URL` to the new address and run the nightly workflow once. Every
    canonical link, `hreflang` link and the sitemap then use it.
 3. Redirect the old address to the new one with a permanent (301) redirect that keeps the path, for

@@ -1,0 +1,13 @@
+{
+  // Serves the built site (dist/) with Cloudflare Workers static assets. No Worker code: only files.
+  // The name is overridden in CI by the repository variable CLOUDFLARE_PROJECT (npx wrangler deploy --name ...).
+  "name": "mf-compare",
+  "compatibility_date": "2026-11-10",
+  "assets": {
+    "directory": "./dist",
+    // /404.html is served, with a 404 status, for addresses that do not exist.
+    "not_found_handling": "404-page",
+    // /tools/x/index.html is served at /tools/x/ (the site is built with trailing slashes).
+    "html_handling": "auto-trailing-slash"
+  }
+}

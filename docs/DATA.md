@@ -115,7 +115,7 @@ in `src/lib/screener/types.ts`.
 
 ## File count
 
-The static host's limit matters: Cloudflare Pages' free plan allows 20,000 files per site. Only the
+The static host's limit matters: Cloudflare's free plan allows 20,000 files per site (Workers static assets and Pages). Only the
 **Direct Growth** variant of each scheme (and the Growth option of single-plan schemes such as ETFs)
 gets a static page; every other variant opens `/fund/?code=…`, one page that loads the fund from
 `screener.json` in the browser and is marked `noindex` (see `src/lib/fundLinks.ts`). The chart file

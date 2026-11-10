@@ -66,24 +66,15 @@ jobs:
       - name: Check links and SEO basics
         run: node scripts/check-site.mjs
 
-      # Creates the Direct Upload project on the first run. If it already exists (for example you made it in the
-      # dashboard) this step fails harmlessly and the deploy below uses the existing project.
-      - name: Create the Pages project if it does not exist yet
+      # Cloudflare Workers static assets (the successor to Pages): uploads dist/ as described in wrangler.jsonc.
+      # The first run creates the Worker. Cloudflare never builds the site and is not connected to the repository.
+      - name: Deploy to Cloudflare Workers
         if: env.CF_READY == 'true'
-        continue-on-error: true
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages project create ${{ vars.CLOUDFLARE_PROJECT }} --production-branch=main
-
-      - name: Deploy to Cloudflare Pages
-        if: env.CF_READY == 'true'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT }}
+          command: deploy --name ${{ vars.CLOUDFLARE_PROJECT }}
 
       - name: Note when deploy was skipped
         if: env.CF_READY != 'true'
