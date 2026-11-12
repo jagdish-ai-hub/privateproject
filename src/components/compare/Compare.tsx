@@ -181,7 +181,7 @@ export function Compare() {
         </section>
       )}
 
-      {insights && <InsightsPanel title="What the numbers say" headline={insights.headline} items={insights.items} caveats={insights.caveats} idPrefix="cmp" />}
+      {insights && <InsightsPanel title="What the numbers say" headline={insights.headline} leaders={insights.leaders} items={insights.items} caveats={insights.caveats} idPrefix="cmp" swatches={selected.map((s) => `var(--s${slotOf(s.code) + 1})`)} />}
 
       {selected.length >= 2 && prepared && (
         <section aria-label="Metrics comparison" class="overflow-auto rounded-md border border-line">

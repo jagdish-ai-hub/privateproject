@@ -91,3 +91,57 @@ describe('fundVsPeers', () => {
     expect(fundVsPeers(fund('E'), med, 'x')).toEqual([]);
   });
 });
+
+describe('insight cards (rows, bars and leaders)', () => {
+  const r = compareInsights([ppfas, uti]);
+  const item = (id: string) => r.items.find((i) => i.id === id)!;
+  it('each measure has a title, a direction hint and one row per fund, best first, with the sentence kept', () => {
+    for (const id of ['returns', 'volatility', 'drawdown', 'sharpe', 'rolling', 'cost', 'size']) {
+      const it = item(id);
+      expect(it.measure, id).toBeTruthy();
+      expect(it.rows, id).toHaveLength(2);
+      expect(it.text.length, id).toBeGreaterThan(20);
+    }
+    expect(item('returns').rows!.map((x) => x.label)).toEqual(['Parag Parikh Flexi Cap Fund', 'UTI - Nifty Next 50 Index Fund']);
+    expect(item('cost').rows!.map((x) => x.value)).toEqual(['0.46%', '0.69%']);
+    expect(item('cost').rows![0].label).toContain('UTI');
+  });
+  it('flags exactly one leader per card, matching the sentence', () => {
+    for (const it of r.items.filter((i) => i.rows)) expect(it.rows!.filter((x) => x.lead), it.id).toHaveLength(1);
+    expect(item('cost').rows!.find((x) => x.lead)!.label).toContain('UTI');
+    expect(item('volatility').rows!.find((x) => x.lead)!.label).toContain('Parag Parikh');
+  });
+  it('bars are in proportion to the figures, and the longest bar is full', () => {
+    const rows = item('cost').rows!;
+    expect(rows[1].share).toBe(1);
+    expect(rows[0].share).toBeCloseTo(0.46 / 0.69, 10);
+    const dd = item('drawdown').rows!; // sized by the depth of the fall
+    expect(dd.map((x) => x.value)).toEqual(['-11.0%', '-26.4%']);
+    expect(dd[0].share).toBeCloseTo(0.1098 / 0.2645, 3);
+    expect(dd[1].share).toBe(1);
+  });
+  it('no bars when a figure is zero or negative, because a bar would mislead', () => {
+    const neg = compareInsights([fund('A Fund', { m: { r1y: -0.05 } }), fund('B Fund', { m: { r1y: 0.02 } })]);
+    const rows = neg.items.find((i) => i.id === 'returns')!.rows!;
+    expect(rows.map((x) => x.share)).toEqual([null, null]);
+    expect(rows[0].lead).toBe(true);
+  });
+  it('gain and loss colouring is only for returns and falls', () => {
+    expect(item('returns').signed).toBe(true);
+    expect(item('drawdown').signed).toBe(true);
+    for (const id of ['volatility', 'sharpe', 'rolling', 'cost', 'size']) expect(item(id).signed, id).toBeFalsy();
+  });
+  it('lists who leads on what, in fund order, matching the headline', () => {
+    expect(r.leaders).toEqual([
+      { fund: 0, label: 'Parag Parikh Flexi Cap Fund', dims: ['Returns', 'Steadiness', 'Consistency', 'Size'] },
+      { fund: 1, label: 'UTI - Nifty Next 50 Index Fund', dims: ['Low cost'] },
+    ]);
+    expect(compareInsights([ppfas]).leaders).toEqual([]);
+  });
+  it('the history warning stays a plain sentence with no rows', () => {
+    const s = compareInsights([ppfas, sbi]);
+    const h = s.items.find((i) => i.id === 'history')!;
+    expect(h.rows).toBeUndefined();
+    expect(h.measure).toBe('Short history');
+  });
+});

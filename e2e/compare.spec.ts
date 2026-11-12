@@ -101,3 +101,26 @@ test('insights: the cost and size sentences quote the same numbers as the table,
   await panel.locator('[data-insight="cost"]').getByRole('button', { name: /What is TER/ }).click();
   await expect(page.locator('.info-pop:popover-open')).toContainText('Total Expense Ratio');
 });
+
+test('insights are drawn as cards: a leader summary, a bar per fund, no sideways scroll on a phone', async ({ page }) => {
+  const d = (await (await page.request.get('/data/screener.json')).json()) as ScreenerData;
+  const picks = Array.from({ length: d.count }, (_, i) => i)
+    .filter((i) => d.dict.plan[d.plan[i]] === 'direct' && d.dict.option[d.option[i]] === 'growth' && d.ter[i] !== null && d.aum[i] !== null && d.metrics.r3y[i] !== null && d.metrics.vol3y[i] !== null)
+    .filter((i, k, a) => d.ter[i] !== d.ter[a[0]] || k === 0).slice(0, 2);
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto(`/compare/?f=${picks.map((i) => d.code[i]).join(',')}`);
+  const panel = page.getByTestId('insights');
+  await expect(panel).toBeVisible({ timeout: 10_000 });
+  await expect(panel.getByTestId('insights-leaders')).toContainText('Who leads on what');
+  expect(await panel.locator('li[data-insight]').count()).toBeGreaterThanOrEqual(4);
+  // every card shows one line per fund, and exactly one of them is marked as leading
+  for (const card of await panel.locator('li[data-insight]').all()) {
+    if ((await card.locator('ol > li').count()) === 0) continue;
+    expect(await card.locator('ol > li').count()).toBe(2);
+    expect(await card.getByText('Leads', { exact: true }).count()).toBe(1);
+  }
+  // the full sentence is still there for screen readers
+  await expect(panel.locator('[data-insight="cost"] .sr-only')).toContainText('costs the least');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});

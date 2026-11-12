@@ -29,17 +29,55 @@ export interface InsightFund {
   metrics: Record<MetricKey, number | null>;
 }
 
-/** One sentence plus the explainer that goes with it. */
+/** One fund's line in an insight card. */
+export interface InsightRow {
+  /** Position of the fund in the list given to {@link compareInsights}. */
+  fund: number;
+  label: string;
+  /** The figure as shown, e.g. "+14.75%". */
+  value: string;
+  /** The number behind `value` (for the gain/loss colour), or null. */
+  raw: number | null;
+  /** Bar length from 0 to 1 in proportion to the figure, or null when a bar would mislead (zero or negative values). */
+  share: number | null;
+  /** True for the fund that comes out ahead on this measure. */
+  lead: boolean;
+}
+
+/**
+ * One sentence plus the explainer that goes with it. The sentence is always filled in (it is the text for screen
+ * readers and the tests); `measure`, `rows` and the rest let the page draw it as a card instead.
+ */
 export interface Insight {
   id: string;
   text: string;
   term?: TermKey;
+  /** Card title, e.g. "Return over 5 years". */
+  measure?: string;
+  /** Which direction is better, e.g. "Lower is better". */
+  hint?: string;
+  /** One line per fund, best first. */
+  rows?: InsightRow[];
+  /** A short extra fact shown under the rows. */
+  note?: string;
+  /** True when the figures are gains or losses and take the gain/loss colour. */
+  signed?: boolean;
+}
+
+/** A fund and what it leads on (for the summary at the top of the panel). */
+export interface InsightLeader {
+  fund: number;
+  label: string;
+  /** Plain names such as "Returns" and "Low cost". */
+  dims: string[];
 }
 
 /** The result for a comparison. */
 export interface InsightSet {
   /** One summary sentence ("A leads on ...; B leads on ..."), or null when nothing can be compared. */
   headline: string | null;
+  /** The same summary as a list, one entry per fund that leads on something. */
+  leaders: InsightLeader[];
   items: Insight[];
   /** Things that make the comparison less like-for-like. */
   caveats: string[];
@@ -73,6 +111,17 @@ function leader(values: (number | null)[], higherIsBetter: boolean): number {
   return Math.abs(have[0].v - have[1].v) < EPS ? -1 : have[0].i;
 }
 
+/**
+ * The lines of an insight card, in the order given. Bars are in proportion to the figure (or to its size, for a fall),
+ * and are left out when any figure is zero or negative, because a bar would then say something untrue.
+ */
+function rowsFor(labels: string[], values: (number | null)[], fmt: (v: number) => string, order: number[], lead: number, magnitude = false): InsightRow[] {
+  const size = values.map((v) => (v === null ? null : magnitude ? Math.abs(v) : v));
+  const drawable = size.every((v) => v !== null && v > 0);
+  const max = drawable ? Math.max(...(size as number[])) : 0;
+  return order.map((i) => ({ fund: i, label: labels[i], value: values[i] === null ? '—' : fmt(values[i] as number), raw: values[i], share: drawable ? (size[i] as number) / max : null, lead: i === lead }));
+}
+
 /** "A (+15.8%), B (+12.8%)" in the order given. */
 const list = (labels: string[], values: (number | null)[], fmt: (v: number) => string, order: number[]): string =>
   order.map((i) => `${labels[i]} (${values[i] === null ? '—' : fmt(values[i] as number)})`).join(', ');
@@ -84,7 +133,7 @@ const list = (labels: string[], values: (number | null)[], fmt: (v: number) => s
  * @returns A headline, one insight per measure that can be compared fairly, and caveats.
  */
 export function compareInsights(funds: readonly InsightFund[]): InsightSet {
-  const out: InsightSet = { headline: null, items: [], caveats: [] };
+  const out: InsightSet = { headline: null, leaders: [], items: [], caveats: [] };
   if (funds.length < 2) return out;
   const L = labelsFor(funds);
   const all = (vals: (number | null)[]): boolean => vals.every((v) => v !== null);
@@ -102,6 +151,8 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
     out.items.push({
       id: 'returns', term: 'cagr',
       text: `Over ${label}, ${L[top]} grew the most: ${list(L, v, (x) => formatPct(x), order)} a year. It is ${gap.toFixed(1)} percentage points ahead of ${L[order[1]]}.`,
+      measure: `Return over ${label}`, hint: 'A year · higher is better', signed: true,
+      rows: rowsFor(L, v, (x) => formatPct(x), order, top),
     });
     win('returns', top);
     break;
@@ -115,12 +166,12 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
   const mddLead = all(mdd) ? leader(mdd, true) : -1;
   if (volLead >= 0) {
     const order = vol.map((_, i) => i).sort((a, b) => (vol[a] as number) - (vol[b] as number));
-    out.items.push({ id: 'volatility', term: 'volatility', text: `${L[volLead]} had the smoother ride over the last 3 years: volatility ${list(L, vol, (x) => formatPlainPct(x, 1), order)}. Lower volatility means smaller day-to-day swings.` });
+    out.items.push({ id: 'volatility', term: 'volatility', text: `${L[volLead]} had the smoother ride over the last 3 years: volatility ${list(L, vol, (x) => formatPlainPct(x, 1), order)}. Lower volatility means smaller day-to-day swings.`, measure: 'Volatility', hint: 'Last 3 years · lower is better', rows: rowsFor(L, vol, (x) => formatPlainPct(x, 1), order, volLead) });
     win('steadiness', volLead);
   }
   if (mddLead >= 0) {
     const order = mdd.map((_, i) => i).sort((a, b) => (mdd[b] as number) - (mdd[a] as number));
-    out.items.push({ id: 'drawdown', term: 'drawdown', text: `${L[mddLead]} fell the least from its peak in the last 3 years: worst fall ${list(L, mdd, (x) => formatPct(x, 1), order)}.` });
+    out.items.push({ id: 'drawdown', term: 'drawdown', text: `${L[mddLead]} fell the least from its peak in the last 3 years: worst fall ${list(L, mdd, (x) => formatPct(x, 1), order)}.`, measure: 'Worst fall from a peak', hint: 'Last 3 years · a smaller fall is better', signed: true, rows: rowsFor(L, mdd, (x) => formatPct(x, 1), order, mddLead, true) });
     if (mddLead !== volLead) win('steadiness', mddLead);
   }
 
@@ -129,7 +180,7 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
   const shLead = all(sharpe) ? leader(sharpe, true) : -1;
   if (shLead >= 0) {
     const order = sharpe.map((_, i) => i).sort((a, b) => (sharpe[b] as number) - (sharpe[a] as number));
-    out.items.push({ id: 'sharpe', term: 'sharpe', text: `For each unit of risk taken over the last 3 years, ${L[shLead]} earned the most above a safe 6.5%: Sharpe ratio ${list(L, sharpe, (x) => x.toFixed(2), order)}.` });
+    out.items.push({ id: 'sharpe', term: 'sharpe', text: `For each unit of risk taken over the last 3 years, ${L[shLead]} earned the most above a safe 6.5%: Sharpe ratio ${list(L, sharpe, (x) => x.toFixed(2), order)}.`, measure: 'Return per unit of risk', hint: 'Sharpe ratio, last 3 years · higher is better', note: 'Measured above a safe 6.5% a year.', rows: rowsFor(L, sharpe, (x) => x.toFixed(2), order, shLead) });
   }
 
   // 4. Consistency of 1-year returns.
@@ -137,7 +188,7 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
   const posLead = all(pos) ? leader(pos, true) : -1;
   if (posLead >= 0) {
     const order = pos.map((_, i) => i).sort((a, b) => (pos[b] as number) - (pos[a] as number));
-    out.items.push({ id: 'rolling', term: 'rollingPositive', text: `${L[posLead]} was up in the highest share of all possible 1-year periods: ${list(L, pos, (x) => formatPlainPct(x, 1), order)}.` });
+    out.items.push({ id: 'rolling', term: 'rollingPositive', text: `${L[posLead]} was up in the highest share of all possible 1-year periods: ${list(L, pos, (x) => formatPlainPct(x, 1), order)}.`, measure: 'Consistency', hint: 'Share of 1-year periods that ended in a gain · higher is better', rows: rowsFor(L, pos, (x) => formatPlainPct(x, 1), order, posLead) });
     win('consistency', posLead);
   }
 
@@ -150,6 +201,9 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
     out.items.push({
       id: 'cost', term: 'ter',
       text: `${L[terLead]} costs the least to hold: expense ratio ${list(L, ter, (x) => formatTer(x), order)} a year. The gap of ${gapPts.toFixed(2)} percentage points between the highest and lowest is about ₹${Math.round(gapPts * 10_000).toLocaleString('en-IN')} a year on ₹10 lakh invested.`,
+      measure: 'Expense ratio, a year', hint: 'Lower is better',
+      rows: rowsFor(L, ter, (x) => formatTer(x), order, terLead),
+      note: `A gap of ${gapPts.toFixed(2)} percentage points is about ₹${Math.round(gapPts * 10_000).toLocaleString('en-IN')} a year on ₹10 lakh invested.`,
     });
     win('cost', terLead);
   }
@@ -161,7 +215,7 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
     const big = aum[order[0]] as number;
     const small = aum[order[order.length - 1]] as number;
     if (big > small * 1.5) {
-      out.items.push({ id: 'size', term: 'aum', text: `${L[order[0]]} is the largest fund: ${list(L, aum, (x) => formatAum(x), order)}${small > 0 ? `, about ${Math.round(big / small).toLocaleString('en-IN')} times the size of the smallest` : ''}.` });
+      out.items.push({ id: 'size', term: 'aum', text: `${L[order[0]]} is the largest fund: ${list(L, aum, (x) => formatAum(x), order)}${small > 0 ? `, about ${Math.round(big / small).toLocaleString('en-IN')} times the size of the smallest` : ''}.`, measure: 'Fund size (AUM)', hint: 'The whole scheme, all plans', rows: rowsFor(L, aum, (x) => formatAum(x), order, order[0]) });
       win('size', order[0]);
     }
   }
@@ -171,7 +225,7 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
   if (all(ages)) {
     const young = ages.map((a, i) => ({ a: a as number, i })).filter((x) => x.a < 5);
     if (young.length > 0 && young.length < funds.length) {
-      out.items.push({ id: 'history', term: 'age', text: `${young.map((y) => `${L[y.i]} has only ${y.a.toFixed(1)} years of history`).join('; ')}, so its longer-period figures are not available and its numbers may not include a full market cycle.` });
+      out.items.push({ id: 'history', term: 'age', text: `${young.map((y) => `${L[y.i]} has only ${y.a.toFixed(1)} years of history`).join('; ')}, so its longer-period figures are not available and its numbers may not include a full market cycle.`, measure: 'Short history' });
     }
   }
 
@@ -179,8 +233,10 @@ export function compareInsights(funds: readonly InsightFund[]): InsightSet {
   const labelOf: Record<string, string> = { returns: 'returns', steadiness: 'steadiness', consistency: 'consistency', cost: 'low cost', size: 'size' };
   const byFund = new Map<number, string[]>();
   for (const [dim, idx] of Object.entries(wins)) for (const i of idx) byFund.set(i, [...(byFund.get(i) ?? []), labelOf[dim]]);
-  const parts = [...byFund.entries()].sort((a, b) => a[0] - b[0]).map(([i, dims]) => `${L[i]} leads on ${dims.join(' and ')}`);
+  const sorted = [...byFund.entries()].sort((a, b) => a[0] - b[0]);
+  const parts = sorted.map(([i, dims]) => `${L[i]} leads on ${dims.join(' and ')}`);
   if (parts.length > 0) out.headline = `${parts.join('; ')}.`;
+  out.leaders = sorted.map(([i, dims]) => ({ fund: i, label: L[i], dims: dims.map((d) => d.charAt(0).toUpperCase() + d.slice(1)) }));
 
   // Caveats that make the comparison less like-for-like.
   const plans = new Set(funds.map((f) => f.plan));
