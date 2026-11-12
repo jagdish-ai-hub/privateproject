@@ -232,3 +232,19 @@ test('searching finds a fund of any type, and the link can be shared', async ({ 
   await expect(showing(page)).toBeVisible();
   await expect(firstRowName(page)).toContainText(/liquid/i);
 });
+
+test.describe('theme on a device set to dark', () => {
+  test.use({ colorScheme: 'dark' });
+  test('the site opens in light mode anyway, and a chosen dark mode is remembered', async ({ page }) => {
+    await page.goto('/');
+    const html = page.locator('html');
+    await expect(html).toHaveAttribute('data-theme', 'light');
+    await expect(page.locator('meta#theme-color')).toHaveAttribute('content', '#ffffff');
+    await page.getByRole('button', { name: 'Toggle theme' }).click();
+    await expect(html).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('meta#theme-color')).toHaveAttribute('content', '#0a0a0a');
+    await page.reload();
+    await expect(html).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('meta#theme-color')).toHaveAttribute('content', '#0a0a0a');
+  });
+});

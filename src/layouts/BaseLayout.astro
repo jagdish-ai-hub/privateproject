@@ -79,15 +79,15 @@ const nav = hi
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
-    <!-- Runs before paint so the saved / system theme never flashes. -->
+    <meta name="theme-color" content="#ffffff" id="theme-color" />
+    <!-- Runs before paint so the saved theme never flashes. First visit is always light (not the device setting); the toggle remembers a choice. -->
     <script is:inline>
       (function () {
         var t = null;
         try { t = localStorage.getItem('theme'); } catch (e) {}
-        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        t = t === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', t);
+        if (t === 'dark') document.getElementById('theme-color').setAttribute('content', '#0a0a0a');
       })();
     </script>
     {import.meta.env.PUBLIC_ADSENSE_CLIENT && (
