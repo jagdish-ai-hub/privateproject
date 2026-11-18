@@ -266,9 +266,9 @@ const partRows = f.terParts
 
   <section class="mt-8" aria-labelledby="about-h">
     <h2 id="about-h" class="mb-2 text-lg font-semibold tracking-tight">Fund details</h2>
-    <dl class="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1.5 rounded-md border border-line p-4 text-sm">
+    <dl class="grid grid-cols-[max-content_1fr] items-baseline gap-x-6 gap-y-2 rounded-md border border-line p-4 text-sm">
       <dt class="text-muted">Fund house</dt><dd>{f.amc}</dd>
-      <dt class="text-muted">Category</dt><dd><a class="inline-block py-1.5 hover:underline" href={`/category/${catSlug}/`}>{f.category}</a> ({f.assetClass})</dd>
+      <dt class="text-muted">Category</dt><dd><a class="underline decoration-line-strong underline-offset-2 hover:decoration-fg" href={`/category/${catSlug}/`}>{f.category}</a> ({f.assetClass})</dd>
       <dt class="text-muted">Scheme type</dt><dd>{f.schemeType}</dd>
       <dt class="text-muted">Plan / option</dt><dd>{[planText, optionText].filter(Boolean).join(' · ') || '—'}</dd>
       <dt class="text-muted">First NAV<InfoTip term="age" /></dt><dd class="num text-left">{formatDay(f.inception)}</dd>

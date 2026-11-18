@@ -28,7 +28,7 @@ export const SITE_NAME = 'Mutual Fund Compare';
  */
 export function siteLd(siteUrl: string): Record<string, unknown>[] {
   return [
-    { '@context': 'https://schema.org', '@type': 'Organization', name: SITE_NAME, url: siteUrl, logo: new URL('/favicon.svg', siteUrl).toString() },
+    { '@context': 'https://schema.org', '@type': 'Organization', name: SITE_NAME, url: siteUrl, logo: new URL('/icon-512.png', siteUrl).toString() },
     { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: siteUrl },
   ];
 }

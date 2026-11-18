@@ -13,7 +13,7 @@
   --bg: #ffffff;
   --bg-subtle: #fafafa;
   --fg: #0a0a0a;
-  --fg-muted: #666666;
+  --fg-muted: #4d4d4d; /* was #666666: too faint for small labels on phones */
   --border: #eaeaea;
   --border-strong: #cfcfcf;
   --accent: #0a0a0a;
@@ -33,7 +33,7 @@
   --bg: #0a0a0a;
   --bg-subtle: #111111;
   --fg: #ededed;
-  --fg-muted: #a1a1a1;
+  --fg-muted: #b8b8b8;
   --border: #262626;
   --border-strong: #3a3a3a;
   --accent: #ededed;

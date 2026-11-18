@@ -63,3 +63,27 @@ test('every icon the page links to is served, and the manifest points at real ic
   for (const i of manifest.icons) expect((await page.request.get(i.src)).status(), i.src).toBe(200);
   await expect(page.getByRole('link', { name: 'Mutual Fund Compare, home' }).locator('svg')).toBeVisible();
 });
+
+test('the raster icons really draw the dark ₹ tile, not a placeholder picture', async ({ page }) => {
+  // The first icon files were valid PNGs that held a picture of Chrome's "broken image" glyph, so a status
+  // check passed while tabs and Google showed a broken icon. Draw each one and read pixels from the tile.
+  await page.goto('/');
+  for (const src of ['/favicon.ico', '/favicon-48.png', '/apple-touch-icon.png', '/icon-192.png', '/icon-512.png']) {
+    const px = await page.evaluate(async (u) => {
+      const img = new Image();
+      img.src = u;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const g = c.getContext('2d')!;
+      g.drawImage(img, 0, 0);
+      const at = (fx: number, fy: number) => Array.from(g.getImageData(Math.floor(c.width * fx), Math.floor(c.height * fy), 1, 1).data);
+      return { w: c.width, bg: at(0.12, 0.5), mark: at(0.42, 0.28) };
+    }, src);
+    expect(px.w, src).toBeGreaterThanOrEqual(16);
+    // Tile: opaque and near-black. The ₹ stroke near the top: light.
+    expect(px.bg[3], `${src} tile alpha`).toBeGreaterThan(200);
+    expect(Math.max(...px.bg.slice(0, 3)), `${src} tile colour`).toBeLessThan(40);
+    expect(Math.min(...px.mark.slice(0, 3)), `${src} ₹ stroke`).toBeGreaterThan(150);
+  }
+});
