@@ -28,7 +28,7 @@ licence allow.
 | Quality | 438 unit tests, 158 end-to-end tests, lint, type check, site link check |
 | Staged indexing | One setting, `INDEX_STAGE`, opens pages to Google in steps: `en` (67 English pages, the default) → `core` (+54 Hindi) → `lists` (+105 category and fund-house pages) → `funds` (+ largest funds, `INDEX_FUNDS`) → `all`. Held-back pages stay live for visitors, carry `noindex, follow`, and are left out of the sitemaps and `hreflang`. One sitemap file per group. How to move up and what to watch: `docs/DEPLOY.md`. Checked by `npm run check:stages` in CI |
 | Delivery | CI on every push; nightly data build and deploy workflow (deploys only once Cloudflare is configured). Deploys use Cloudflare Workers static assets (`wrangler deploy`, configured in `wrangler.jsonc`); Cloudflare is never connected to the GitHub repository, because Cloudflare's own build stops at 20 minutes and the data build takes about 21 |
-| Analytics | Microsoft Clarity, switched on by setting `PUBLIC_CLARITY_ID` |
+| Analytics | Microsoft Clarity, on in the nightly deploy (`PUBLIC_CLARITY_ID` in `nightly.yml`) |
 
 ## Known limits (read these)
 
@@ -65,9 +65,8 @@ licence allow.
 
 1. Pick and buy the final domain; until then a subdomain can be used (see `docs/DEPLOY.md`).
 2. The Cloudflare token and the GitHub variables for the Workers deploy (never "Connect to Git"), and one of the deploy routes in `docs/DEPLOY.md`: run wrangler on your own computer, give a Claude session a Cloudflare token, or add the token as a GitHub secret for nightly deploys.
-3. Set `PUBLIC_CLARITY_ID` after creating a Clarity project.
-4. Email AMFI about commercial use of their data. Keep ads off until they answer.
-5. Have the "known limits" facts above checked once. (The Hindi pages have been read by a Hindi speaker.)
+3. Email AMFI about commercial use of their data. Keep ads off until they answer.
+4. Have the "known limits" facts above checked once. (The Hindi pages have been read by a Hindi speaker.)
 6. Decide where gold and silver prices should come from, if a price page is wanted.
 7. Apply for AdSense once the site is live and has traffic.
 

@@ -139,7 +139,7 @@ Expect a short dip in search traffic while Google follows the redirects. Do not 
 ## Turning on Microsoft Clarity
 
 1. Create a free project at clarity.microsoft.com and copy the project id (the short code in the install snippet).
-2. Set the repository variable `PUBLIC_CLARITY_ID` to it. Without it, no analytics script is on the page.
+2. The project id (`zflmhh492f`) is set directly in `.github/workflows/nightly.yml` as `PUBLIC_CLARITY_ID`, so every nightly deploy includes the script. Other builds (CI, local) leave it out unless `PUBLIC_CLARITY_ID` is set.
 3. The script loads after the page `load` event, so it does not affect first paint. The privacy page already describes it.
 4. The site targets India only, so there is no consent banner. If you ever target the EEA / UK, add one before analytics and ads run.
 
