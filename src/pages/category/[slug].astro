@@ -11,6 +11,7 @@ import { fundAt, loadScreener } from '../../lib/data.ts';
 import { formatPct, formatTer } from '../../lib/format.ts';
 import { breadcrumbLd, faqLd, type Faq as FaqItem } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
+import { screenerHref } from '../../lib/home.ts';
 import { median } from '../../lib/stats.ts';
 
 export function getStaticPaths() {
@@ -72,7 +73,7 @@ const faqs: FaqItem[] = [
     {top && <> The highest 3-year return in this list is {formatPct(top.metrics.r3y)} ({top.name}).</>}
     Median expense ratio {medTer === null ? 'is not available' : formatTer(medTer)}. This is a data ordering, not a recommendation.
   </p>
-  <p class="mt-3 text-sm"><a class="underline" href={`/?cat=${encodeURIComponent(name)}`}>Open these funds in the screener</a> to filter by plan, fund house, returns or risk.</p>
+  <p class="mt-3 text-sm"><a class="underline" href={screenerHref({ category: name, assetClass, key: 'r3y' })}>Open these funds in the screener</a> to filter by plan, fund house, returns or risk.</p>
 
   <div class="mt-5">
     <FundTable funds={shown} caption={`${name} Direct Growth funds by 3-year return`} />

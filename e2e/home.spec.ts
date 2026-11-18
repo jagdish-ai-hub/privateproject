@@ -43,3 +43,34 @@ test('the hero fits a phone without sideways scrolling', async ({ page }) => {
   await expect(page.getByTestId('hero-stats')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test('highest returns: one list at a time, tabs switch it, and every list is in the page for search engines', async ({ page }) => {
+  await page.goto('/');
+  const block = page.getByTestId('top-returns');
+  test.skip((await block.count()) === 0, 'no fund passes the size filter in this dataset');
+  const panels = block.locator('[data-top-panel]');
+  expect(await panels.count()).toBeGreaterThan(0);
+  await expect(block.locator('[data-top-panel]:visible')).toHaveCount(1);
+  const tabs = block.getByRole('tab');
+  const last = tabs.last();
+  await last.click();
+  await expect(last).toHaveAttribute('aria-selected', 'true');
+  const key = await last.getAttribute('data-top-tab');
+  await expect(block.locator(`[data-top-panel="${key}"]`)).toBeVisible();
+  // every row links to a fund page and shows a signed percentage
+  const row = block.locator(`[data-top-panel="${key}"] li a`).first();
+  await expect(row).toHaveAttribute('href', /^\/fund\//);
+  await expect(row).toContainText(/[+-]\d+\.\d{2}%/);
+  // the screener link opens a sorted view
+  const more = block.locator(`[data-top-panel="${key}"]`).getByRole('link', { name: /See every equity fund/ });
+  await expect(more).toHaveAttribute('href', /sort=r\w+%3Adesc/);
+});
+
+test('home page sections: category tops link to category pages, calculators and guides are listed', async ({ page }) => {
+  await page.goto('/');
+  const tops = page.getByTestId('category-tops');
+  if (await tops.count()) await expect(tops.getByRole('link', { name: /^All .* funds$/ }).first()).toHaveAttribute('href', /^\/category\/[a-z0-9-]+\/$/);
+  await expect(page.getByRole('heading', { name: 'Calculators', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Home loan eligibility calculator' })).toHaveAttribute('href', '/tools/home-loan-eligibility-calculator/');
+  await expect(page.getByRole('link', { name: 'SIP vs FD' }).first()).toHaveAttribute('href', '/learn/sip-vs-fd/');
+});

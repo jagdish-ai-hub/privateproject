@@ -1,21 +1,32 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import Faq from '../components/Faq.astro';
+import TopReturns from '../components/home/TopReturns.astro';
 import { Screener } from '../components/screener/Screener.tsx';
 import { loadScreener } from '../lib/data.ts';
+import { formatPct, signClass } from '../lib/format.ts';
+import { HOME_PERIODS, screenerHref, topByCategory, topByReturn } from '../lib/home.ts';
 import { popularPairs } from '../lib/popular.ts';
-import { siteLd } from '../lib/seo.ts';
+import { faqLd, siteLd } from '../lib/seo.ts';
+import { HOME_CALCULATORS, HOME_FAQS, HOME_GUIDES, VS_LINKS } from '../data/home.ts';
 
 const data = loadScreener();
-const pairs = popularPairs(data, ['Flexi Cap', 'Large Cap', 'Mid Cap', 'Small Cap']);
+const lists = HOME_PERIODS.map((key) => ({ key, funds: topByReturn(data, key) }));
+const tops = topByCategory(data, ['Large Cap', 'Mid Cap', 'Small Cap', 'Flexi Cap', 'ELSS (Tax Saver)', 'Index Fund', 'Aggressive Hybrid', 'Corporate Bond']);
+const pairs = popularPairs(data, ['Flexi Cap', 'Large Cap', 'Mid Cap', 'Small Cap', 'ELSS (Tax Saver)', 'Index Fund']);
+const card = 'rounded-md border border-line p-4';
 ---
 <BaseLayout
   title="Compare Mutual Funds in India: Returns, Risk & Costs"
   description="Compare Indian mutual funds free: returns, SIP returns, risk, expense ratio and fund size for every scheme, side by side with plain-English insights. No sign-up."
   path="/"
-  jsonLd={siteLd(new URL('/', Astro.site).toString())}
+  jsonLd={[...siteLd(new URL('/', Astro.site).toString()), faqLd(HOME_FAQS)]}
 >
-  <Hero slot="hero" schemes={data.count} fundHouses={data.dict.amc.length} asOf={data.asOf} pairs={pairs} />
+  <Hero slot="hero" schemes={data.count} fundHouses={data.dict.amc.length} asOf={data.asOf} />
+
+  <TopReturns lists={lists} asOf={data.asOf} />
+
   <section id="screener" aria-labelledby="screener-h" class="scroll-mt-4">
     <h2 id="screener-h" class="text-2xl font-semibold tracking-tight">Mutual fund screener</h2>
     <p class="mt-1 mb-5 max-w-3xl text-sm text-muted">
@@ -25,4 +36,84 @@ const pairs = popularPairs(data, ['Flexi Cap', 'Large Cap', 'Mid Cap', 'Small Ca
     </p>
     <Screener client:load />
   </section>
+
+  {tops.length > 0 && (
+    <section class="mt-14" aria-labelledby="cat-h" data-testid="category-tops">
+      <h2 id="cat-h" class="text-2xl font-semibold tracking-tight">Top funds by category</h2>
+      <p class="mt-1 max-w-3xl text-sm text-muted">Highest 3-year return a year in each category, Direct plan, Growth option. Funds in one category follow the same rules, so this is where returns compare fairly.</p>
+      <ul class="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {tops.map((t) => (
+          <li class={card}>
+            <h3 class="text-sm font-semibold"><a class="hover:underline" href={`/category/${t.slug}/`}>{t.category}</a></h3>
+            <ol class="mt-2 space-y-2">
+              {t.funds.map((f) => (
+                <li class="flex items-baseline justify-between gap-3 text-sm">
+                  <a class="min-w-0 break-words hover:underline" href={f.href}>{f.name}</a>
+                  <span class={`num shrink-0 ${signClass(f.value)}`}>{formatPct(f.value)}</span>
+                </li>
+              ))}
+            </ol>
+            <p class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+              <a class="underline" href={`/category/${t.slug}/`}>All {t.category} funds</a>
+              <a class="underline" href={screenerHref({ category: t.category, assetClass: t.assetClass, key: 'r3y' })}>Open in screener</a>
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="mt-14" aria-labelledby="pop-h">
+    <h2 id="pop-h" class="text-2xl font-semibold tracking-tight">Popular comparisons</h2>
+    {pairs.length > 0 && (
+      <div class="mt-4" data-testid="popular">
+        <h3 class="text-sm font-medium">The two largest funds in a category, side by side</h3>
+        <ul class="mt-2 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {pairs.map((p) => (
+            <li>
+              <a href={`/compare/?f=${p.a.code},${p.b.code}`} class="flex h-full flex-col rounded-md border border-line px-3 py-2 text-sm hover:bg-subtle">
+                <span class="text-xs text-muted">{p.category}</span>
+                <span>{p.a.name} <span class="text-muted">vs</span> {p.b.name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+    <h3 class="mt-6 text-sm font-medium">Which is better for you?</h3>
+    <ul class="mt-2 flex flex-wrap gap-2">
+      {VS_LINKS.map((l) => <li><a href={l.href} class="inline-flex min-h-10 items-center rounded-full border border-line px-3 text-sm hover:bg-subtle">{l.label}</a></li>)}
+    </ul>
+  </section>
+
+  <section class="mt-14" aria-labelledby="calc-h">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 id="calc-h" class="text-2xl font-semibold tracking-tight">Calculators</h2>
+      <a class="text-sm underline" href="/tools/">All calculators</a>
+    </div>
+    <div class="mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {HOME_CALCULATORS.map((g) => (
+        <div class={card}>
+          <h3 class="text-sm font-semibold">{g.group}</h3>
+          <ul class="mt-2 space-y-1 text-sm">
+            {g.links.map((l) => <li><a class="inline-block py-1 hover:underline" href={l.href}>{l.label}</a></li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-14" aria-labelledby="guides-h">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 id="guides-h" class="text-2xl font-semibold tracking-tight">Guides</h2>
+      <a class="text-sm underline" href="/learn/">All guides</a>
+    </div>
+    <ul class="mt-4 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      {HOME_GUIDES.map((g) => (
+        <li><a href={`/learn/${g.slug}/`} class="flex h-full flex-col rounded-md border border-line px-3 py-2.5 hover:bg-subtle"><span class="text-sm font-medium">{g.title}</span><span class="mt-0.5 text-xs text-muted">{g.blurb}</span></a></li>
+      ))}
+    </ul>
+  </section>
+
+  <Faq faqs={HOME_FAQS} heading="Questions about comparing mutual funds" />
 </BaseLayout>

@@ -1,0 +1,81 @@
+---
+/**
+ * "Highest returns" on the home page: five server-rendered lists (1M, 3M, 1Y, 3Y, 5Y), one shown at a time
+ * through tabs. All lists are in the HTML, so search engines and no-JS visitors see every one; the small
+ * script below only switches which list is visible. Lists, not tables: the screener tests look for the
+ * page's tables, and a list reads better on a phone.
+ */
+import { formatPct, signClass } from '../../lib/format.ts';
+import { formatIsoDate } from '../../lib/costs.ts';
+import { MIN_AUM, screenerHref, type HomeFund, type HomePeriod } from '../../lib/home.ts';
+interface Props { lists: { key: HomePeriod; funds: HomeFund[] }[]; asOf: string }
+const { lists, asOf } = Astro.props;
+const META: Record<HomePeriod, { tab: string; heading: string; link: string }> = {
+  r1m: { tab: '1M', heading: 'Highest returns over the last month (absolute)', link: '1-month' },
+  r3m: { tab: '3M', heading: 'Highest returns over the last 3 months (absolute)', link: '3-month' },
+  r1y: { tab: '1Y', heading: 'Highest returns over the last year', link: '1-year' },
+  r3y: { tab: '3Y', heading: 'Highest returns a year over the last 3 years (CAGR)', link: '3-year' },
+  r5y: { tab: '5Y', heading: 'Highest returns a year over the last 5 years (CAGR)', link: '5-year' },
+};
+const shown = lists.filter((l) => l.funds.length > 0);
+const first = shown.find((l) => l.key === 'r1y')?.key ?? shown[0]?.key;
+---
+{shown.length > 0 && (
+  <section class="mb-12" aria-labelledby="top-h" data-testid="top-returns">
+    <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+      <div>
+        <h2 id="top-h" class="text-2xl font-semibold tracking-tight">Highest returns</h2>
+        <p class="mt-1 max-w-3xl text-sm text-muted">
+          Direct-plan Growth equity funds of ₹{MIN_AUM.toLocaleString('en-IN')} Cr or more, NAV as on {formatIsoDate(asOf)}.
+          Sector and theme funds are left out. Past returns, not a recommendation.
+        </p>
+      </div>
+      <div class="flex gap-1.5" role="tablist" aria-label="Return period">
+        {shown.map((l) => (
+          <button type="button" role="tab" id={`top-tab-${l.key}`} aria-controls={`top-${l.key}`} aria-selected={l.key === first ? 'true' : 'false'} data-top-tab={l.key}
+            class="h-10 min-w-11 rounded-md border px-3 text-sm aria-selected:border-accent aria-selected:bg-accent aria-selected:text-accent-fg border-line hover:bg-subtle sm:h-9">{META[l.key].tab}</button>
+        ))}
+      </div>
+    </div>
+    {shown.map((l) => (
+      <div role="tabpanel" id={`top-${l.key}`} aria-labelledby={`top-tab-${l.key}`} data-top-panel={l.key} class="mt-4">
+        <h3 class="text-sm font-medium">{META[l.key].heading}</h3>
+        <ol class="mt-2 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
+          {l.funds.map((f, i) => (
+            <li>
+              <a href={f.href} class="flex items-center gap-3 rounded-md border border-line px-3 py-2.5 hover:bg-subtle">
+                <span class="num w-5 shrink-0 text-right text-xs text-muted" aria-hidden="true">{i + 1}</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block break-words text-sm font-medium">{f.name}</span>
+                  <span class="block text-xs text-muted">{f.category}</span>
+                </span>
+                <span class={`num shrink-0 text-sm font-semibold ${signClass(f.value)}`}>{formatPct(f.value)}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <p class="mt-3 text-sm"><a class="underline" href={screenerHref({ key: l.key, minAum: MIN_AUM })}>See every equity fund by {META[l.key].link} return in the screener</a></p>
+      </div>
+    ))}
+  </section>
+)}
+<script>
+  // Show one list at a time once scripts run; without them every list stays visible.
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-top-tab]')];
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-top-panel]')];
+  const show = (key: string) => {
+    for (const t of tabs) t.setAttribute('aria-selected', String(t.dataset.topTab === key));
+    for (const p of panels) p.hidden = p.dataset.topPanel !== key;
+  };
+  const current = tabs.find((t) => t.getAttribute('aria-selected') === 'true')?.dataset.topTab;
+  if (current) show(current);
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => show(t.dataset.topTab!));
+    t.addEventListener('keydown', (e) => {
+      const next = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : -1;
+      if (next < 0 && e.key !== 'ArrowLeft') return;
+      const to = tabs[(next + tabs.length) % tabs.length];
+      to.focus(); show(to.dataset.topTab!);
+    });
+  });
+</script>

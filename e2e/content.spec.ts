@@ -21,10 +21,13 @@ test('a guide has Article, FAQPage and Breadcrumb JSON-LD, a visible FAQ and a r
   await expect(page.getByText('₹12.6 lakh')).toBeVisible();
 });
 
-test('home page has Organization and WebSite JSON-LD', async ({ page }) => {
+test('home page has Organization, WebSite and FAQPage JSON-LD, and the FAQ markup matches the visible questions', async ({ page }) => {
   await page.goto('/');
-  const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
-  expect(blocks.map((b) => (JSON.parse(b) as { '@type': string })['@type'])).toEqual(['Organization', 'WebSite']);
+  const blocks = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((b) => JSON.parse(b) as { '@type': string; mainEntity?: { name: string }[] });
+  expect(blocks.map((b) => b['@type'])).toEqual(['Organization', 'WebSite', 'FAQPage']);
+  const questions = blocks[2].mainEntity!.map((q) => q.name);
+  expect(questions.length).toBeGreaterThanOrEqual(4);
+  for (const q of questions) await expect(page.locator('#faq-h ~ div summary', { hasText: q })).toHaveCount(1);
 });
 
 test('policy pages exist and the footer links to them', async ({ page }) => {
