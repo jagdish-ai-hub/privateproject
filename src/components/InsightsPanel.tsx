@@ -74,8 +74,10 @@ export function InsightsPanel({ title, headline, leaders = [], items, caveats = 
                       <span class={`num shrink-0 text-sm ${it.signed && r.raw !== null ? signClass(r.raw) : ''} ${r.lead ? 'font-semibold' : ''}`}>{r.value}</span>
                     </div>
                     {r.share !== null && (
-                      <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-subtle">
-                        <div class="h-full rounded-full" style={{ width: `${Math.max(3, r.share * 100)}%`, background: r.lead ? 'var(--fg)' : 'var(--fg-muted)', opacity: r.lead ? 1 : 0.4 }} />
+                      // Each fund's bar is drawn in its own chart colour (the dash before its name), at full strength, so
+                      // every bar reads clearly; the leader is marked by the "Leads" tag and bold figure, not by colour.
+                      <div class="mt-1 h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--border)' }}>
+                        <div class="h-full rounded-full" style={{ width: `${Math.max(3, r.share * 100)}%`, background: swatches[r.fund] ?? 'var(--fg)' }} />
                       </div>
                     )}
                   </li>
