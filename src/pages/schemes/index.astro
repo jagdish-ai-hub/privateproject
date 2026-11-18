@@ -9,7 +9,7 @@ import { SMALL_SAVINGS } from '../../data/small-savings.ts';
 
 const path = '/schemes/';
 const title = 'Govt Savings Scheme Calculators & Interest Rates: PPF, SSY, Post Office';
-const description = `Interest rates for ${SMALL_SAVINGS.period.label}: PPF, Sukanya Samriddhi, SCSS, NSC, KVP, MIS, RD and Post Office FD, from the Finance Ministry notice, with a free calculator for each.`;
+const description = `Interest rates for ${SMALL_SAVINGS.period.label}: PPF, SSY, SCSS, NSC, KVP, MIS, RD and Post Office FD, with a free calculator for each.`;
 ---
 <BaseLayout title={title} description={description} path={path} lang="en" alternates={[{ lang: 'en', path: '/schemes/' }, { lang: 'hi', path: '/hi/schemes/' }]}
   jsonLd={[breadcrumbLd([{ name: 'Home', url: new URL('/', Astro.site).toString() }, { name: 'Govt schemes', url: new URL(path, Astro.site).toString() }])]}>

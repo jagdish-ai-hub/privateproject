@@ -37,7 +37,7 @@ export const TOOLS: Tool[] = [
     slug: 'sip-calculator', kind: 'sip', name: 'SIP calculator',
     title: 'SIP Calculator: Mutual Fund SIP Returns Calculator',
     h1: 'SIP calculator',
-    description: 'Free SIP calculator. Enter a monthly amount, expected return and time period to see the invested amount, estimated returns and total value, with a year-by-year table.',
+    description: 'Free SIP calculator: enter a monthly amount, expected return and years to see the amount invested, estimated gain and final value, year by year.',
     intro: 'See what a monthly SIP (Systematic Investment Plan) could grow to over time. Change the amount, the expected yearly return and the number of years to see the invested amount, the estimated gain and the final value.',
     formula: 'Future value = P × [ ((1 + i)ⁿ − 1) ÷ i ] × (1 + i)    where P = monthly amount, i = yearly return ÷ 12, n = number of months',
     how: [
@@ -158,7 +158,7 @@ export const TOOLS: Tool[] = [
     slug: 'rent-vs-buy-calculator', kind: 'rentbuy', name: 'Rent vs buy calculator',
     title: 'Rent vs Buy Calculator India: Should You Buy a House?',
     h1: 'Rent vs buy calculator',
-    description: 'Free rent vs buy calculator for India. Compare buying a home with a loan against renting and investing the difference, with EMI, stamp duty, rent growth, tax and the rent at which buying breaks even.',
+    description: 'Rent vs buy calculator for India: compare buying with a loan against renting and investing the difference, with EMI, stamp duty, rent growth and tax.',
     intro: 'Is it cheaper to buy a home or to keep renting and invest the money? Enter the home price, your loan and the rent you pay today. The calculator compares what you would own after the years you choose, and shows the rent at which buying would break even.',
     formula: 'Buyer = home value × (1 − selling cost) − loan left − tax on gain + savings;  Renter = investments − tax on gain.  Each month, whoever pays less (EMI + upkeep, or rent) invests the difference.',
     how: [
@@ -188,7 +188,7 @@ export const TOOLS: Tool[] = [
     slug: 'car-running-cost-calculator', kind: 'car', name: 'Car running cost calculator',
     title: 'Car Running Cost Calculator: Cost per km for Petrol, Diesel, CNG and EV',
     h1: 'Car running cost calculator',
-    description: 'Free car running cost calculator for India. Enter the fuel price, mileage and kilometres driven to get the cost per km, per month and per year for petrol, diesel, CNG and electric cars.',
+    description: 'Car running cost calculator for India: cost per km, per month and per year for petrol, diesel, CNG and electric cars from fuel price and mileage.',
     intro: 'What does your car really cost to run? Pick the fuel, enter the price, the mileage and how far you drive each month, and see the cost per kilometre, per month and per year. For an electric car, enter the battery size, the range and what you pay for a unit of electricity.',
     formula: 'Petrol, diesel, CNG: cost per km = price per litre (or kg) ÷ km per litre (or kg) + maintenance per km.   Electric: cost per km = (battery kWh ÷ range km) ÷ (1 − charging loss) × price per unit + maintenance per km',
     how: [
@@ -214,7 +214,7 @@ export const TOOLS: Tool[] = [
     slug: 'ev-vs-petrol-running-cost-calculator', kind: 'evpetrol', name: 'EV vs petrol car cost calculator',
     title: 'EV vs Petrol Car Cost Calculator India: Running Cost and Payback',
     h1: 'EV vs petrol car cost calculator',
-    description: 'Free EV vs petrol (or diesel, CNG) calculator for India. Compare running cost per km, monthly saving, how long the higher price of an electric car takes to pay back, and the total cost over the years you keep it.',
+    description: 'EV vs petrol car calculator for India: running cost per km, monthly saving, payback time on the higher price, and total cost over the years you keep it.',
     intro: 'Is an electric car cheaper than a petrol, diesel or CNG car? Enter how far you drive, the fuel and electricity prices, and the price of each car. The calculator shows the running cost of each, the monthly saving, how long the extra price of the electric car takes to pay back, and the total cost over the years you keep it.',
     formula: 'Monthly saving = fuel car cost per month − electric car cost per month.   Payback (months) = (price of electric car − subsidy − price of fuel car) ÷ monthly saving.   Total cost = price + running cost × years + other yearly costs × years',
     how: [
@@ -239,7 +239,7 @@ export const TOOLS: Tool[] = [
     slug: 'gold-jewellery-price-calculator', kind: 'jewellery', name: 'Gold and silver jewellery price calculator',
     title: 'Gold Jewellery Price Calculator India: Making Charges and GST',
     h1: 'Gold and silver jewellery price calculator',
-    description: 'Free gold and silver jewellery price calculator for India. Enter the rate, weight and purity to see the metal value, making charges, GST and the total, plus what you would get back if you sold it.',
+    description: 'Gold and silver jewellery price calculator: rate, weight and purity give the metal value, making charges, GST, total bill and sell-back value.',
     intro: 'The price on a jewellery bill is more than the weight times the rate. Enter today’s rate, the weight and the purity, then the making charges and GST, to see the total you pay, and how much of it you would not get back if you sold the piece.',
     formula: 'Metal value = rate per gram × weight × purity.   Total = (metal value + making charges) × (1 + GST).   Making charges = % of metal value, or ₹ per gram × weight',
     how: [
@@ -264,7 +264,7 @@ export const TOOLS: Tool[] = [
     slug: 'gold-silver-return-calculator', kind: 'metalreturn', name: 'Gold and silver return calculator',
     title: 'Gold and Silver Return Calculator: Your Return After Costs',
     h1: 'Gold and silver return calculator',
-    description: 'Free gold and silver return calculator. Enter the buying and selling price per gram, the years held and your costs to see how much you really earn per year, and the price you need just to get your money back.',
+    description: 'Gold and silver return calculator: your real yearly return from buying and selling prices, years held and costs, and the price needed to break even.',
     intro: 'The price of gold or silver rising is not the same as you making money. GST, making charges, brokerage and holding costs all take a share. Enter what you paid, what it is worth now (or what you expect), the years held and your costs, to see the return you actually earn.',
     formula: 'Grams = amount × (1 − buying cost) ÷ buying price.   Final value = grams × selling price × (1 − selling cost) − holding cost.   Net return per year = (final value ÷ amount)^(1 ÷ years) − 1',
     how: [
@@ -289,7 +289,7 @@ export const TOOLS: Tool[] = [
     slug: 'home-loan-emi-calculator', kind: 'homeloan', name: 'Home loan EMI calculator',
     title: 'Home Loan EMI Calculator India: EMI, Interest and Prepayment',
     h1: 'Home loan EMI calculator',
-    description: 'Free home loan EMI calculator for India. Enter the loan amount, interest rate and tenure to see the EMI, total interest, a year-by-year schedule, and how prepaying saves interest and time.',
+    description: 'Home loan EMI calculator for India: EMI, total interest and a year-by-year schedule for any amount, rate and tenure, plus what prepaying saves.',
     intro: 'Enter the loan amount, the interest rate your lender quotes and the tenure, and see the monthly EMI, the total interest you will pay and how the loan is repaid year by year. Then try an extra monthly payment or a one-time prepayment to see how much interest and time it saves.',
     formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = number of months.   Each month: interest = balance × i; principal repaid = EMI − interest',
     how: [
@@ -315,7 +315,7 @@ export const TOOLS: Tool[] = [
     slug: 'car-loan-emi-calculator', kind: 'carloan', name: 'Car loan EMI calculator',
     title: 'Car Loan EMI Calculator India: EMI, Interest and Flat Rate',
     h1: 'Car loan EMI calculator',
-    description: 'Free car loan EMI calculator for India. Enter the loan amount, rate and tenure to see the EMI, total interest and fee, and convert a flat rate into the real reducing-balance rate.',
+    description: 'Car loan EMI calculator for India: EMI, total interest and fees for any amount, rate and tenure, and the real reducing-balance rate of a flat-rate offer.',
     intro: 'Work out the EMI of a car loan from the amount, the interest rate and the number of years. If your lender quotes a flat rate, switch the rate type to see the real yearly rate you are paying and compare it with other offers.',
     formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = months.   Flat rate: EMI = (P + P × flat rate × years) ÷ months',
     how: [
@@ -340,7 +340,7 @@ export const TOOLS: Tool[] = [
     slug: 'personal-loan-emi-calculator', kind: 'personalloan', name: 'Personal loan EMI calculator',
     title: 'Personal Loan EMI Calculator India: EMI, Interest and Total Cost',
     h1: 'Personal loan EMI calculator',
-    description: 'Free personal loan EMI calculator for India. Enter the amount, interest rate, tenure and processing fee to see the EMI, total interest and the full cost, with a year-by-year schedule.',
+    description: 'Personal loan EMI calculator for India: EMI, total interest and full cost including the processing fee, with a year-by-year schedule.',
     intro: 'Personal loans are unsecured and usually carry a higher interest rate and a processing fee. Enter the amount, the rate, the tenure and the fee to see what the loan will really cost, and what prepaying would save.',
     formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = months.   Total cost = EMI × n + processing fee',
     how: [
@@ -388,7 +388,7 @@ export const TOOLS: Tool[] = [
     slug: 'inflation-calculator', kind: 'inflation', name: 'Inflation calculator',
     title: 'Inflation Calculator India: Future Cost and Buying Power',
     h1: 'Inflation calculator',
-    description: 'Free inflation calculator. See what something that costs ₹1 lakh today will cost after a number of years, and how much less your money will buy, at an inflation rate you enter.',
+    description: 'Inflation calculator for India: what costs ₹1 lakh today will cost in future, and how much less your money will buy, at the inflation rate you choose.',
     intro: 'Prices rise, so the same money buys less each year. Enter an amount, a yearly inflation rate and a number of years to see what it will cost to buy the same things later, and how much of your money’s buying power is lost.',
     formula: 'Future cost = amount × (1 + inflation)^years.   Buying power of the same amount = amount ÷ (1 + inflation)^years',
     how: [
@@ -409,11 +409,11 @@ export const TOOLS: Tool[] = [
   },
 
   {
-    slug: 'home-loan-eligibility-calculator', kind: 'eligibility', name: 'Home loan eligibility calculator', englishOnly: true,
+    slug: 'home-loan-eligibility-calculator', kind: 'eligibility', name: 'Home loan eligibility calculator',
     related: ['home-loan-emi-calculator', 'emi-calculator', 'rent-vs-buy-calculator'],
     title: 'Home Loan Eligibility Calculator: How Much Loan Can I Get?',
     h1: 'Home loan eligibility calculator',
-    description: 'Free home loan eligibility calculator. Enter your monthly income, existing EMIs, interest rate and tenure to estimate how much home loan you can get and its EMI.',
+    description: 'Home loan eligibility calculator: how much home loan you can get on your salary, from income, existing EMIs, interest rate and tenure, with the EMI.',
     intro: 'Estimate how much home loan you may get on your salary. Enter your monthly take-home income, the EMIs you already pay, the interest rate and the tenure to see the loan amount, its EMI and the home budget it gives you with your down payment.',
     formula: 'EMI you can take = income × share allowed for EMIs − existing EMIs;   loan = EMI × (1 − (1 + i)⁻ⁿ) ÷ i    where i = yearly rate ÷ 12, n = number of months',
     how: [
@@ -441,11 +441,11 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
-    slug: 'emi-calculator', kind: 'emi', name: 'EMI calculator', englishOnly: true,
+    slug: 'emi-calculator', kind: 'emi', name: 'EMI calculator',
     related: ['home-loan-emi-calculator', 'car-loan-emi-calculator', 'personal-loan-emi-calculator', 'home-loan-eligibility-calculator'],
     title: 'EMI Calculator: Loan EMI, Total Interest and Yearly Schedule',
     h1: 'EMI calculator',
-    description: 'Free EMI calculator for any loan. Enter the amount, interest rate and tenure to see the monthly EMI, total interest, a year-by-year schedule and what prepayment saves.',
+    description: 'EMI calculator for any loan: monthly EMI, total interest and a year-by-year schedule from the amount, rate and tenure, plus what a prepayment saves.',
     intro: 'Work out the EMI of any loan. Enter the amount, the yearly interest rate and the tenure to see the monthly instalment, the total interest and how the balance falls each year. It also converts a flat rate to the reducing-balance rate and shows what prepaying saves.',
     formula: 'EMI = P × i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1)    where P = loan amount, i = yearly rate ÷ 12, n = number of months',
     how: [
@@ -470,11 +470,11 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
-    slug: 'xirr-calculator', kind: 'xirr', name: 'XIRR calculator', englishOnly: true,
+    slug: 'xirr-calculator', kind: 'xirr', name: 'XIRR calculator',
     related: ['cagr-calculator', 'sip-calculator'],
     title: 'XIRR Calculator: Returns for SIPs and Irregular Investments',
     h1: 'XIRR calculator',
-    description: 'Free XIRR calculator. Enter each investment and withdrawal with its date and the current value to get the yearly return (XIRR) of a SIP or any irregular investment.',
+    description: 'XIRR calculator: the yearly return of a SIP or any irregular investment, from each investment and withdrawal with its date and the current value.',
     intro: 'Find the yearly return on money invested at different times, such as a SIP, top-ups or part withdrawals. Enter each amount with its date and what the investment is worth today; the calculator gives the XIRR, the same figure a spreadsheet’s XIRR function returns.',
     formula: 'XIRR is the yearly rate r at which   Σ amountₖ ÷ (1 + r)^(daysₖ ÷ 365) = 0    (investments negative, withdrawals and the current value positive; days counted from the first date)',
     how: [
@@ -496,11 +496,11 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
-    slug: 'fuel-cost-calculator', kind: 'fuelcost', name: 'Fuel cost calculator', englishOnly: true,
+    slug: 'fuel-cost-calculator', kind: 'fuelcost', name: 'Fuel cost calculator',
     related: ['mileage-calculator', 'car-running-cost-calculator', 'ev-vs-petrol-running-cost-calculator'],
     title: 'Fuel Cost Calculator: Trip and Monthly Petrol, Diesel, CNG Cost',
     h1: 'Fuel cost calculator',
-    description: 'Free fuel cost calculator for petrol, diesel and CNG. Enter the fuel price, your mileage and the distance to see the cost of a trip, the cost per km and the monthly fuel bill.',
+    description: 'Fuel cost calculator for petrol, diesel and CNG: trip cost, cost per km and monthly fuel bill from fuel price, mileage and distance.',
     intro: 'See what a trip or a month of driving costs in fuel. Enter the price at your pump, the mileage your vehicle actually gives and the distance; the calculator shows the fuel needed, the cost of the trip, the cost per kilometre and the monthly and yearly bill. It works for cars, bikes and scooters.',
     formula: 'Cost per km = fuel price ÷ mileage;   fuel for a trip = distance ÷ mileage;   trip cost = distance × cost per km',
     how: [
@@ -519,11 +519,11 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
-    slug: 'mileage-calculator', kind: 'mileage', name: 'Mileage calculator', englishOnly: true,
+    slug: 'mileage-calculator', kind: 'mileage', name: 'Mileage calculator',
     related: ['fuel-cost-calculator', 'car-running-cost-calculator'],
     title: 'Mileage Calculator: km per Litre for Your Car or Bike',
     h1: 'Mileage calculator',
-    description: 'Free mileage calculator for cars and bikes. Enter the distance driven and the fuel filled to get km per litre (or km per kg for CNG), litres per 100 km and fuel cost per km.',
+    description: 'Mileage calculator for cars and bikes: km per litre (or km per kg for CNG), litres per 100 km and fuel cost per km from distance and fuel filled.',
     intro: 'Find the mileage your car, bike or scooter really gives. Enter the kilometres driven between two full tanks and the fuel it took to fill up again; the calculator shows km per litre (km per kg for CNG), the fuel used per 100 km and the fuel cost of each kilometre.',
     formula: 'Mileage = distance driven ÷ fuel used;   fuel per 100 km = fuel used ÷ distance × 100;   cost per km = fuel price ÷ mileage',
     how: [
@@ -541,11 +541,11 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
-    slug: 'gold-sip-calculator', kind: 'goldsip', name: 'Gold SIP calculator', englishOnly: true,
+    slug: 'gold-sip-calculator', kind: 'goldsip', name: 'Gold SIP calculator',
     related: ['gold-silver-return-calculator', 'gold-jewellery-price-calculator', 'sip-calculator'],
     title: 'Gold SIP Calculator: Monthly Gold Investment Returns',
     h1: 'Gold SIP calculator',
-    description: 'Free gold SIP calculator. Enter a monthly amount, today’s gold price, an assumed yearly rise and the years to see the grams collected, the amount invested and the value.',
+    description: 'Gold SIP calculator: grams collected, amount invested and value of a monthly gold SIP, from today’s gold price and an assumed yearly rise.',
     intro: 'See what a fixed monthly investment in gold could build up to. Enter the monthly amount, today’s price per gram, the yearly rise in the gold price you want to assume and the number of years; the calculator shows the grams you collect, the money you put in and what the gold is worth at the end.',
     formula: 'Grams bought in a month = monthly amount ÷ (1 + cost) ÷ price that month;   price after t years = price today × (1 + rise)ᵗ;   value = total grams × price at the end',
     how: [

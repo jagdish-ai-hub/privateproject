@@ -36,7 +36,11 @@ const canonical = new URL(path, Astro.site).toString();
 // Staged indexing: a page that is not open yet is tagged noindex, and hreflang links only join pages that are all open.
 const listed = !noindex && pageIndexable(path);
 const hreflang = listed && alternates.length > 0 && hreflangOk([path, ...alternates.map((a) => a.path)]);
-const fullTitle = title.includes('Mutual Fund Compare') ? title : `${title} | Mutual Fund Compare`;
+// The site name is added after the title when the whole still fits in a search result (about 65 characters);
+// longer titles go out alone so the words that describe the page are not cut off. Main pages always carry it.
+const SUFFIX = ' | Mutual Fund Compare';
+const BRANDED = ['/', '/compare/', '/tools/'];
+const fullTitle = title.includes('Mutual Fund Compare') || (title.length + SUFFIX.length > 65 && !BRANDED.includes(path)) ? title : `${title}${SUFFIX}`;
 // The first item is the main call to action: it goes straight to the screener on the home page.
 const nav = hi
   ? [

@@ -35,6 +35,8 @@ export interface SchemePage {
 }
 
 const R = SMALL_SAVINGS.rates;
+/** Year of the current rate period, shown in titles (people search "PPF calculator 2026"). */
+const Y = SMALL_SAVINGS.period.from.slice(0, 4);
 const pct = (v: number) => `${v}%`;
 const rs = (v: number) => formatRupees(v, v < 10_000 && v % 1 !== 0 ? 2 : 0);
 const TAX_NOTE = 'Tax rules are those of the Income-tax Act, 2025, in force from 1 April 2026; check your own position before relying on them.';
@@ -43,9 +45,9 @@ const DEDUCTION = 'deposits count towards the ₹1.5 lakh deduction under Sectio
 export const SCHEMES_EN: SchemePage[] = [
   {
     kind: 'ppf', slug: 'ppf-calculator', name: 'PPF calculator',
-    title: `PPF Calculator ${new Date(SMALL_SAVINGS.period.from).getFullYear()}: Public Provident Fund at ${pct(R.ppf)}`,
+    title: `PPF Calculator ${Y}: PPF Maturity at ${pct(R.ppf)} Interest`,
     h1: 'PPF calculator',
-    description: `Free PPF calculator at the current ${pct(R.ppf)} rate. See the maturity value, interest earned and a year-by-year table for yearly or monthly deposits, with the rate notice and formula shown.`,
+    description: `PPF calculator at the current ${pct(R.ppf)} rate: maturity value, interest earned and a year-by-year table for yearly or monthly deposits.`,
     intro: 'Work out what your Public Provident Fund (PPF) account will be worth. Enter how much you deposit each year and for how long. The calculator uses the rate notified by the Finance Ministry and shows exactly how the interest is worked out.',
     conventions: [
       'Interest is calculated every month on the lowest balance between the 5th and the end of that month, at the yearly rate ÷ 12.',
@@ -71,7 +73,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'ssy', slug: 'sukanya-samriddhi-calculator', name: 'Sukanya Samriddhi calculator',
-    title: `Sukanya Samriddhi Yojana Calculator (SSY) at ${pct(R.ssy)}`,
+    title: `SSY Calculator ${Y}: Sukanya Samriddhi Yojana at ${pct(R.ssy)}`,
     h1: 'Sukanya Samriddhi Yojana (SSY) calculator',
     description: `Free Sukanya Samriddhi Yojana calculator at the current ${pct(R.ssy)} rate. See the maturity value after 21 years, interest earned and a year-by-year table.`,
     intro: 'Sukanya Samriddhi Yojana (SSY) is a savings scheme for a girl child. You deposit for 15 years, and the account keeps earning interest until it matures 21 years after it was opened. Enter the yearly deposit and the girl’s age to see the maturity value.',
@@ -99,7 +101,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'scss', slug: 'scss-calculator', name: 'SCSS calculator',
-    title: `Senior Citizen Savings Scheme Calculator (SCSS) at ${pct(R.scss)}`,
+    title: `SCSS Calculator ${Y}: Senior Citizen Savings Scheme at ${pct(R.scss)}`,
     h1: 'Senior Citizens’ Savings Scheme (SCSS) calculator',
     description: `Free SCSS calculator at the current ${pct(R.scss)} rate. See the quarterly interest payout and the total interest over 5 years.`,
     intro: 'The Senior Citizens’ Savings Scheme (SCSS) pays interest every quarter on a lump sum. Enter the amount to see how much you receive each quarter and in total.',
@@ -126,7 +128,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'nsc', slug: 'nsc-calculator', name: 'NSC calculator',
-    title: `NSC Calculator: National Savings Certificate at ${pct(R.nsc)}`,
+    title: `NSC Calculator ${Y}: National Savings Certificate at ${pct(R.nsc)}`,
     h1: 'National Savings Certificate (NSC) calculator',
     description: `Free NSC calculator at the current ${pct(R.nsc)} rate. See the maturity value after 5 years and the interest added each year.`,
     intro: 'The National Savings Certificate (NSC) is a 5-year Post Office deposit. Interest is added every year and paid with the deposit at maturity. Enter the amount to see what you get back.',
@@ -150,7 +152,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'kvp', slug: 'kvp-calculator', name: 'KVP calculator',
-    title: `KVP Calculator: Kisan Vikas Patra Doubles in ${SMALL_SAVINGS.kvpMonths} Months`,
+    title: `KVP Calculator ${Y}: Kisan Vikas Patra Doubles in ${SMALL_SAVINGS.kvpMonths} Months`,
     h1: 'Kisan Vikas Patra (KVP) calculator',
     description: `Free Kisan Vikas Patra calculator. At the current ${pct(R.kvp)} rate, money invested in KVP doubles in ${SMALL_SAVINGS.kvpMonths} months.`,
     intro: `Kisan Vikas Patra (KVP) doubles your money over a fixed period. At the current rate of ${pct(R.kvp)} the period is ${SMALL_SAVINGS.kvpMonths} months. Enter the amount to see the maturity value and date.`,
@@ -173,7 +175,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'mis', slug: 'post-office-mis-calculator', name: 'Post Office MIS calculator',
-    title: `Post Office MIS Calculator: Monthly Income Scheme at ${pct(R.mis)}`,
+    title: `Post Office MIS Calculator ${Y}: Monthly Income at ${pct(R.mis)}`,
     h1: 'Post Office Monthly Income Scheme (MIS) calculator',
     description: `Free Post Office MIS calculator at the current ${pct(R.mis)} rate. See the monthly income and the total interest over 5 years.`,
     intro: 'The Post Office Monthly Income Scheme (MIS) pays interest every month on a lump sum for 5 years. Enter the amount to see your monthly income.',
@@ -197,7 +199,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'rd', slug: 'post-office-rd-calculator', name: 'Post Office RD calculator',
-    title: `Post Office RD Calculator: Recurring Deposit at ${pct(R.rd5)}`,
+    title: `Post Office RD Calculator ${Y}: Interest Rate ${pct(R.rd5)}`,
     h1: 'Post Office Recurring Deposit (RD) calculator',
     description: `Free Post Office RD calculator at the current ${pct(R.rd5)} rate. See the maturity value of a monthly deposit after 5 years, with a yearly table.`,
     intro: 'A Post Office Recurring Deposit (RD) is a fixed amount saved every month for 5 years. Enter the monthly amount to see the maturity value.',
@@ -221,7 +223,7 @@ export const SCHEMES_EN: SchemePage[] = [
   },
   {
     kind: 'td', slug: 'post-office-fd-calculator', name: 'Post Office FD (Time Deposit) calculator',
-    title: `Post Office FD Calculator: Time Deposit Rates up to ${pct(R.td5)}`,
+    title: `Post Office FD Calculator ${Y}: Time Deposit up to ${pct(R.td5)}`,
     h1: 'Post Office Time Deposit (FD) calculator',
     description: `Free Post Office FD calculator for 1, 2, 3 and 5-year Time Deposits (${pct(R.td1)} to ${pct(R.td5)}). See the yearly interest and the total.`,
     intro: 'A Post Office Time Deposit (TD), often called a Post Office FD, is a lump sum deposited for 1, 2, 3 or 5 years. Choose the term to see the interest.',

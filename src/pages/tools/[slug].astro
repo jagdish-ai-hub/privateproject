@@ -1,5 +1,7 @@
 ---
 /** One page per calculator: the interactive calculator, how it works, a worked example, FAQ, JSON-LD. */
+import Reckoner from '../../components/Reckoner.astro';
+import { toolReckoner } from '../../lib/reckoners.ts';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Byline from '../../components/Byline.astro';
 import Sources from '../../components/Sources.astro';
@@ -50,6 +52,7 @@ const related = (tool.related ?? []).map((s) => TOOLS.find((t) => t.slug === s)!
   )}
 
   <ToolCalculator kind={tool.kind} lang="en" />
+  <Reckoner table={toolReckoner(tool.kind, 'en')} />
 
   <section class="mt-10 max-w-3xl" aria-labelledby="how-h">
     <h2 id="how-h" class="text-lg font-semibold tracking-tight">How it works</h2>

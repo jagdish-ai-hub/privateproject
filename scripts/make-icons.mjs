@@ -1,7 +1,7 @@
-// Usage: node scripts/make-icons.cjs public   (needs Playwright's Chromium). Check the result by eye afterwards.
+// Usage: node scripts/make-icons.mjs public   (needs Playwright's Chromium). Check the result by eye afterwards.
 // Renders the raster icons from public/favicon.svg (light variant) with Chromium, and packs favicon.ico (16/32/48 PNG entries).
-const { chromium } = require('playwright');
-const fs = require('fs');
+import fs from 'node:fs';
+import { chromium } from '@playwright/test';
 const pub = process.argv[2];
 const svg = fs.readFileSync(`${pub}/favicon.svg`, 'utf8').replace(/<style>.*?<\/style>/, '');
 const square = svg.replace(' rx="8"', ''); // full-bleed tile for iOS, which rounds corners itself

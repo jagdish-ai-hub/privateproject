@@ -1,0 +1,27 @@
+---
+/**
+ * A ready-reckoner table under a calculator: worked answers for common amounts, computed at build time
+ * by `src/lib/reckoners.ts`. Scrolls sideways inside its own box on narrow screens.
+ */
+import type { Reckoner } from '../lib/reckoners.ts';
+interface Props { table: Reckoner | null }
+const { table } = Astro.props;
+---
+{table && (
+  <section class="mt-8" aria-labelledby="reckoner-h" data-testid="reckoner">
+    <h2 id="reckoner-h" class="mb-2 text-lg font-semibold tracking-tight">{table.caption}</h2>
+    <div class="overflow-x-auto rounded-md border border-line">
+      <table class="w-full min-w-max text-sm">
+        <thead class="bg-subtle text-left text-xs text-muted">
+          <tr>{table.head.map((h, i) => <th scope="col" class={`px-3 py-2 font-medium ${i > 0 ? 'text-right' : ''}`}>{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {table.rows.map((r) => (
+            <tr class="border-t border-line">{r.map((c, i) => (i === 0 ? <th scope="row" class="px-3 py-2 text-left font-medium">{c}</th> : <td class="num px-3 py-2 text-right">{c}</td>))}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-xs text-muted">{table.note}</p>
+  </section>
+)}

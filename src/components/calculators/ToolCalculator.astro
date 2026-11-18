@@ -20,8 +20,8 @@ const { kind, lang } = Astro.props;
   : kind === 'jewellery' || kind === 'metalreturn' ? <MetalCalculator client:load kind={kind === 'jewellery' ? 'jewellery' : 'return'} lang={lang} />
   : kind === 'homeloan' || kind === 'carloan' || kind === 'personalloan' || kind === 'emi' ? <LoanCalculator client:load kind={kind} lang={lang} />
   : kind === 'fd' || kind === 'inflation' ? <DepositCalculator client:load kind={kind} lang={lang} />
-  : kind === 'eligibility' ? <EligibilityCalculator client:load />
-  : kind === 'fuelcost' || kind === 'mileage' ? <FuelCalculator client:load kind={kind} />
-  : kind === 'goldsip' ? <GoldSipCalculator client:load />
-  : kind === 'xirr' ? <XirrCalculator client:load />
+  : kind === 'eligibility' ? <EligibilityCalculator client:load lang={lang} />
+  : kind === 'fuelcost' || kind === 'mileage' ? <FuelCalculator client:load kind={kind} lang={lang} />
+  : kind === 'goldsip' ? <GoldSipCalculator client:load lang={lang} />
+  : kind === 'xirr' ? <XirrCalculator client:load lang={lang} />
   : <Calculator client:load kind={kind} lang={lang} />}

@@ -1,12 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import { TOOLS } from '../src/lib/tools.ts';
+import { toolFaqs } from '../src/lib/toolsExtraFaqs.ts';
 import { loanEligibility, emi } from '../src/lib/loans.ts';
 import { fuelCost, mileage } from '../src/lib/vehicle.ts';
 import { goldSip } from '../src/lib/metals.ts';
 import { xirrOf } from '../src/lib/xirrTool.ts';
 
-/** English-only calculators: they work, their numbers match the maths, and they have no Hindi twin. */
-const ONLY = TOOLS.filter((t) => t.englishOnly);
+/** The six calculators added in November 2026 (first English only, now in both languages): they work and their numbers match the maths. */
+const SIX = ['home-loan-eligibility-calculator', 'emi-calculator', 'xirr-calculator', 'fuel-cost-calculator', 'mileage-calculator', 'gold-sip-calculator'];
+const ONLY = TOOLS.filter((t) => SIX.includes(t.slug));
 
 /** Wait until the page's islands have hydrated, so a click or fill is not lost. */
 async function hydrated(page: Page): Promise<void> {
@@ -14,23 +16,22 @@ async function hydrated(page: Page): Promise<void> {
 }
 const rupees = (n: number): string => `₹${Math.round(n).toLocaleString('en-IN')}`;
 
-test('six English-only calculators exist and are listed on the English index only', async ({ page }) => {
-  expect(ONLY.map((t) => t.slug).sort()).toEqual(['emi-calculator', 'fuel-cost-calculator', 'gold-sip-calculator', 'home-loan-eligibility-calculator', 'mileage-calculator', 'xirr-calculator']);
+test('the six calculators exist and are listed on the English and the Hindi index', async ({ page }) => {
+  expect(ONLY).toHaveLength(6);
+  expect(TOOLS.filter((t) => t.englishOnly)).toHaveLength(0);
   await page.goto('/tools/');
   for (const t of ONLY) await expect(page.locator(`ul.grid li a[href="/tools/${t.slug}/"]`)).toBeVisible();
   await page.goto('/hi/tools/');
-  for (const t of ONLY) await expect(page.locator(`a[href="/hi/tools/${t.slug}/"]`)).toHaveCount(0);
+  for (const t of ONLY) await expect(page.locator(`a[href="/hi/tools/${t.slug}/"]`)).toHaveCount(1);
 });
 
 for (const t of ONLY) {
-  test(`${t.slug}: English only (no Hindi alternate, no language switch, no Hindi page), with byline, sources, FAQ and structured data`, async ({ page }) => {
+  test(`${t.slug}: paired with its Hindi page, with byline, sources, FAQ and structured data`, async ({ page }) => {
     await page.goto(`/tools/${t.slug}/`);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en-IN');
-    await expect(page.locator('link[rel="alternate"][hreflang="hi-IN"]')).toHaveCount(0);
-    await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveCount(0);
-    await expect(page.getByTestId('lang-switch')).toHaveCount(0);
-    await expect(page.getByTestId('lang-switch-mobile')).toHaveCount(0);
-    expect((await page.request.get(`/hi/tools/${t.slug}/`)).status()).toBe(404);
+    await expect(page.locator('link[rel="alternate"][hreflang="hi-IN"]')).toHaveCount(1);
+    await expect(page.getByTestId('lang-switch')).toHaveCount(1);
+    expect((await page.request.get(`/hi/tools/${t.slug}/`)).status()).toBe(200);
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await expect(page.getByTestId('byline')).toContainText('Omm');
     await expect(page.getByTestId('sources')).toBeVisible();
@@ -40,7 +41,7 @@ for (const t of ONLY) {
     const types = blocks.map((b) => (JSON.parse(b) as { '@type': string })['@type']);
     expect(types).toEqual(expect.arrayContaining(['WebApplication', 'FAQPage', 'WebPage']));
     const faq = JSON.parse(blocks[types.indexOf('FAQPage')]) as { mainEntity: unknown[] };
-    expect(faq.mainEntity.length).toBe(t.faqs.length);
+    expect(faq.mainEntity.length).toBe(toolFaqs(t).length);
     await expect(page.locator('details summary').filter({ hasText: t.faqs[0].question })).toBeVisible();
     // every input has its own id and every label points at an input that exists
     const ids = await page.locator('form input[id]').evaluateAll((els) => els.map((e) => e.id));

@@ -52,10 +52,9 @@ describe('calculators and their guides', () => {
     }
     for (const t of TOOLS) expect(files, t.kind).toContain(`${TOOL_GUIDES[t.kind].slug}.md`);
   });
-  it('English-only calculators have no Hindi text, and every related calculator exists', () => {
-    const only = TOOLS.filter((t) => t.englishOnly);
-    expect(only.length).toBe(6);
-    for (const t of only) expect(TOOLS_HI[t.slug], t.slug).toBeUndefined();
+  it('every calculator is in both languages, and every related calculator exists', () => {
+    expect(TOOLS.filter((t) => t.englishOnly)).toHaveLength(0);
+    expect(BILINGUAL_TOOLS).toHaveLength(TOOLS.length);
     for (const t of TOOLS) for (const r of t.related ?? []) expect(TOOLS.some((x) => x.slug === r), `${t.slug} -> ${r}`).toBe(true);
     expect(new Set(TOOLS.map((t) => t.slug)).size).toBe(TOOLS.length);
   });

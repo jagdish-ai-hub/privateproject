@@ -9,7 +9,9 @@
  */
 import { lumpsumProjection, requiredSip, sipProjection } from './calculators.ts';
 import { formatRupees } from './format.ts';
-import { emi, inflation } from './loans.ts';
+import { emi, inflation, loanEligibility } from './loans.ts';
+import { goldSip } from './metals.ts';
+import { fuelCost } from './vehicle.ts';
 import type { Faq } from './seo.ts';
 import type { Tool } from './tools.ts';
 
@@ -18,6 +20,8 @@ const sip = (monthly: number, years: number): string => rs(sipProjection(monthly
 const lump = (amount: number, years: number): string => rs(lumpsumProjection(amount, 0.12, years).value);
 const need = (target: number, years: number): string => rs(requiredSip(target, 0.12, years));
 const perLakh = (rate: number, years: number): string => rs(emi(100_000, rate, years));
+const homeLoan = (income: number, years = 20): string => rs(loanEligibility({ income, existingEmi: 0, emiShare: 0.5, rate: 0.0875, years }).maxLoan);
+const fuel = (price: number, kmPerUnit: number, km: number): string => rs(fuelCost({ fuelPrice: price, kmPerUnit, mileageCut: 0, tripKm: km, kmPerMonth: 0, people: 1 }).tripCost);
 const TAX_GUIDE = 'The guide to mutual fund taxation on this site has the details.';
 
 export const EXTRA_FAQS: Partial<Record<Tool['kind'], Faq[]>> = {
@@ -94,6 +98,31 @@ export const EXTRA_FAQS: Partial<Record<Tool['kind'], Faq[]>> = {
     { question: 'What will ₹1 lakh be worth in 10, 20 and 30 years?', answer: `At 6% inflation a year, ${rs(100_000)} will buy what about ${rs(inflation(100_000, 0.06, 10).buyingPower)} buys today after 10 years, ${rs(inflation(100_000, 0.06, 20).buyingPower)} after 20 years and ${rs(inflation(100_000, 0.06, 30).buyingPower)} after 30 years.` },
     { question: 'What will ₹1 crore be worth after 20 years?', answer: `At 6% inflation a year, ${rs(10_000_000)} in 20 years will buy what about ${rs(inflation(10_000_000, 0.06, 20).buyingPower)} buys today. Put the other way, something that costs ${rs(10_000_000)} today will cost about ${rs(inflation(10_000_000, 0.06, 20).futureCost)} then.` },
     { question: 'How much will my monthly expenses be at retirement?', answer: `Multiply today’s expenses by (1 + inflation) for each year until you retire. Expenses of ${rs(50_000)} a month today become about ${rs(inflation(50_000, 0.06, 20).futureCost)} a month in 20 years and ${rs(inflation(50_000, 0.06, 30).futureCost)} in 30 years at 6% inflation.` },
+  ],
+  eligibility: [
+    { question: 'How much home loan can I get on a ₹30,000, ₹50,000 or ₹1 lakh salary?', answer: `As a rough guide at 8.75% for 20 years, with half of take-home pay allowed for EMIs and no other loans: ${rs(30_000)} a month supports about ${homeLoan(30_000)}, ${rs(50_000)} about ${homeLoan(50_000)}, and ${rs(100_000)} about ${homeLoan(100_000)}. Over 30 years the same incomes support about ${homeLoan(30_000, 30)}, ${homeLoan(50_000, 30)} and ${homeLoan(100_000, 30)}. Lenders set their own limits.` },
+    { question: 'How do I calculate home loan eligibility myself?', answer: 'Take your monthly take-home pay, multiply by the share lenders allow for EMIs (often 40% to 60%), and subtract the EMIs you already pay. That is the largest new EMI. Then work the EMI formula backwards for your rate and tenure to get the loan amount, which is what this calculator does.' },
+    { question: 'Does a co-applicant increase home loan eligibility?', answer: 'Yes. A co-applicant with their own income adds to the income lenders count, so the EMI limit and the loan amount rise. Both applicants are responsible for the repayments, and their credit scores are both checked.' },
+  ],
+  emi: [
+    { question: 'What is the EMI on a ₹5 lakh, ₹10 lakh and ₹20 lakh loan?', answer: `At 10% a year for 5 years the EMI is about ${rs(emi(500_000, 0.10, 5))} on ${rs(500_000)}, ${rs(emi(1_000_000, 0.10, 5))} on ${rs(1_000_000)} and ${rs(emi(2_000_000, 0.10, 5))} on ${rs(2_000_000)}. At 12% the same loans cost ${rs(emi(500_000, 0.12, 5))}, ${rs(emi(1_000_000, 0.12, 5))} and ${rs(emi(2_000_000, 0.12, 5))} a month.` },
+    { question: 'Can I pay EMI in advance?', answer: 'Many lenders let you prepay part of the loan, which cuts the interest because it reduces the balance on which interest is charged. Some charge a fee on prepaying fixed-rate loans; floating-rate home loans taken by individuals usually have no prepayment charge. Ask your lender how a prepayment is applied: as a shorter tenure or a lower EMI.' },
+  ],
+  xirr: [
+    { question: 'What is a good XIRR for a mutual fund SIP?', answer: 'There is no single good number. Compare your XIRR with what a fixed deposit or an index fund would have earned over the same dates, and with the category’s returns over the same period. An equity SIP can show a low or negative XIRR for a year or two after a market fall without anything being wrong.' },
+    { question: 'Why is my XIRR different from the return shown by the fund?', answer: 'The fund’s return (CAGR) assumes one investment on one date. XIRR uses your own dates and amounts, so money added recently counts for less time. Two investors in the same fund can have different XIRRs.' },
+  ],
+  fuelcost: [
+    { question: 'What does it cost to drive 1,000 km on petrol?', answer: `At ${rs(100)} a litre, a car that gives 15 km a litre costs about ${fuel(100, 15, 1_000)} for 1,000 km, one that gives 18 km a litre about ${fuel(100, 18, 1_000)}, and 22 km a litre about ${fuel(100, 22, 1_000)}. Divide the distance by the mileage, then multiply by the price.` },
+    { question: 'Is CNG cheaper than petrol per km?', answer: `Usually. At ${rs(80)} a kg and 25 km a kg, CNG costs about ${rs(80 / 25)} a km; petrol at ${rs(100)} a litre and 18 km a litre costs about ${rs(100 / 18)} a km. Check your own prices and mileage, and the extra cost of a CNG car or kit.` },
+  ],
+  mileage: [
+    { question: 'How do I check my car or bike mileage?', answer: 'Fill the tank fully and note the odometer. Drive normally until the next fill, fill the tank fully again, and note the litres added and the distance driven. Mileage is distance ÷ litres. Repeat over a few fills for a steadier figure.' },
+    { question: 'Why is my real mileage lower than the company figure?', answer: 'Company figures come from a fixed test cycle. Traffic, air conditioning, tyre pressure, load, speed and short trips all lower real mileage, often by 15% to 30% in city driving.' },
+  ],
+  goldsip: [
+    { question: 'How much will ₹5,000 a month in a gold SIP become?', answer: `If gold rises 8% a year and each purchase costs 3%, ${rs(5_000)} a month grows to about ${rs(goldSip({ monthly: 5_000, pricePerGram: 10_000, growth: 0.08, years: 10, buyCost: 0.03 }).value)} in 10 years, on ${rs(600_000)} invested. Gold can also fall for years at a time, so treat 8% as an assumption only.` },
+    { question: 'Gold SIP in a fund or digital gold: what is the difference?', answer: 'A gold SIP in a gold ETF or gold fund buys fund units that track the gold price, with a yearly expense ratio. Digital gold buys metal held by a vault company, with GST and a buy-sell spread instead. Gold funds are regulated by SEBI; digital gold is not.' },
   ],
 };
 
