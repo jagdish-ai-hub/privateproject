@@ -139,7 +139,7 @@ test('gold SIP calculator matches the maths and shows a year-by-year table', asy
   await expect(page.getByTestId('goldsip-value')).toHaveText(rupees(flat.value));
   await expect(page.getByTestId('goldsip-gain')).toContainText('-');
   await page.locator('summary', { hasText: 'Year-by-year breakdown' }).click();
-  await expect(page.locator('tbody tr')).toHaveCount(10);
+  await expect(page.locator('details', { hasText: 'Year-by-year breakdown' }).locator('tbody tr')).toHaveCount(10);
 });
 
 test('extra English FAQs appear on existing English pages and not on the Hindi twins', async ({ page }) => {

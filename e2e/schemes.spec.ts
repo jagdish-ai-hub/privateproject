@@ -104,3 +104,14 @@ test('every form control on the Hindi pages has its own id, and each label point
   const broken = await page.locator('[data-testid="scheme-calculator"] label[for]').evaluateAll((ls) => ls.filter((l) => document.getElementById((l as HTMLLabelElement).htmlFor) === null).length);
   expect(broken).toBe(0);
 });
+
+test('scheme pages show the current rate under the heading and a table of worked answers', async ({ page }) => {
+  await page.goto('/schemes/post-office-rd-calculator/');
+  await expect(page.getByTestId('current-rate')).toContainText('6.7%');
+  const table = page.getByTestId('reckoner');
+  await expect(table.getByRole('heading')).toContainText('Post Office RD');
+  await expect(table.getByRole('row', { name: /₹5,000/ })).toContainText('₹3,56,829');
+  await page.goto('/hi/schemes/sukanya-samriddhi-calculator/');
+  await expect(page.getByTestId('current-rate')).toContainText('मौजूदा दर');
+  await expect(page.getByTestId('reckoner').locator('tbody tr')).toHaveCount(21);
+});
