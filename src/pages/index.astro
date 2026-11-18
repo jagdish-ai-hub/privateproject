@@ -14,7 +14,9 @@ import { HOME_CALCULATORS, HOME_FAQS, HOME_GUIDES, VS_LINKS } from '../data/home
 const data = loadScreener();
 const lists = HOME_PERIODS.map((key) => ({ key, funds: topByReturn(data, key) }));
 const tops = topByCategory(data, ['Large Cap', 'Mid Cap', 'Small Cap', 'Flexi Cap', 'ELSS (Tax Saver)', 'Index Fund', 'Aggressive Hybrid', 'Corporate Bond']);
-const pairs = popularPairs(data, ['Flexi Cap', 'Large Cap', 'Mid Cap', 'Small Cap', 'ELSS (Tax Saver)', 'Index Fund']);
+// The hero shows the two largest funds in four popular categories; the comparisons section further down adds two more.
+const heroPairs = popularPairs(data, ['Flexi Cap', 'Large Cap', 'Mid Cap', 'Small Cap']);
+const morePairs = popularPairs(data, ['ELSS (Tax Saver)', 'Index Fund']);
 const card = 'rounded-md border border-line p-4';
 ---
 <BaseLayout
@@ -23,9 +25,7 @@ const card = 'rounded-md border border-line p-4';
   path="/"
   jsonLd={[...siteLd(new URL('/', Astro.site).toString()), faqLd(HOME_FAQS)]}
 >
-  <Hero slot="hero" schemes={data.count} fundHouses={data.dict.amc.length} asOf={data.asOf} />
-
-  <TopReturns lists={lists} asOf={data.asOf} />
+  <Hero slot="hero" schemes={data.count} fundHouses={data.dict.amc.length} asOf={data.asOf} pairs={heroPairs} />
 
   <section id="screener" aria-labelledby="screener-h" class="scroll-mt-4">
     <h2 id="screener-h" class="text-2xl font-semibold tracking-tight">Mutual fund screener</h2>
@@ -36,6 +36,8 @@ const card = 'rounded-md border border-line p-4';
     </p>
     <Screener client:load />
   </section>
+
+  <TopReturns lists={lists} asOf={data.asOf} />
 
   {tops.length > 0 && (
     <section class="mt-14" aria-labelledby="cat-h" data-testid="category-tops">
@@ -65,11 +67,11 @@ const card = 'rounded-md border border-line p-4';
 
   <section class="mt-14" aria-labelledby="pop-h">
     <h2 id="pop-h" class="text-2xl font-semibold tracking-tight">Popular comparisons</h2>
-    {pairs.length > 0 && (
-      <div class="mt-4" data-testid="popular">
-        <h3 class="text-sm font-medium">The two largest funds in a category, side by side</h3>
+    {morePairs.length > 0 && (
+      <div class="mt-4" data-testid="more-pairs">
+        <h3 class="text-sm font-medium">More of the largest funds, side by side</h3>
         <ul class="mt-2 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {pairs.map((p) => (
+          {morePairs.map((p) => (
             <li>
               <a href={`/compare/?f=${p.a.code},${p.b.code}`} class="flex h-full flex-col rounded-md border border-line px-3 py-2 text-sm hover:bg-subtle">
                 <span class="text-xs text-muted">{p.category}</span>

@@ -1,14 +1,15 @@
 ---
 /**
- * Home page hero band: what the site is, two calls to action and a few real numbers from the dataset.
- * All figures come from the data build, so nothing here can go stale or be made up. Popular comparisons
- * now have their own section further down the home page.
+ * Home page hero band: what the site is, two calls to action, a few real numbers from the dataset,
+ * and quick links to compare the largest funds in popular categories. All figures come from the
+ * data build, so nothing here can go stale or be made up.
  *
- * Props: `schemes` (count), `fundHouses` (count), `asOf` (ISO date of the newest NAV).
+ * Props: `schemes` (count), `fundHouses` (count), `asOf` (ISO date of the newest NAV), `pairs` (popular comparisons).
  */
 import { formatIsoDate } from '../lib/costs.ts';
-interface Props { schemes: number; fundHouses: number; asOf: string }
-const { schemes, fundHouses, asOf } = Astro.props;
+import type { PopularPair } from '../lib/popular.ts';
+interface Props { schemes: number; fundHouses: number; asOf: string; pairs: PopularPair[] }
+const { schemes, fundHouses, asOf, pairs } = Astro.props;
 const stats = [
   { value: schemes.toLocaleString('en-IN'), label: 'active schemes' },
   { value: String(fundHouses), label: 'fund houses' },
@@ -44,5 +45,20 @@ const stats = [
       ))}
     </dl>
 
+    {pairs.length > 0 && (
+      <div class="mt-8" data-testid="popular">
+        <p class="text-xs font-medium uppercase tracking-wide text-muted">Compare the two largest funds in a category</p>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          {pairs.map((p) => (
+            <li>
+              <a href={`/compare/?f=${p.a.code},${p.b.code}`} class="flex flex-col rounded-md border border-line bg-bg px-3 py-2 text-sm hover:bg-subtle">
+                <span class="text-xs text-muted">{p.category}</span>
+                <span>{p.a.name} <span class="text-muted">vs</span> {p.b.name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
   </div>
 </section>

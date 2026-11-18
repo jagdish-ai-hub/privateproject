@@ -74,3 +74,17 @@ test('home page sections: category tops link to category pages, calculators and 
   await expect(page.getByRole('link', { name: 'Home loan eligibility calculator' })).toHaveAttribute('href', '/tools/home-loan-eligibility-calculator/');
   await expect(page.getByRole('link', { name: 'SIP vs FD' }).first()).toHaveAttribute('href', '/learn/sip-vs-fd/');
 });
+
+test('home page order: hero with the largest-fund comparisons, then the screener (25 a page), then the highest returns', async ({ page }) => {
+  await page.goto('/');
+  const top = async (sel: string): Promise<number> => page.locator(sel).first().evaluate((e) => e.getBoundingClientRect().top + window.scrollY);
+  const order = [await top('[data-testid="hero-stats"]'), await top('#screener')];
+  if (await page.getByTestId('popular').count()) expect(await top('[data-testid="popular"]')).toBeLessThan(order[1]);
+  if (await page.getByTestId('top-returns').count()) {
+    order.push(await top('[data-testid="top-returns"]'));
+    await expect(page.getByRole('heading', { name: 'Funds with highest returns' })).toBeVisible();
+  }
+  expect(order).toEqual([...order].sort((a, b) => a - b));
+  const showing = page.getByText(/^Showing 1–\d+ of/);
+  if (await showing.count()) await expect(showing).toContainText(/1–(25|\d) of/);
+});

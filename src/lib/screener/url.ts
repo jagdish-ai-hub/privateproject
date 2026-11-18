@@ -13,7 +13,7 @@ export const DEFAULT_VIEW: ViewState = {
   filters: { q: '', amc: [], assetClass: ['Equity'], category: [], plan: ['direct'], option: ['growth'], ranges: {} },
   sort: { key: 'aum', dir: 'desc' },
   page: 1,
-  size: 50,
+  size: 25,
 };
 
 const LIST_FIELDS = ['amc', 'assetClass', 'category', 'plan', 'option'] as const;

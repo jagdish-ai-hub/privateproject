@@ -1,6 +1,6 @@
 ---
 /**
- * "Highest returns" on the home page: five server-rendered lists (1M, 3M, 1Y, 3Y, 5Y), one shown at a time
+ * "Funds with highest returns" on the home page: five server-rendered lists (1M, 3M, 1Y, 3Y, 5Y), one shown at a time
  * through tabs. All lists are in the HTML, so search engines and no-JS visitors see every one; the small
  * script below only switches which list is visible. Lists, not tables: the screener tests look for the
  * page's tables, and a list reads better on a phone.
@@ -21,10 +21,10 @@ const shown = lists.filter((l) => l.funds.length > 0);
 const first = shown.find((l) => l.key === 'r1y')?.key ?? shown[0]?.key;
 ---
 {shown.length > 0 && (
-  <section class="mb-12" aria-labelledby="top-h" data-testid="top-returns">
+  <section class="mt-14" aria-labelledby="top-h" data-testid="top-returns">
     <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <div>
-        <h2 id="top-h" class="text-2xl font-semibold tracking-tight">Highest returns</h2>
+        <h2 id="top-h" class="text-2xl font-semibold tracking-tight">Funds with highest returns</h2>
         <p class="mt-1 max-w-3xl text-sm text-muted">
           Direct-plan Growth equity funds of ₹{MIN_AUM.toLocaleString('en-IN')} Cr or more, NAV as on {formatIsoDate(asOf)}.
           Sector and theme funds are left out. Past returns, not a recommendation.
