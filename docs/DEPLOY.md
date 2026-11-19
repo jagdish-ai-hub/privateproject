@@ -51,10 +51,10 @@ language switch still link to it. Rules and code: `src/lib/indexStage.ts`.
 
 | `INDEX_STAGE` | Open to Google | Pages |
 |---|---|---|
-| `en` (default, also when empty) | the hand-written English pages: home, compare, calculators, schemes, guides, about, author, legal | 73 |
-| `core` | + the Hindi pages | 139 |
-| `lists` | + the 50 category and 55 fund-house list pages | 244 |
-| `funds` | + the largest funds by fund size; how many is `INDEX_FUNDS` (default 250) | 244 + N |
+| `en` (default, also when empty) | the hand-written English pages: home, compare, calculators, schemes, guides, about, author, legal | 74 |
+| `core` | + the Hindi pages | 141 |
+| `lists` | + the 50 category and 55 fund-house list pages | 246 |
+| `funds` | + the largest funds by fund size; how many is `INDEX_FUNDS` (default 250) | 246 + N |
 | `all` | + every fund page | about 2,080 |
 
 The shared `/fund/?code=…` page is never listed. A mistyped value (for example `everything`) stops the

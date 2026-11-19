@@ -83,7 +83,7 @@ export const HOME_GUIDES: { slug: string; title: string; blurb: string }[] = [
   { slug: 'sip-vs-fd', title: 'SIP vs FD', blurb: 'Monthly SIP in a fund or a fixed deposit' },
   { slug: 'sip-vs-rd', title: 'SIP vs RD', blurb: 'Monthly saving in a fund or a recurring deposit' },
   { slug: 'mutual-funds-vs-post-office-schemes', title: 'Mutual funds vs post office schemes', blurb: 'Guaranteed rates against market returns' },
-  { slug: 'how-to-use-the-screener', title: 'How to compare mutual funds', blurb: 'Using the screener and the side-by-side view' },
+  { slug: 'how-to-compare-mutual-funds', title: 'How to compare mutual funds', blurb: 'Returns, benchmark, risk, cost and overlap, step by step' },
   { slug: 'direct-vs-regular-mutual-funds', title: 'Direct vs regular mutual funds', blurb: 'The same fund at a lower cost' },
   { slug: 'mutual-fund-taxation-india', title: 'Mutual fund tax in India', blurb: 'Equity, debt and hybrid funds after the 2024 changes' },
 ];
@@ -92,7 +92,7 @@ export const HOME_GUIDES: { slug: string; title: string; blurb: string }[] = [
 export const HOME_FAQS: Faq[] = [
   {
     question: 'How do I compare two mutual funds?',
-    answer: 'Pick funds from the same category, plan and option, so they follow the same rules. Then look at returns over several periods (1, 3 and 5 years), SIP returns, how much the fund fell in bad times (volatility and worst fall), the expense ratio and the fund size. Use "Pick funds side by side" to see up to four funds on one chart with plain-English notes.',
+    answer: 'Pick funds from the same category, plan and option, so they follow the same rules. Then look at returns over several periods (1, 3 and 5 years), SIP returns, how much the fund fell in bad times (volatility and worst fall), the expense ratio and the fund size. Use "Pick funds side by side" to see up to four funds on one chart with plain-English notes. The guide "How to compare mutual funds" on this site goes through each step.',
   },
   {
     question: 'What does Direct plan, Growth option mean?',
