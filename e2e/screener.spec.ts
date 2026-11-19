@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { applyView, prepare } from '../src/lib/screener/query.ts';
-import { parseView } from '../src/lib/screener/url.ts';
+import { DEFAULT_VIEW, parseView } from '../src/lib/screener/url.ts';
 import type { ScreenerData } from '../src/lib/screener/types.ts';
 
 /** The expected result count for a URL query, computed by the pure functions on the real data file. */
@@ -18,15 +18,41 @@ async function loadData(page: Page): Promise<ScreenerData> {
 }
 const firstRowName = (page: Page) => page.locator('tbody tr').first().locator('td').first();
 
-test('shows a skeleton first, then the real table with the default Direct + Growth view', async ({ page }) => {
+test('shows the built-in first rows (or a skeleton on other views) first, then the real table with the default Direct + Growth view', async ({ page }) => {
+  const data = await loadData(page);
+  const builtIn = applyView(prepare(data), { ...DEFAULT_VIEW, page: 1 }).rows.length;
   await page.route('**/data/screener.json', async (route) => { await new Promise((r) => setTimeout(r, 600)); await route.continue(); });
   await page.goto('/');
-  await expect(page.locator('tbody .skeleton').first()).toBeVisible();
+  // Default view: real fund rows are already in the page while the data file is still loading.
+  if (builtIn > 0) {
+    await expect(page.locator('tbody tr').first().locator('a')).toBeVisible();
+    await expect(page.locator('tbody .skeleton')).toHaveCount(0);
+  }
   await expect(showing(page)).toBeVisible();
   await expect(page.locator('tbody .skeleton')).toHaveCount(0);
   const total = await expectedTotal(page, '');
   await expect(page.getByTestId('result-count')).toContainText(total.toLocaleString('en-IN'));
   await expect(page.getByRole('button', { name: /^Plan/ })).toContainText('1');
+});
+
+test('a shared link to another view shows a skeleton, never the built-in default rows', async ({ page }) => {
+  await page.route('**/data/screener.json', async (route) => { await new Promise((r) => setTimeout(r, 600)); await route.continue(); });
+  await page.goto('/?sort=r1y%3Aasc');
+  await expect(page.locator('tbody .skeleton').first()).toBeVisible();
+  await expect(showing(page)).toBeVisible();
+});
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+  test('the first rows of the default view are in the page HTML (what search engines see)', async ({ page }) => {
+    const data = await loadData(page);
+    const rows = applyView(prepare(data), { ...DEFAULT_VIEW, page: 1 });
+    test.skip(rows.rows.length === 0, 'the default view is empty in this dataset');
+    await page.goto('/');
+    await expect(page.locator('tbody tr')).toHaveCount(rows.rows.length);
+    await expect(page.locator('tbody tr').first().locator('a')).toHaveText(data.name[rows.rows[0]]);
+    await expect(page.locator('tbody tr').first()).toContainText('%');
+  });
 });
 
 test('search filters the table, updates the URL and matches the pure function', async ({ page }) => {

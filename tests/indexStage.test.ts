@@ -62,24 +62,25 @@ const PAGES = {
   en: '/tools/sip-calculator/',
   hi: '/hi/tools/sip-calculator/',
   lists: '/category/flexi-cap/',
+  amc: '/amc/hdfc-mutual-fund/',
   top: '/fund/big-fund-direct-growth-1/',
   other: '/fund/small-fund-direct-growth-2/',
   ondemand: '/fund/',
 };
 const TOP = new Set(['big-fund-direct-growth-1']);
-/** What each stage opens: en, hi, lists, a top fund, any other fund. */
-const OPEN: Record<Stage, [boolean, boolean, boolean, boolean, boolean]> = {
-  en: [true, false, false, false, false],
-  core: [true, true, false, false, false],
-  lists: [true, true, true, false, false],
-  funds: [true, true, true, true, false],
-  all: [true, true, true, true, true],
+/** What each stage opens: en, hi, a category page, a fund-house page, a top fund, any other fund. */
+const OPEN: Record<Stage, [boolean, boolean, boolean, boolean, boolean, boolean]> = {
+  en: [true, false, false, false, false, false],
+  core: [true, true, true, false, false, false],
+  lists: [true, true, true, true, false, false],
+  funds: [true, true, true, true, true, false],
+  all: [true, true, true, true, true, true],
 };
 
 describe('isIndexable', () => {
   for (const stage of STAGES) {
     it(`stage ${stage} opens exactly its groups`, () => {
-      const got = [PAGES.en, PAGES.hi, PAGES.lists, PAGES.top, PAGES.other].map((p) => isIndexable(p, stage, TOP));
+      const got = [PAGES.en, PAGES.hi, PAGES.lists, PAGES.amc, PAGES.top, PAGES.other].map((p) => isIndexable(p, stage, TOP));
       expect(got).toEqual(OPEN[stage]);
     });
   }
@@ -96,16 +97,22 @@ describe('isIndexable', () => {
       for (const p of paths) if (isIndexable(p, STAGES[i - 1], TOP)) expect(isIndexable(p, STAGES[i], TOP), `${p} at ${STAGES[i]}`).toBe(true);
     }
   });
-  it('hand-picked fund pages open from stage core, and only they: other funds and list pages stay closed', () => {
+  it('hand-picked fund pages open from stage core, and only they: other funds and fund-house pages stay closed', () => {
     const early = new Set([2]);
     const picked = '/fund/small-fund-direct-growth-2/';
     expect(isIndexable(picked, 'en', TOP, early)).toBe(false);
     for (const stage of ['core', 'lists', 'funds', 'all'] as const) expect(isIndexable(picked, stage, TOP, early), stage).toBe(true);
     expect(isIndexable(PAGES.top, 'core', TOP, early)).toBe(false);
-    expect(isIndexable(PAGES.lists, 'core', TOP, early)).toBe(false);
+    expect(isIndexable(PAGES.amc, 'core', TOP, early)).toBe(false);
     expect(isIndexable('/fund/', 'core', TOP, new Set([0]))).toBe(false);
     // a code must match the whole number at the end of the slug, not a part of it
     expect(isIndexable('/fund/some-fund-direct-growth-12/', 'core', TOP, early)).toBe(false);
+  });
+  it('category pages open from stage core; fund-house pages wait for stage lists', () => {
+    expect(isIndexable(PAGES.lists, 'en')).toBe(false);
+    for (const stage of ['core', 'lists', 'funds', 'all'] as const) expect(isIndexable(PAGES.lists, stage), `category at ${stage}`).toBe(true);
+    expect(isIndexable(PAGES.amc, 'core')).toBe(false);
+    for (const stage of ['lists', 'funds', 'all'] as const) expect(isIndexable(PAGES.amc, stage), `fund house at ${stage}`).toBe(true);
   });
   it('reads the scheme code at the end of a fund slug', () => {
     expect(codeOfSlug('parag-parikh-flexi-cap-fund-direct-plan-growth-122639')).toBe(122639);

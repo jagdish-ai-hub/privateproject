@@ -8,8 +8,8 @@
  * | Stage   | Open to Google                                                 |
  * |---------|----------------------------------------------------------------|
  * | `en`    | the hand-written English pages (the default)                   |
- * | `core`  | + the Hindi pages, + a few hand-picked fund pages (`EARLY_FUND_CODES`) |
- * | `lists` | + the category and fund-house list pages                       |
+ * | `core`  | + the Hindi pages, + the category pages, + a few hand-picked fund pages (`EARLY_FUND_CODES`) |
+ * | `lists` | + the fund-house list pages                                    |
  * | `funds` | + the largest funds by fund size (`INDEX_FUNDS`, default 250)  |
  * | `all`   | + every fund page                                              |
  *
@@ -121,7 +121,8 @@ export function isIndexable(path: string, stage: Stage, topFunds: ReadonlySet<st
   if (stage === 'all') return true;
   if (g === 'en') return true;
   if (g === 'hi') return stage !== 'en';
-  if (g === 'lists') return stage === 'lists' || stage === 'funds';
+  // Category pages (about 50, each a ranked list that links to its funds) open with the Hindi pages; fund-house pages one stage later.
+  if (g === 'lists') return clean(path).startsWith('/category/') ? stage !== 'en' : stage === 'lists' || stage === 'funds';
   const slug = clean(path).split('/')[2];
   if (stage !== 'en') {
     const code = codeOfSlug(slug);

@@ -26,7 +26,7 @@ const E = EARLY.size;
  */
 const PLAN = [
   { stage: 'en', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: 0, lists: 0, funds: 0 } },
-  { stage: 'core', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: 0, funds: E }, onlyEarly: true },
+  { stage: 'core', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: E }, onlyEarly: true, listsOnly: 'category' },
   { stage: 'lists', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: E }, onlyEarly: true },
   { stage: 'funds', env: { INDEX_FUNDS: '3' }, open: { en: null, hi: null, lists: null, funds: `atLeast:${Math.max(E, 3)}` } },
   { stage: 'all', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: `atLeast:${Math.max(E, 5)}` } },
@@ -41,7 +41,7 @@ function walk(dir, out = []) {
   return out;
 }
 
-for (const { stage, env, open, onlyEarly } of PLAN) {
+for (const { stage, env, open, onlyEarly, listsOnly } of PLAN) {
   const outDir = join(base, stage);
   const r = spawnSync('npx', ['astro', 'build'], { env: { ...process.env, ...env, INDEX_STAGE: stage, OUT_DIR: outDir, SITE_URL: 'https://example.test' }, encoding: 'utf8' });
   if (r.status !== 0) { fail(stage, `build failed:\n${r.stdout}\n${r.stderr}`); continue; }
@@ -87,6 +87,9 @@ for (const { stage, env, open, onlyEarly } of PLAN) {
     const atLeast = typeof want === 'string' ? Number(want.split(':')[1]) : null;
     const bad = want === null ? n[g] === 0 : atLeast !== null ? n[g] < atLeast : n[g] !== want;
     if (bad) fail(stage, `open ${g} pages: ${n[g]}, expected ${want === null ? 'at least 1' : atLeast !== null ? `at least ${atLeast}` : want}`);
+  }
+  if (listsOnly) {
+    for (const p of openPages) if (groupOf(p) === 'lists' && !p.startsWith(`/${listsOnly}/`)) fail(stage, `${p} is open but only /${listsOnly}/ pages should be at this stage`);
   }
   if (onlyEarly) {
     for (const p of openPages) if (groupOf(p) === 'funds' && !EARLY.has(codeOfSlug(p.split('/')[2]))) fail(stage, `${p} is open but is not a hand-picked fund`);

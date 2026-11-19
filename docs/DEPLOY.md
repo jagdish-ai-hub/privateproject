@@ -52,8 +52,8 @@ language switch still link to it. Rules and code: `src/lib/indexStage.ts`.
 | `INDEX_STAGE` | Open to Google | Pages |
 |---|---|---|
 | `en` (default, also when empty) | the hand-written English pages: home, compare, calculators, schemes, guides, about, author, legal | 74 |
-| `core` | + the Hindi pages, + 16 hand-picked fund pages (`src/data/earlyFunds.ts`) | 157 |
-| `lists` | + the 50 category and 55 fund-house list pages | 262 |
+| `core` | + the Hindi pages, + the 50 category pages, + 16 hand-picked fund pages (`src/data/earlyFunds.ts`) | 207 |
+| `lists` | + the 55 fund-house pages | 262 |
 | `funds` | + the largest funds by fund size; how many is `INDEX_FUNDS` (default 250) | 262 + N (the 16 hand-picked funds count once) |
 | `all` | + every fund page | about 2,080 |
 

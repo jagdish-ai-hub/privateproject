@@ -3,7 +3,8 @@ import { formatDay } from '../../lib/format.ts';
 import { COLUMNS } from '../../lib/screener/columns.ts';
 import { toCsv } from '../../lib/screener/csv.ts';
 import { applyView, filterIndices, sortIndices } from '../../lib/screener/query.ts';
-import type { Filters, SortKey, ViewState } from '../../lib/screener/types.ts';
+import { prepare, type Prepared } from '../../lib/screener/query.ts';
+import type { Filters, ScreenerData, SortKey, ViewState } from '../../lib/screener/types.ts';
 import { DEFAULT_VIEW, parseView, serializeView, withSearchWidening } from '../../lib/screener/url.ts';
 import { FilterBar } from './FilterBar.tsx';
 import { Pagination } from './Pagination.tsx';
@@ -25,8 +26,10 @@ function writeStore(key: string, value: string): void {
  * The whole view (filters, sort, page, page size) lives in the URL query string, so Back /
  * Forward and shared links reproduce exactly what the user saw.
  */
-export function Screener() {
+export function Screener({ seed = null }: { seed?: ScreenerData | null }) {
   const { state, retry } = useScreenerData();
+  // The first rows of the default view, built into the page: shown until the full data arrives (see below).
+  const seedPrepared = useMemo<Prepared | null>(() => (seed ? prepare(seed) : null), [seed]);
   const [view, setView] = useState<ViewState>(DEFAULT_VIEW);
   const viewRef = useRef(view);
   const [visibleKeys, setVisibleKeys] = useState<string[]>(DEFAULT_COLUMNS);
@@ -66,6 +69,9 @@ export function Screener() {
   const result = useMemo(() => (prepared ? applyView(prepared, view) : null), [prepared, view]);
   const columns = useMemo(() => COLUMNS.filter((c) => visibleKeys.includes(c.key)), [visibleKeys]);
   const isDefault = serializeView(view) === '';
+  // Until the full data loads, a visitor on the default view sees the built-in rows instead of a skeleton.
+  // Any other view (a shared link, a sort click) shows a skeleton as before, because the built-in rows would be wrong for it.
+  const showSeed = prepared === null && seedPrepared !== null && isDefault && state.status === 'loading';
 
   const exportCsv = (): void => {
     if (!prepared) return;
@@ -96,7 +102,7 @@ export function Screener() {
       ) : (
         <>
           <div class="flex items-center justify-between text-xs text-muted">
-            <span>{prepared ? <>NAV as of <span class="num">{formatDay(Date.parse(prepared.data.asOf) / 86_400_000)}</span></> : 'Loading funds…'}</span>
+            <span>{prepared || showSeed ? <>NAV as of <span class="num">{formatDay(Date.parse((prepared ?? seedPrepared)!.data.asOf) / 86_400_000)}</span></> : 'Loading funds…'}</span>
             <span>Sorted by {view.sort.key === 'name' ? 'name' : COLUMNS.find((c) => c.key === view.sort.key)?.label ?? view.sort.key} ({view.sort.dir === 'desc' ? 'high to low' : 'low to high'}); funds with no value come last</span>
           </div>
           {result && result.total === 0 ? (
@@ -106,7 +112,11 @@ export function Screener() {
               <button type="button" class="mt-4 h-9 rounded-md border border-line px-4 text-sm hover:bg-subtle" onClick={() => update(() => DEFAULT_VIEW)}>Clear filters</button>
             </div>
           ) : (
-            <ResultsTable prepared={prepared} rows={result?.rows ?? []} columns={columns} sort={view.sort} onSort={onSort} compact={compact} />
+            <ResultsTable
+              prepared={showSeed ? seedPrepared : prepared}
+              rows={showSeed ? Array.from({ length: seedPrepared!.data.count }, (_, i) => i) : result?.rows ?? []}
+              columns={columns} sort={view.sort} onSort={onSort} compact={compact}
+            />
           )}
           {result && (
             <Pagination

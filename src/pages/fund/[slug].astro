@@ -18,6 +18,7 @@ import { formatIsoDate, leviesNote, terGap } from '../../lib/costs.ts';
 import { breadcrumbLd, faqLd, fundLd } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
 import { hasFundPage } from '../../lib/fundLinks.ts';
+import { duplicateTitleKeys, fundTitle, titleKey } from '../../lib/fundTitle.ts';
 import { EARLY_FUND_CODES } from '../../data/earlyFunds.ts';
 import { clip } from '../../lib/stats.ts';
 
@@ -64,8 +65,10 @@ const description = clip(
   `${f.displayName}: NAV ₹${formatNav(f.nav)} (${formatDay(f.navDate)}). Returns 1Y ${formatPct(m.r1y, 1)}, 3Y ${formatPct(m.r3y, 1)}, 5Y ${formatPct(m.r5y, 1)}; SIP returns, volatility, drawdown and category rank. Free, no sign-up.`,
   158,
 );
-// Not clipped: long names end in "Direct Plan - Growth" etc., which is what makes titles unique.
-const title = `${f.displayName}: NAV, Returns & SIP Returns`;
+// Names the fund, then what people search for, then the month (shows the figures are current). The scheme code
+// is added only if two funds would otherwise share a title.
+const dupes = duplicateTitleKeys(data);
+const title = fundTitle({ name: f.name, plan: f.plan, option: f.option, navDate: f.navDate, code: f.code }, dupes.has(titleKey({ name: f.name, plan: f.plan, option: f.option })));
 
 const returnsRows = [
   ['1 month', 'r1m', 'Absolute', null], ['3 months', 'r3m', 'Absolute', null], ['6 months', 'r6m', 'Absolute', null],

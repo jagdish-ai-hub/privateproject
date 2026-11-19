@@ -5,6 +5,7 @@ import Faq from '../components/Faq.astro';
 import TopReturns from '../components/home/TopReturns.astro';
 import { Screener } from '../components/screener/Screener.tsx';
 import { loadScreener } from '../lib/data.ts';
+import { seedFromDefaultView } from '../lib/screener/seed.ts';
 import { formatPct, signClass } from '../lib/format.ts';
 import { HOME_PERIODS, screenerHref, topByCategory, topByReturn } from '../lib/home.ts';
 import { popularPairs } from '../lib/popular.ts';
@@ -12,6 +13,8 @@ import { faqLd, siteLd } from '../lib/seo.ts';
 import { HOME_CALCULATORS, HOME_FAQS, HOME_GUIDES, VS_LINKS } from '../data/home.ts';
 
 const data = loadScreener();
+// The first rows of the default view are written into the page, so search engines see real funds, not an empty table.
+const seed = seedFromDefaultView(data);
 const lists = HOME_PERIODS.map((key) => ({ key, funds: topByReturn(data, key) }));
 const tops = topByCategory(data, ['Large Cap', 'Mid Cap', 'Small Cap', 'Flexi Cap', 'ELSS (Tax Saver)', 'Index Fund', 'Aggressive Hybrid', 'Corporate Bond']);
 // The hero shows the two largest funds in four popular categories; the comparisons section further down adds two more.
@@ -34,7 +37,7 @@ const card = 'rounded-md border border-line p-4';
       Calculated from official AMFI NAV history; <a class="underline" href="/methodology/">see how</a>.
       It opens with Direct-plan Growth equity funds, largest fund size first: a fact, not a ranking of performance. Change any filter, or click a column heading to sort by returns, cost or risk.
     </p>
-    <Screener client:load />
+    <Screener client:load seed={seed} />
   </section>
 
   <TopReturns lists={lists} asOf={data.asOf} />
