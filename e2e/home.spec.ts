@@ -86,5 +86,11 @@ test('home page order: hero with the largest-fund comparisons, then the screener
   }
   expect(order).toEqual([...order].sort((a, b) => a - b));
   const showing = page.getByText(/^Showing 1–\d+ of/);
-  if (await showing.count()) await expect(showing).toContainText(/1–(25|\d) of/);
+  if (await showing.count()) {
+    // "Showing 1–N of T": 25 a page, or all of them when there are fewer (small CI samples).
+    const m = /1–(\d+) of ([\d,]+)/.exec((await showing.textContent()) ?? '');
+    expect(m, 'range text').not.toBeNull();
+    const [shown, total] = [Number(m![1]), Number(m![2].replace(/,/g, ''))];
+    expect(shown).toBe(Math.min(25, total));
+  }
 });
