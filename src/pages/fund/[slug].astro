@@ -18,6 +18,7 @@ import { formatIsoDate, leviesNote, terGap } from '../../lib/costs.ts';
 import { breadcrumbLd, faqLd, fundLd } from '../../lib/seo.ts';
 import { slugify } from '../../lib/slug.ts';
 import { hasFundPage } from '../../lib/fundLinks.ts';
+import { EARLY_FUND_CODES } from '../../data/earlyFunds.ts';
 import { clip } from '../../lib/stats.ts';
 
 export function getStaticPaths() {
@@ -27,10 +28,14 @@ export function getStaticPaths() {
   const max = Number(process.env.MAX_FUND_PAGES ?? Infinity);
   const only = process.env.FUND_CODES ? new Set(process.env.FUND_CODES.split(',').map(Number)) : null;
   // Only Direct Growth (and single-plan Growth) schemes get a page of their own; see hasFundPage.
-  const indices = Array.from({ length: data.count }, (_, i) => i)
+  const all = Array.from({ length: data.count }, (_, i) => i)
     .filter((i) => hasFundPage(data.dict.plan[data.plan[i]], data.dict.option[data.option[i]]))
-    .filter((i) => !only || only.has(data.code[i]))
-    .slice(0, max);
+    .filter((i) => !only || only.has(data.code[i]));
+  // A limited build still includes the hand-picked funds that are open to Google, so tests cover them.
+  const early = new Set(EARLY_FUND_CODES);
+  const indices = Number.isFinite(max) && !only
+    ? [...new Set([...all.slice(0, max), ...all.filter((i) => early.has(data.code[i]))])]
+    : all.slice(0, max);
   return indices.map((i) => ({ params: { slug: fundAt(data, i).slug }, props: { index: i } }));
 }
 

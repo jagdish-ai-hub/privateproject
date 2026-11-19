@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_STAGE, DEFAULT_TOP_FUNDS, GROUPS, STAGES, groupOf, hreflangAllowed, isIndexable, parseStage, parseTopFunds, topFundSlugs, type Stage } from '../src/lib/indexStage.ts';
+import { DEFAULT_STAGE, DEFAULT_TOP_FUNDS, GROUPS, STAGES, codeOfSlug, groupOf, hreflangAllowed, isIndexable, parseStage, parseTopFunds, topFundSlugs, type Stage } from '../src/lib/indexStage.ts';
+import { EARLY_FUND_CODES } from '../src/data/earlyFunds.ts';
 import { fundSlug } from '../src/lib/slug.ts';
 import type { ScreenerData } from '../src/lib/screener/types.ts';
 
@@ -94,6 +95,26 @@ describe('isIndexable', () => {
     for (let i = 1; i < STAGES.length; i++) {
       for (const p of paths) if (isIndexable(p, STAGES[i - 1], TOP)) expect(isIndexable(p, STAGES[i], TOP), `${p} at ${STAGES[i]}`).toBe(true);
     }
+  });
+  it('hand-picked fund pages open from stage core, and only they: other funds and list pages stay closed', () => {
+    const early = new Set([2]);
+    const picked = '/fund/small-fund-direct-growth-2/';
+    expect(isIndexable(picked, 'en', TOP, early)).toBe(false);
+    for (const stage of ['core', 'lists', 'funds', 'all'] as const) expect(isIndexable(picked, stage, TOP, early), stage).toBe(true);
+    expect(isIndexable(PAGES.top, 'core', TOP, early)).toBe(false);
+    expect(isIndexable(PAGES.lists, 'core', TOP, early)).toBe(false);
+    expect(isIndexable('/fund/', 'core', TOP, new Set([0]))).toBe(false);
+    // a code must match the whole number at the end of the slug, not a part of it
+    expect(isIndexable('/fund/some-fund-direct-growth-12/', 'core', TOP, early)).toBe(false);
+  });
+  it('reads the scheme code at the end of a fund slug', () => {
+    expect(codeOfSlug('parag-parikh-flexi-cap-fund-direct-plan-growth-122639')).toBe(122639);
+    expect(codeOfSlug('no-code-here')).toBeNull();
+  });
+  it('the hand-picked list has 10 to 20 distinct codes', () => {
+    expect(new Set(EARLY_FUND_CODES).size).toBe(EARLY_FUND_CODES.length);
+    expect(EARLY_FUND_CODES.length).toBeGreaterThanOrEqual(10);
+    expect(EARLY_FUND_CODES.length).toBeLessThanOrEqual(20);
   });
   it('every group is covered, so the sitemap files add up to the open pages', () => {
     expect([...GROUPS].sort()).toEqual(['en', 'funds', 'hi', 'lists']);

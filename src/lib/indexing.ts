@@ -4,7 +4,11 @@
  * sitemap setup in astro.config.mjs. The rules themselves are in indexStage.ts.
  */
 import { loadScreener } from './data.ts';
+import { EARLY_FUND_CODES } from '../data/earlyFunds.ts';
 import { hreflangAllowed, isIndexable, parseStage, parseTopFunds, topFundSlugs, type Stage } from './indexStage.ts';
+
+/** Hand-picked fund pages open from stage `core` (see src/data/earlyFunds.ts). */
+const EARLY = new Set(EARLY_FUND_CODES);
 
 let top: { n: number; slugs: Set<string> } | null = null;
 
@@ -26,7 +30,7 @@ function topFunds(): Set<string> {
  */
 export function pageIndexable(path: string): boolean {
   const stage = currentStage();
-  return isIndexable(path, stage, stage === 'funds' ? topFunds() : undefined);
+  return isIndexable(path, stage, stage === 'funds' ? topFunds() : undefined, EARLY);
 }
 
 /**
@@ -36,5 +40,5 @@ export function pageIndexable(path: string): boolean {
  */
 export function hreflangOk(paths: readonly string[]): boolean {
   const stage = currentStage();
-  return hreflangAllowed(paths, stage, stage === 'funds' ? topFunds() : undefined);
+  return hreflangAllowed(paths, stage, stage === 'funds' ? topFunds() : undefined, EARLY);
 }

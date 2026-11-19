@@ -8,7 +8,7 @@
  * | Stage   | Open to Google                                                 |
  * |---------|----------------------------------------------------------------|
  * | `en`    | the hand-written English pages (the default)                   |
- * | `core`  | + the Hindi pages                                              |
+ * | `core`  | + the Hindi pages, + a few hand-picked fund pages (`EARLY_FUND_CODES`) |
  * | `lists` | + the category and fund-house list pages                       |
  * | `funds` | + the largest funds by fund size (`INDEX_FUNDS`, default 250)  |
  * | `all`   | + every fund page                                              |
@@ -98,20 +98,36 @@ export function topFundSlugs(data: ScreenerData, n: number): Set<string> {
 }
 
 /**
+ * AMFI scheme code at the end of a fund page slug (`…-direct-plan-growth-122639`), or null.
+ *
+ * @param slug - The fund page slug.
+ */
+export function codeOfSlug(slug: string): number | null {
+  const m = /-(\d+)$/.exec(slug);
+  return m ? Number(m[1]) : null;
+}
+
+/**
  * Is a page open to Google at this stage?
  *
  * @param path - Site path.
  * @param stage - The stage.
  * @param topFunds - Slugs of the funds open at stage `funds` (see {@link topFundSlugs}); only read at that stage.
+ * @param earlyFunds - Scheme codes of hand-picked fund pages that open from stage `core` (src/data/earlyFunds.ts).
  */
-export function isIndexable(path: string, stage: Stage, topFunds: ReadonlySet<string> = new Set()): boolean {
+export function isIndexable(path: string, stage: Stage, topFunds: ReadonlySet<string> = new Set(), earlyFunds: ReadonlySet<number> = new Set()): boolean {
   const g = groupOf(path);
   if (g === 'ondemand') return false;
   if (stage === 'all') return true;
   if (g === 'en') return true;
   if (g === 'hi') return stage !== 'en';
   if (g === 'lists') return stage === 'lists' || stage === 'funds';
-  return stage === 'funds' && topFunds.has(clean(path).split('/')[2]);
+  const slug = clean(path).split('/')[2];
+  if (stage !== 'en') {
+    const code = codeOfSlug(slug);
+    if (code !== null && earlyFunds.has(code)) return true;
+  }
+  return stage === 'funds' && topFunds.has(slug);
 }
 
 /**
@@ -121,7 +137,8 @@ export function isIndexable(path: string, stage: Stage, topFunds: ReadonlySet<st
  * @param paths - The page and its alternates in other languages.
  * @param stage - The stage.
  * @param topFunds - See {@link isIndexable}.
+ * @param earlyFunds - See {@link isIndexable}.
  */
-export function hreflangAllowed(paths: readonly string[], stage: Stage, topFunds: ReadonlySet<string> = new Set()): boolean {
-  return paths.every((p) => isIndexable(p, stage, topFunds));
+export function hreflangAllowed(paths: readonly string[], stage: Stage, topFunds: ReadonlySet<string> = new Set(), earlyFunds: ReadonlySet<number> = new Set()): boolean {
+  return paths.every((p) => isIndexable(p, stage, topFunds, earlyFunds));
 }

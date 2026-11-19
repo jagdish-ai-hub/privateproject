@@ -7,20 +7,29 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { groupOf } from '../src/lib/indexStage.ts';
+import { codeOfSlug, groupOf } from '../src/lib/indexStage.ts';
+import { EARLY_FUND_CODES } from '../src/data/earlyFunds.ts';
 
 const base = join(process.cwd(), '.stage-check');
 rmSync(base, { recursive: true, force: true });
 const problems = [];
 const fail = (stage, msg) => problems.push(`[${stage}] ${msg}`);
 
-/** What each stage must open: the number of open pages per group (null = at least one, a number = exactly that many). */
+// The hand-picked fund pages (src/data/earlyFunds.ts) that exist in this dataset: open from stage core.
+const data = JSON.parse(readFileSync(join(process.cwd(), 'public/data/screener.json'), 'utf8'));
+const EARLY = new Set(EARLY_FUND_CODES.filter((c) => data.code.includes(c)));
+const E = EARLY.size;
+
+/**
+ * What each stage must open: the number of open pages per group (null = at least one, a number = exactly that many,
+ * a string 'atLeast:N' = N or more). At core and lists the only open fund pages are the hand-picked ones.
+ */
 const PLAN = [
   { stage: 'en', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: 0, lists: 0, funds: 0 } },
-  { stage: 'core', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: 0, funds: 0 } },
-  { stage: 'lists', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: 0 } },
-  { stage: 'funds', env: { INDEX_FUNDS: '3' }, open: { en: null, hi: null, lists: null, funds: 3 } },
-  { stage: 'all', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: 5 } },
+  { stage: 'core', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: 0, funds: E }, onlyEarly: true },
+  { stage: 'lists', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: E }, onlyEarly: true },
+  { stage: 'funds', env: { INDEX_FUNDS: '3' }, open: { en: null, hi: null, lists: null, funds: `atLeast:${Math.max(E, 3)}` } },
+  { stage: 'all', env: { MAX_FUND_PAGES: '5' }, open: { en: null, hi: null, lists: null, funds: `atLeast:${Math.max(E, 5)}` } },
 ];
 
 function walk(dir, out = []) {
@@ -32,7 +41,7 @@ function walk(dir, out = []) {
   return out;
 }
 
-for (const { stage, env, open } of PLAN) {
+for (const { stage, env, open, onlyEarly } of PLAN) {
   const outDir = join(base, stage);
   const r = spawnSync('npx', ['astro', 'build'], { env: { ...process.env, ...env, INDEX_STAGE: stage, OUT_DIR: outDir, SITE_URL: 'https://example.test' }, encoding: 'utf8' });
   if (r.status !== 0) { fail(stage, `build failed:\n${r.stdout}\n${r.stderr}`); continue; }
@@ -75,7 +84,15 @@ for (const { stage, env, open } of PLAN) {
   const n = { en: 0, hi: 0, lists: 0, funds: 0 };
   for (const p of openPages) { const g = groupOf(p); if (g !== 'ondemand') n[g]++; else fail(stage, `${p} (on-demand) must be noindex`); }
   for (const [g, want] of Object.entries(open)) {
-    if (want === null ? n[g] === 0 : n[g] !== want) fail(stage, `open ${g} pages: ${n[g]}, expected ${want === null ? 'at least 1' : want}`);
+    const atLeast = typeof want === 'string' ? Number(want.split(':')[1]) : null;
+    const bad = want === null ? n[g] === 0 : atLeast !== null ? n[g] < atLeast : n[g] !== want;
+    if (bad) fail(stage, `open ${g} pages: ${n[g]}, expected ${want === null ? 'at least 1' : atLeast !== null ? `at least ${atLeast}` : want}`);
+  }
+  if (onlyEarly) {
+    for (const p of openPages) if (groupOf(p) === 'funds' && !EARLY.has(codeOfSlug(p.split('/')[2]))) fail(stage, `${p} is open but is not a hand-picked fund`);
+  }
+  if (stage !== 'en') {
+    for (const c of EARLY) if (!openPages.some((p) => groupOf(p) === 'funds' && codeOfSlug(p.split('/')[2]) === c)) fail(stage, `hand-picked fund ${c} is not open`);
   }
   if (!pages.get('/fund/')?.noindex) fail(stage, '/fund/ is not tagged noindex');
   if (pages.get('/')?.noindex) fail(stage, 'the home page is tagged noindex');
