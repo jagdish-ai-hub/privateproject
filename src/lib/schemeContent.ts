@@ -224,9 +224,9 @@ export const SCHEMES_EN: SchemePage[] = [
   {
     kind: 'td', slug: 'post-office-fd-calculator', name: 'Post Office FD (Time Deposit) calculator',
     title: `Post Office FD Calculator ${Y}: Time Deposit up to ${pct(R.td5)}`,
-    h1: 'Post Office Time Deposit (FD) calculator',
+    h1: 'Post Office FD calculator (Fixed Deposit / Time Deposit)',
     description: `Free Post Office FD calculator for 1, 2, 3 and 5-year Time Deposits (${pct(R.td1)} to ${pct(R.td5)}). See the yearly interest and the total.`,
-    intro: 'A Post Office Time Deposit (TD), often called a Post Office FD, is a lump sum deposited for 1, 2, 3 or 5 years. Choose the term to see the interest.',
+    intro: 'A Post Office Fixed Deposit, officially the Post Office Time Deposit (TD), is a lump sum deposited for 1, 2, 3 or 5 years. Choose the term to see the interest.',
     conventions: [
       'Interest is calculated quarterly and paid out once a year; the payout does not compound.',
       `The rate depends on the term: 1 year ${pct(R.td1)}, 2 years ${pct(R.td2)}, 3 years ${pct(R.td3)}, 5 years ${pct(R.td5)}.`,

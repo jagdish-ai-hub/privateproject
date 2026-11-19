@@ -4,7 +4,7 @@ description: "A plain guide to Post Office savings schemes: how MIS, RD, time de
 group: "Government schemes"
 order: 22
 datePublished: "2026-10-13"
-dateModified: "2026-10-13"
+dateModified: "2026-11-19"
 related: ["small-savings-schemes-compared", "ppf-explained", "mutual-fund-taxation-india"]
 faqs:
   - question: "Which Post Office scheme pays a monthly income?"
@@ -15,8 +15,25 @@ faqs:
     answer: "Yes. The Ministry of Finance reviews them every quarter. For most schemes the rate that applies when you open the account stays for its whole term, but PPF and Sukanya Samriddhi follow the rate in force in each period."
   - question: "Are Post Office schemes safe?"
     answer: "They are backed by the Government of India, so the risk of losing your deposit is very low. The main risks are inflation eating into a fixed return and the rate being lower when you renew."
+  - question: "What are the full forms of MIS, SCSS, TD, RD, KVP and NSC?"
+    answer: "MIS is the Post Office Monthly Income Scheme, SCSS the Senior Citizens’ Savings Scheme, TD the Time Deposit (the Post Office FD), RD the Recurring Deposit, KVP Kisan Vikas Patra and NSC the National Savings Certificate."
+  - question: "Post Office MIS or a liquid mutual fund: which is better for monthly income?"
+    answer: "MIS pays a fixed 7.4% a year every month for 5 years and is backed by the Government of India, but money is locked in and early closure costs 1% to 2%. A liquid fund has no fixed rate (liquid funds have earned roughly 6.5% to 7% a year recently), can be withdrawn on any working day and is not guaranteed. Both are taxed at your slab rate."
 ---
 Post offices offer a set of savings schemes backed by the Government of India. They have different shapes: some pay you regularly, some grow your money and pay at the end, and some are meant for particular groups. Here is how each works. Current rates are in the [rates table](/schemes/), updated every quarter.
+
+## Full forms at a glance
+
+| Short name | Full form | In one line |
+| --- | --- | --- |
+| MIS (POMIS) | Post Office Monthly Income Scheme | Lump sum, interest paid every month for 5 years |
+| SCSS | Senior Citizens’ Savings Scheme | For 60+, interest paid every quarter for 5 years |
+| TD | Time Deposit (the Post Office FD) | Lump sum for 1, 2, 3 or 5 years |
+| RD | Recurring Deposit | Fixed amount every month for 5 years |
+| NSC | National Savings Certificate | 5-year certificate, interest paid at maturity |
+| KVP | Kisan Vikas Patra | Money doubles in a fixed number of months |
+| PPF | Public Provident Fund | 15-year account, tax-free interest |
+| SSY | Sukanya Samriddhi Yojana | Account for a girl child, matures at 21 years |
 
 ## Schemes that pay you regularly
 
@@ -32,6 +49,21 @@ Post offices offer a set of savings schemes backed by the Government of India. T
 
 - **Recurring Deposit (RD)**: you save a fixed amount every month for 5 years, and interest compounds every quarter. [RD calculator](/schemes/post-office-rd-calculator/).
 - **Time Deposit (TD)**: a fixed deposit for 1, 2, 3 or 5 years. The interest is calculated every quarter and paid yearly. The 5-year deposit has a tax-deduction benefit under the old regime. [Time Deposit calculator](/schemes/post-office-fd-calculator/).
+
+## Post Office MIS vs liquid mutual funds
+
+Both are used to park money safely and draw on it, but they work differently.
+
+| | Post Office MIS | Liquid mutual fund |
+| --- | --- | --- |
+| Return | 7.4% a year, fixed for 5 years (October–December 2026) | Not fixed; liquid funds have earned roughly 6.5% to 7% a year recently |
+| Income | Paid every month | None by itself; set up a systematic withdrawal plan (SWP) if you want monthly money |
+| Safety | Backed by the Government of India | Holds very short-term debt; low risk but not guaranteed |
+| Access | Locked for 1 year; 2% deducted before 3 years, 1% after | Any working day, usually next day |
+| Limit | ₹9 lakh single, ₹15 lakh joint | None |
+| Tax | Interest at your slab rate | Gains at your slab rate, only when you redeem |
+
+MIS suits a fixed monthly income you can count on. A liquid fund suits an emergency fund or money you may need any day. You can compare liquid funds in the [screener](/?type=Debt&cat=Liquid&sort=r1y%3Adesc).
 
 ## Tax in brief
 

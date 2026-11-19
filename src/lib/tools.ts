@@ -237,9 +237,9 @@ export const TOOLS: Tool[] = [
   },
   {
     slug: 'gold-jewellery-price-calculator', kind: 'jewellery', name: 'Gold and silver jewellery price calculator',
-    title: 'Gold Jewellery Price Calculator India: Making Charges and GST',
+    title: 'Gold Jewellery Price Calculator: 22K/24K, Making, 3% GST',
     h1: 'Gold and silver jewellery price calculator',
-    description: 'Gold and silver jewellery price calculator: rate, weight and purity give the metal value, making charges, GST, total bill and sell-back value.',
+    description: 'Work out the full bill for 22K or 24K gold (or silver) jewellery: weight in grams, rate, making charges, 3% GST, and what you get back if you sell.',
     intro: 'The price on a jewellery bill is more than the weight times the rate. Enter today’s rate, the weight and the purity, then the making charges and GST, to see the total you pay, and how much of it you would not get back if you sold the piece.',
     formula: 'Metal value = rate per gram × weight × purity.   Total = (metal value + making charges) × (1 + GST).   Making charges = % of metal value, or ₹ per gram × weight',
     how: [

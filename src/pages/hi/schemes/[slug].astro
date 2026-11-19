@@ -23,7 +23,7 @@ const url = new URL(path, Astro.site).toString();
       { name: 'सरकारी योजनाएँ', url: new URL('/hi/schemes/', Astro.site).toString() },
       { name: page.name, url },
     ]),
-    calculatorLd(page.name, url, page.description),
+    calculatorLd(page.name, url, page.description, 'hi'),
     webPageLd({ url, name: page.title, description: page.description, dateModified: REVIEWED_ON, siteUrl: new URL('/', Astro.site).toString(), lang: 'hi' }),
     faqLd(page.faqs),
   ]}>

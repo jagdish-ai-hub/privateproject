@@ -117,8 +117,11 @@ const nav = hi
     <header class="relative border-b border-line">
       <div class="mx-auto flex min-h-14 max-w-7xl items-center gap-x-2 px-4 py-2 sm:gap-x-6">
         <a href="/" class="flex shrink-0 items-center gap-2 whitespace-nowrap py-2 text-[15px] font-semibold tracking-tight sm:text-base" aria-label="Mutual Fund Compare, home"><Logo size={24} /><span>Mutual Fund Compare</span></a>
-        <nav class="hidden flex-wrap gap-x-3 text-sm text-muted sm:flex" aria-label="Main">
-          {nav.map((n) => <a href={n.href} class={n.cta ? 'whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'whitespace-nowrap px-1 py-1 hover:text-fg'}>{n.label}</a>)}
+        <nav class="hidden text-sm text-muted sm:block" aria-label="Main">
+          {/* A list, not bare links: text extractors (and screen readers) then see separate items, not "Compare Mutual FundsSide by side…". */}
+          <ul class="m-0 flex list-none flex-wrap items-center gap-x-3 p-0">
+            {nav.map((n) => <li><a href={n.href} class={n.cta ? 'inline-block whitespace-nowrap rounded-md bg-accent px-3 py-1 font-medium text-accent-fg hover:opacity-90' : 'inline-block whitespace-nowrap px-1 py-1 hover:text-fg'}>{n.label}</a></li>)}
+          </ul>
         </nav>
         <div class="ml-auto flex items-center gap-1.5 sm:gap-3">
           {other && <a href={other.path} lang={other.lang === 'hi' ? 'hi' : 'en'} hreflang={other.lang === 'hi' ? 'hi-IN' : 'en-IN'} class="hidden rounded-md border border-line px-2.5 py-1 text-sm hover:bg-subtle sm:inline-block" data-testid="lang-switch">{other.lang === 'hi' ? 'हिंदी' : 'English'}</a>}

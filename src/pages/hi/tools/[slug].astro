@@ -38,7 +38,7 @@ const others = TOOLS.filter((t) => t.slug !== slug);
       { name: 'कैलकुलेटर', url: new URL('/hi/tools/', Astro.site).toString() },
       { name: hi.name, url },
     ]),
-    calculatorLd(hi.name, url, hi.description),
+    calculatorLd(hi.name, url, hi.description, 'hi'),
     webPageLd({ url, name: hi.title, description: hi.description, dateModified: REVIEWED_ON, siteUrl: new URL('/', Astro.site).toString(), lang: 'hi' }),
     faqLd(hi.faqs),
   ]}

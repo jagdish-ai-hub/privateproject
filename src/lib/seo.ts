@@ -171,15 +171,17 @@ export function webPageLd(p: { url: string; name: string; description: string; d
  * @param description - One-sentence description.
  * @returns A JSON-LD object.
  */
-export function calculatorLd(name: string, url: string, description: string): Record<string, unknown> {
+export function calculatorLd(name: string, url: string, description: string, lang: 'en' | 'hi' = 'en'): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name,
     url,
     description,
+    inLanguage: lang === 'hi' ? 'hi-IN' : 'en-IN',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'Any',
+    isAccessibleForFree: true,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
   };
 }
